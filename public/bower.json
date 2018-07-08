@@ -1,0 +1,20 @@
+{
+  "name": "project-lyna-3",
+  "authors": [
+    "Alex P. <yinjiat.phoon@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "app-layout": "PolymerElements/app-layout#^2.1.1"
+  }
+}
