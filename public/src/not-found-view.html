@@ -10,7 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
-<dom-module id="my-view404">
+<dom-module id="not-found-view">
   <template>
     <style>
       :host {
@@ -24,8 +24,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    class MyView404 extends Polymer.Element {
-      static get is() { return 'my-view404'; }
+    class NotFoundView extends Polymer.Element {
+      static get is() { return 'not-found-view'; }
       static get properties() {
         return {
           // This shouldn't be neccessary, but the Analyzer isn't picking up
@@ -34,7 +34,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       }
     }
-
-    window.customElements.define(MyView404.is, MyView404);
+    window.customElements.define(NotFoundView.is, NotFoundView);
   </script>
 </dom-module>

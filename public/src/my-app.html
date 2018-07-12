@@ -19,17 +19,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Satisfy">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="my-icons.html">
 
 <link rel="lazy-import" href="store-view.html">
-<link rel="lazy-import" href="my-view404.html">
+<link rel="lazy-import" href="not-found-view.html">
 
 <dom-module id="my-app">
   <template>
+    <firebase-auth
+      id="auth"
+      app-name="absolute-reborn"
+      provider="google"
+      signed-in="{{signedIn}}"
+      user="{{user}}">
+    </firebase-auth>
     <style>
       :host {
         --app-primary-color: #4285f4;
@@ -109,16 +117,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
         <div class = "profile-pic">
+
           <img src="../images/AlexP.png" alt="profilePic"/>
           <h3>Alex Phoon</h3>
           <h4>VIP ZHONG DAI</h4> 
         </div>
+        <paper-button on-tap="signIn" disabled="[[disabled]]">
+          <iron-icon icon="account-circle"></iron-icon>
+          <span>Sign in with Google</span>
+        </paper-button>
+        <paper-button on-tap="signOut" disabled="[[disabled]]">
+          <iron-icon icon="account-circle"></iron-icon>
+          <span>Sign out</span>
+        </paper-button>
+        <paper-button on-tap="check" disabled="[[disabled]]">
+          <iron-icon icon="account-circle"></iron-icon>
+          <span>debug</span>
+        </paper-button>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="store" href="[[rootPath]]store">Store</a>
-          <a name="store" href="[[rootPath]]people">People</a>
-          <a name="store" href="[[rootPath]]team">Team</a>
-          <a name="store" href="[[rootPath]]sales">Sales</a>
-          <a name="store" href="[[rootPath]]logout">Log Out</a> 
+          <a name="people" href="[[rootPath]]people">People</a>
+          <a name="team" href="[[rootPath]]team">Team</a>
+          <a name="sales" href="[[rootPath]]sales">Sales</a>
+          <a name="logout" href="[[rootPath]]logout">Log Out</a> 
         </iron-selector>
       </app-drawer>
 
@@ -135,10 +156,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <iron-pages
             selected="[[page]]"
             attr-for-selected="name"
-            fallback-selection="view404"
+            fallback-selection="not-found"
             role="main">
           <store-view name="store"></store-view>
-          <my-view404 name="view404"></my-view404>
+          <not-found-view name="not-found"></not-found-view>
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
@@ -164,6 +185,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // This shouldn't be neccessary, but the Analyzer isn't picking up
           // Polymer.Element#rootPath
           rootPath: String,
+          signedIn: {
+            type: Boolean,
+            notify: true,
+            value: false
+          }
         };
       }
 
@@ -194,7 +220,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           default:
           {
-            page = "view404";
+            page = "not-found";
             break;
           }
         }
@@ -207,7 +233,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _showPage404() {
-        this.page = 'view404';
+        this.page = 'not-found';
+      }
+
+      signIn() {
+        this.$.auth.signInWithPopup();
+      }
+
+      signOut() {
+        this.$.auth.signOut();
+      }
+
+      check() {
+        console.log(this.signedIn);
       }
     }
 

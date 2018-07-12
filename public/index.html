@@ -1,11 +1,6 @@
 <!--
 @license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
 <!doctype html>
@@ -75,13 +70,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       window.Polymer = {rootPath: '/'};
 
       // Load and register pre-caching Service Worker
-      if ('serviceWorker' in navigator) {
+      /*if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
           navigator.serviceWorker.register('service-worker.js', {
             scope: Polymer.rootPath,
           });
         });
-      }
+      }*/
     </script>
 
     <!-- Load webcomponents-loader.js to check and load any polyfills your browser needs -->
@@ -89,6 +84,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <!-- Load your application shell -->
     <link rel="import" href="src/my-app.html">
+    <link rel="import" href="bower_components/polymerfire/firebase-app.html">
 
     <!-- Add any global styles for body, document, etc. -->
     <style>
@@ -102,20 +98,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
   </head>
   <body>
-    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase.js"></script>
-    <script>
-      // Initialize Firebase
-      var config = {
-        apiKey: "AIzaSyDib3iWABuj3HccfXt-GJQOeXy0qdFcCEI",
-        authDomain: "lyna-31c16.firebaseapp.com",
-        databaseURL: "https://lyna-31c16.firebaseio.com",
-        projectId: "lyna-31c16",
-        storageBucket: "lyna-31c16.appspot.com",
-        messagingSenderId: "527544892337"
-      };
-      firebase.initializeApp(config);
-    </script>
-
+    <firebase-app
+      name="absolute-reborn"
+      api-key="AIzaSyDib3iWABuj3HccfXt-GJQOeXy0qdFcCEI"
+      auth-domain="lyna-31c16.firebaseapp.com"
+      database-url="https://lyna-31c16.firebaseio.com">
+    </firebase-app>
     <my-app></my-app>
 
     <noscript>
