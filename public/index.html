@@ -15,7 +15,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta name="generator" content="Polymer Starter Kit">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>My App</title>
+    <title>Absolute Reborn</title>
     <meta name="description" content="My App description">
 
     <!--
@@ -30,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     -->
     <base href="/">
 
-    <link rel="icon" href="images/favicon.ico">
+    <link rel="icon" href="images/favicon (1).ico">
 
     <!-- See https://goo.gl/OOhYW5 -->
     <link rel="manifest" href="manifest.json">
@@ -48,14 +48,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta name="apple-mobile-web-app-title" content="My App">
 
     <!-- Homescreen icons -->
-    <link rel="apple-touch-icon" href="images/manifest/icon-48x48.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="images/manifest/icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="96x96" href="images/manifest/icon-96x96.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="images/manifest/icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="images/manifest/icon-192x192.png">
+    <link rel="apple-touch-icon" href="images/manifest/AR-48x48.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/manifest/AR-72x72.png">
+    <link rel="apple-touch-icon" sizes="96x96" href="images/manifest/AR-96x96.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="images/manifest/AR-144x144.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="images/manifest/AR-192x192.png">
 
     <!-- Tile icon for Windows 8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="images/manifest/icon-144x144.png">
+    <meta name="msapplication-TileImage" content="images/manifest/AR-144x144.png">
     <meta name="msapplication-TileColor" content="#3f51b5">
     <meta name="msapplication-tap-highlight" content="no">
 
@@ -102,10 +102,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
   </head>
   <body>
+    <script src="https://www.gstatic.com/firebasejs/5.2.0/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyDib3iWABuj3HccfXt-GJQOeXy0qdFcCEI",
+        authDomain: "lyna-31c16.firebaseapp.com",
+        databaseURL: "https://lyna-31c16.firebaseio.com",
+        projectId: "lyna-31c16",
+        storageBucket: "lyna-31c16.appspot.com",
+        messagingSenderId: "527544892337"
+      };
+      firebase.initializeApp(config);
+    </script>
+
     <my-app></my-app>
+
     <noscript>
       Please enable JavaScript to view this website.
     </noscript>
-    <!-- Built with love using Polymer Starter Kit -->
   </body>
 </html>

@@ -20,6 +20,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Satisfy">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="my-icons.html">
 
 <link rel="lazy-import" href="store-view.html">
@@ -58,11 +61,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-decoration: none;
         color: var(--app-secondary-color);
         line-height: 40px;
+        font-family: 'Roboto Condensed', sans-serif;
       }
 
       .drawer-list a.iron-selected {
         color: black;
         font-weight: bold;
+        background-color: grey;
       }
 
       .profile-pic img{
@@ -78,6 +83,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .profile-pic h3{
         position: relative;
         text-align: center;
+        font-family: 'Roboto Condensed', sans-serif;
+      }
+
+      .profile-pic h4{
+        position: relative;
+        text-align: center;
+        font-family: 'Roboto Condensed', sans-serif;
       }
     </style>
 
@@ -98,12 +110,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
         <div class = "profile-pic">
           <img src="../images/AlexP.png" alt="profilePic"/>
-          <h3>Alex Phoon</h3> 
+          <h3>Alex Phoon</h3>
+          <h4>VIP ZHONG DAI</h4> 
         </div>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="store" href="[[rootPath]]store">Store</a>
-          <a name="store" href="[[rootPath]]store">Team</a>
-          <a name="store" href="[[rootPath]]store">Log Out</a> 
+          <a name="store" href="[[rootPath]]people">People</a>
+          <a name="store" href="[[rootPath]]team">Team</a>
+          <a name="store" href="[[rootPath]]sales">Sales</a>
+          <a name="store" href="[[rootPath]]logout">Log Out</a> 
         </iron-selector>
       </app-drawer>
 
@@ -113,7 +128,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header slot="header" condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-            <div main-title>Absolute Reborn</div>
+            <div main-title style="font-family: 'Satisfy', cursive;">Absolute Reborn</div>
           </app-toolbar>
         </app-header>
 
