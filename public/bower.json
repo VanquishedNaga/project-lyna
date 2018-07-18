@@ -26,6 +26,7 @@
     "polymer": "Polymer/polymer#^2.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0",
     "polymerfire": "firebase/polymerfire#^2.2.1",
-    "paper-button": "PolymerElements/paper-button#^2.1.1"
+    "paper-button": "PolymerElements/paper-button#^2.1.1",
+    "iron-icons": "PolymerElements/iron-icons#^2.1.1"
   }
 }

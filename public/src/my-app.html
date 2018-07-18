@@ -21,6 +21,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../bower_components/iron-icons/social-icons.html">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Satisfy">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
@@ -40,10 +43,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </firebase-auth>
     <style>
       :host {
-        --app-primary-color: #4285f4;
-        --app-secondary-color: black;
-
+        --app-primary-color: white;
+        --app-secondary-color: white;
+        --app-drawer-width: 220px;
         display: block;
+      }
+
+      app-toolbar {
+        height: 120px;
       }
 
       app-drawer-layout:not([narrow]) [drawer-toggle] {
@@ -57,6 +64,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
+      }
+
+      app-drawer {
+        --app-drawer-content-container: {
+          background-color: #81040A
+        };
       }
 
       .drawer-list {
@@ -73,9 +86,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .drawer-list a.iron-selected {
-        color: black;
         font-weight: bold;
-        background-color: grey;
+        background-color: #555555;
       }
 
       .profile-pic img{
@@ -88,17 +100,52 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-size: cover;
       }
 
-      .profile-pic h3{
+      .profile-pic h2{
         position: relative;
         text-align: center;
+        color: white;
         font-family: 'Roboto Condensed', sans-serif;
       }
 
       .profile-pic h4{
         position: relative;
         text-align: center;
+        color: white;
         font-family: 'Roboto Condensed', sans-serif;
       }
+
+      [condensed-title] {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-size: 200px;
+      background-image: url('../images/small logo.png');
+      background-repeat: no-repeat;
+      background-position: center center;
+      /*background-size: 90px;*/
+
+      /* The difference in font size is used to calculate the scale of the title in the transition. */
+      font-size: 16px;
+    }
+
+    [main-title] {
+      position: absolute;
+      top: -150px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-image: url('../images/temp banner.JPG');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 800px;
+      -webkit-transform-origin: center top !important;
+      transform-origin: center top !important;
+
+      /* The difference in font size is used to calculate the scale of the title in the transition. */
+      font-size: 32px;
+    }
     </style>
 
     <app-location
@@ -119,10 +166,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div class = "profile-pic">
 
           <img src="../images/AlexP.png" alt="profilePic"/>
-          <h3>Alex Phoon</h3>
+          <h2>Alex Phoon</h2>
           <h4>VIP ZHONG DAI</h4> 
         </div>
-        <paper-button on-tap="signIn" disabled="[[disabled]]">
+        <!-- <paper-button on-tap="signIn" disabled="[[disabled]]">
           <iron-icon icon="account-circle"></iron-icon>
           <span>Sign in with Google</span>
         </paper-button>
@@ -133,23 +180,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-button on-tap="check" disabled="[[disabled]]">
           <iron-icon icon="account-circle"></iron-icon>
           <span>debug</span>
-        </paper-button>
+        </paper-button> -->
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="store" href="[[rootPath]]store">Store</a>
-          <a name="people" href="[[rootPath]]people">People</a>
-          <a name="team" href="[[rootPath]]team">Team</a>
-          <a name="sales" href="[[rootPath]]sales">Sales</a>
-          <a name="logout" href="[[rootPath]]logout">Log Out</a> 
+          <a name="store" href="[[rootPath]]store">
+            <iron-icon icon="icons:store"></iron-icon> Store
+          </a>
+          <a name="people" href="[[rootPath]]people">
+            <iron-icon icon="icons:face"></iron-icon> People
+          </a> 
+          <a name="team" href="[[rootPath]]team">
+            <iron-icon icon="icons:supervisor-account"></iron-icon> Team
+          </a> 
+          <a name="sales" href="[[rootPath]]sales">
+            <iron-icon icon="icons:trending-up"></iron-icon> Sales
+          </a>
+          <a name="logout" href="[[rootPath]]logout">
+            <iron-icon icon="icons:power-settings-new"></iron-icon> Log Out
+          </a> 
         </iron-selector>
       </app-drawer>
 
       <!-- Main content -->
       <app-header-layout has-scrolling-region>
-
-        <app-header slot="header" condenses reveals effects="waterfall">
+        <app-header slot="header" condenses shadow fixed effects="resize-title waterfall"> 
+          <app-toolbar>
+            <div condensed-title></div>
+          </app-toolbar>
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-            <div main-title style="font-family: 'Satisfy', cursive;">Absolute Reborn</div>
+            <div main-title></div>
           </app-toolbar>
         </app-header>
 
