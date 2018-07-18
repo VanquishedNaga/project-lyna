@@ -1,0 +1,63 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<!-- Imports -->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="login-view">
+  <template>
+    <firebase-auth
+      id="auth"
+      app-name="absolute-reborn"
+      provider="google"
+      signed-in="{{signedIn}}"
+      user="{{user}}">
+    </firebase-auth>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+    </style>
+
+    <div class="card">
+      <h1>Login</h1>
+      <paper-button on-tap="signIn"">
+        <iron-icon icon="account-circle"></iron-icon>
+        <span>Sign in with Google</span>
+      </paper-button>
+    </div>
+  </template>
+
+  <script>
+    class LoginView extends Polymer.Element {
+      static get is() { return 'login-view'; }
+      static get properties() {
+        return {
+          productName: String
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("LoginView ready.");
+      }
+
+      signIn() {
+        this.$.auth.signInWithPopup()
+          .then(function(response){
+            console.log('Login successful.');
+          })
+          .catch(function(error){
+            console.log('Login failed.');
+          });
+      }
+    }
+
+    window.customElements.define(LoginView.is, LoginView);
+  </script>
+</dom-module>

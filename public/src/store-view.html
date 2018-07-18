@@ -13,6 +13,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="store-view">
   <template>
+    <firebase-auth
+      id="auth"
+      app-name="absolute-reborn"
+      provider="google"
+      signed-in="{{signedIn}}"
+      user="{{user}}">
+    </firebase-auth>
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
     <style include="shared-styles">
       :host {
         display: block;
@@ -24,14 +35,44 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div class="card">
       <h1>Store</h1>
       <p>Store Product: </p>
-      <p id = "productName">0</p>
+      <p>[[productName]]</p>
+      <paper-button on-tap="check2" disabled="[[disabled]]">
+        <iron-icon icon="account-circle"></iron-icon>
+        <span>debug2</span>
+      </paper-button>
     </div>
   </template>
 
   <script>
     class StoreView extends Polymer.Element {
       static get is() { return 'store-view'; }
+      static get properties() {
+        return {
+          productName: String
+        };
+      }
+      ready() {
+        super.ready();
+        console.log("StoreView ready.");
+        //this.$.doc.path = '/users/' + this.user.uid + '/love';
+        //this.productName = this.$.doc.data;
+      }
+
+
+
+
+      check2() {
+        //var productName = document.getElementById("productName");
+        //console.log(productName);
+        var test;
+        //this.productName  = 'lololo';
+        this.$.doc.path = '/users/' + this.user.uid + '/love';
+        this.productName = this.$.doc.data;
+        console.log(this.$.doc.data);
+        //this.productName = test;
+      }
     }
+
 
     /*var productID = "1234567";
     var productName = document.getElementById("productName");

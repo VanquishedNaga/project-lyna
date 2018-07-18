@@ -1,13 +1,9 @@
 <!--
 @license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
+<!-- Imports -->
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
@@ -39,8 +35,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app-name="absolute-reborn"
       provider="google"
       signed-in="{{signedIn}}"
-      user="{{user}}">
+      user="{{user}}"
+      status-known="{{statusKnown}}">
     </firebase-auth>
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+    <firebase-query
+      id = "query"
+      app-name="absolute-reborn"
+      path = "/users"
+      data = "{{usersData}}">
+    </firebase-query>
     <style>
       :host {
         --app-primary-color: white;
@@ -100,7 +107,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-size: cover;
       }
 
-      .profile-pic h2{
+      .profile-pic h3{
         position: relative;
         text-align: center;
         color: white;
@@ -165,22 +172,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
         <div class = "profile-pic">
 
-          <img src="../images/AlexP.png" alt="profilePic"/>
-          <h2>Alex Phoon</h2>
+          <img id="user-pic" src="../images/AlexP.png" alt="profilePic"/>
+          <h3>Alex Phoon</h3>
           <h4>VIP ZHONG DAI</h4> 
         </div>
-        <!-- <paper-button on-tap="signIn" disabled="[[disabled]]">
-          <iron-icon icon="account-circle"></iron-icon>
-          <span>Sign in with Google</span>
-        </paper-button>
-        <paper-button on-tap="signOut" disabled="[[disabled]]">
-          <iron-icon icon="account-circle"></iron-icon>
-          <span>Sign out</span>
-        </paper-button>
-        <paper-button on-tap="check" disabled="[[disabled]]">
-          <iron-icon icon="account-circle"></iron-icon>
-          <span>debug</span>
-        </paper-button> -->
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="store" href="[[rootPath]]store">
             <iron-icon icon="icons:store"></iron-icon> Store
@@ -198,6 +193,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <iron-icon icon="icons:power-settings-new"></iron-icon> Log Out
           </a> 
         </iron-selector>
+        <paper-button on-tap="signIn" disabled="[[disabled]]">
+          <iron-icon icon="account-circle"></iron-icon>
+          <span>Sign in with Google</span>
+        </paper-button>
+        <paper-button on-tap="signOut" disabled="[[disabled]]">
+          <iron-icon icon="account-circle"></iron-icon>
+          <span>Sign out</span>
+        </paper-button>
+        <paper-button on-tap="check" disabled="[[disabled]]">
+          <iron-icon icon="account-circle"></iron-icon>
+          <span>debug</span>
+        </paper-button>
+        </paper-button>
+        <paper-button on-tap="check2" disabled="[[disabled]]">
+          <iron-icon icon="account-circle"></iron-icon>
+          <span>debug2</span>
+        </paper-button>
       </app-drawer>
 
       <!-- Main content -->
@@ -218,6 +230,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             fallback-selection="not-found"
             role="main">
           <store-view name="store"></store-view>
+          <login-view name="login"></login-view>
           <not-found-view name="not-found"></not-found-view>
         </iron-pages>
       </app-header-layout>
@@ -225,6 +238,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
+    'use strict';
+
     // Gesture events like tap and track generated from touch will not be
     // preventable, allowing for better scrolling performance.
     Polymer.setPassiveTouchGestures(true);
@@ -247,7 +262,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           signedIn: {
             type: Boolean,
             notify: true,
-            value: false
+            value: false,
+            observer: 'onAuthChange',
+          },
+          statusKnown: {
+            type: Boolean,
+            notify: true,
+            value: false,
+            observer: 'onStatusKnown',
           }
         };
       }
@@ -256,6 +278,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return [
           '_routePageChanged(routeData.page)',
         ];
+      }
+
+      ready(){
+        super.ready();
+        console.log("MyAppView ready.");
+        this.userPic = this.shadowRoot.querySelector('#user-pic');
       }
 
       _routePageChanged(page) {
@@ -277,6 +305,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           {
             break;
           }
+          case "login":
+          {
+            if(this.statusKnown && this.signedIn) {
+              page = "not-found";
+            }
+            break;
+          }
           default:
           {
             page = "not-found";
@@ -291,20 +326,91 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             true);
       }
 
+      onAuthChange(signedIn) {
+        console.log('signedIn changed: ' + signedIn);
+        if(this.statusKnown){
+          if(signedIn){
+            console.log("User signed in.");
+            this.userPic.removeAttribute('style');
+            this.$.drawer.open();
+
+            // Direct to home page.
+            this.set('route.path', '/store/');
+          }
+          else{
+            console.log("User signed out.");
+            this.userPic.setAttribute('style', 'display: none');
+            this.$.drawer.close();
+
+            // Direct to sign in page.
+            this.set('route.path', '/login/');
+          }
+        }
+      }
+
+      // Called when firebase-auth is done initializing
+      // Refer to https://github.com/firebase/polymerfire/pull/24
+      onStatusKnown(statusKnown){
+        console.log('statusKnown changed: ' + statusKnown);
+        console.log('signedIn: ' + this.signedIn);
+
+        // Call onAuthChange to handle user sign-in/sign-out
+        this.onAuthChange(this.signedIn);
+      }
+
       _showPage404() {
         this.page = 'not-found';
       }
 
       signIn() {
-        this.$.auth.signInWithPopup();
+        this.$.auth.signInWithPopup()
+          .then(function(response){
+            console.log('Login successful.');
+          })
+          .catch(function(error){
+            console.log('Login failed.');
+          });
+        //console.log("signedIn: " + this.signedIn);
       }
 
       signOut() {
         this.$.auth.signOut();
+        //console.log("signedIn: " + this.signedIn);
       }
 
       check() {
+        console.log("test");
         console.log(this.signedIn);
+        this.$.doc.path = '/users/' + this.user.uid;
+        //this.$.doc.ref.push({fuck: 'alex'});
+
+        //this.$.doc.ref.child('/users/' + this.user.uid).set({testing: 'alex'});
+        //this.$.doc.data = {alex: 'cool'};
+        //save(path, key), by not giving a key firebase will generate one itself
+        //this.$.doc.saveValue();
+        //this.$.doc.path = '/users';
+        //this.$.doc.ref.set({data: 'alex'});
+        //this.$.doc.ref.set({testing: 'data'});
+          /*firebase.database().ref('users/' + this.user.uid).set({
+    username: "name",
+    email: "email",
+    profile_picture : "imageUrl"
+  });*/
+
+
+      }
+
+      check2() {
+        console.log("test2");
+        console.log("User login: " + this.signedIn);
+        /*this.$.doc.getStoredValue('/users/' + this.user.uid)
+        .then((response) => {
+          console.log(response);
+        });*/
+        this.$.doc.path = '/users/' + this.user.uid + '/love';
+        this.$.doc.ref.on('value', function(snapshot){
+          console.log(snapshot.val());
+        });
       }
     }
 
