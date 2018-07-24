@@ -25,10 +25,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="my-icons.html">
 
+<link rel="lazy-import" href="homepage-view.html">
 <link rel="lazy-import" href="store-view.html">
 <link rel="lazy-import" href="not-found-view.html">
 
-<dom-module id="my-app">
+<dom-module id="app-view">
   <template>
     <firebase-auth
       id="auth"
@@ -57,7 +58,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       app-toolbar {
-        height: 120px;
+        height: 150px;
       }
 
       app-drawer-layout:not([narrow]) [drawer-toggle] {
@@ -143,10 +144,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       bottom: 0;
       left: 0;
       right: 0;
-      background-image: url('../images/temp banner.JPG');
+      background-image: url('../images/banner.PNG');
       background-repeat: no-repeat;
       background-position: center center;
-      background-size: 800px;
+      /*background-size: 800px;*/
       -webkit-transform-origin: center top !important;
       transform-origin: center top !important;
 
@@ -162,22 +163,24 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <app-route
         route="{{route}}"
-        pattern="[[rootPath]]:page"
+        pattern="[[rootPath]]app/:page"
         data="{{routeData}}"
         tail="{{subroute}}">
     </app-route>
 
     <app-drawer-layout fullbleed narrow="{{narrow}}">
       <!-- Drawer content -->
-      <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
+      <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" hidden$="[[!user]]">
         <div class = "profile-pic">
-
           <img id="user-pic" src="../images/AlexP.png" alt="profilePic"/>
           <h3>Alex Phoon</h3>
           <h4>VIP ZHONG DAI</h4> 
         </div>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="store" href="[[rootPath]]store">
+          <a name="homepage" href="[[rootPath]]app/homepage">
+            <iron-icon icon="icons:home"></iron-icon> Homepage
+          </a>
+          <a name="store" href="[[rootPath]]app/store">
             <iron-icon icon="icons:store"></iron-icon> Store
           </a>
           <a name="people" href="[[rootPath]]people">
@@ -189,32 +192,20 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <a name="sales" href="[[rootPath]]sales">
             <iron-icon icon="icons:trending-up"></iron-icon> Sales
           </a>
-          <a name="logout" href="[[rootPath]]logout">
-            <iron-icon icon="icons:power-settings-new"></iron-icon> Log Out
-          </a> 
         </iron-selector>
         <paper-button on-tap="signIn" disabled="[[disabled]]">
-          <iron-icon icon="account-circle"></iron-icon>
+          <iron-icon icon="icons:power-settings-new"></iron-icon>
           <span>Sign in with Google</span>
         </paper-button>
         <paper-button on-tap="signOut" disabled="[[disabled]]">
           <iron-icon icon="account-circle"></iron-icon>
           <span>Sign out</span>
         </paper-button>
-        <paper-button on-tap="check" disabled="[[disabled]]">
-          <iron-icon icon="account-circle"></iron-icon>
-          <span>debug</span>
-        </paper-button>
-        </paper-button>
-        <paper-button on-tap="check2" disabled="[[disabled]]">
-          <iron-icon icon="account-circle"></iron-icon>
-          <span>debug2</span>
-        </paper-button>
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout has-scrolling-region>
-        <app-header slot="header" condenses shadow fixed effects="resize-title waterfall"> 
+      <app-header-layout has-scrolling-region hidden >
+        <app-header hidden slot="header" condenses shadow fixed effects="resize-title waterfall" > 
           <app-toolbar>
             <div condensed-title></div>
           </app-toolbar>
@@ -229,6 +220,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             attr-for-selected="name"
             fallback-selection="not-found"
             role="main">
+          <homepage-view name="homepage"></homepage-view>
           <store-view name="store"></store-view>
           <login-view name="login"></login-view>
           <not-found-view name="not-found"></not-found-view>
@@ -244,8 +236,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     // preventable, allowing for better scrolling performance.
     Polymer.setPassiveTouchGestures(true);
 
-    class MyApp extends Polymer.Element {
-      static get is() { return 'my-app'; }
+    class AppView extends Polymer.Element {
+      static get is() { return 'app-view'; }
 
       static get properties() {
         return {
@@ -259,18 +251,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           // This shouldn't be neccessary, but the Analyzer isn't picking up
           // Polymer.Element#rootPath
           rootPath: String,
-          signedIn: {
-            type: Boolean,
-            notify: true,
-            value: false,
-            observer: 'onAuthChange',
-          },
-          statusKnown: {
-            type: Boolean,
-            notify: true,
-            value: false,
-            observer: 'onStatusKnown',
-          }
         };
       }
 
@@ -282,14 +262,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       ready(){
         super.ready();
-        console.log("MyAppView ready.");
+        console.log("AppView is ready.");
         this.userPic = this.shadowRoot.querySelector('#user-pic');
       }
 
       _routePageChanged(page) {
         // If no page was found in the route data, page will be an empty string.
-        // Default to 'view1' in that case.
-        this.page = page || 'store';
+        // Default to 'homepage' in that case.
+        this.page = page || 'homepage';
 
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
@@ -301,22 +281,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         // Load page import on demand. Show 404 page if fails
         switch(page) {
           // Add new views here !!!!!!!!!!!!!!!!!!!!!!!!!
+          case "homepage":
           case "store":
-          {
             break;
-          }
-          case "login":
-          {
-            if(this.statusKnown && this.signedIn) {
-              page = "not-found";
-            }
-            break;
-          }
+    
           default:
-          {
             page = "not-found";
             break;
-          }
         }
         const resolvedPageUrl = this.resolveUrl(page + '-view.html');
         Polymer.importHref(
@@ -326,40 +297,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             true);
       }
 
-      onAuthChange(signedIn) {
-        console.log('signedIn changed: ' + signedIn);
-        if(this.statusKnown){
-          if(signedIn){
-            console.log("User signed in.");
-            this.userPic.removeAttribute('style');
-            this.$.drawer.open();
-
-            // Direct to home page.
-            this.set('route.path', '/store/');
-          }
-          else{
-            console.log("User signed out.");
-            this.userPic.setAttribute('style', 'display: none');
-            this.$.drawer.close();
-
-            // Direct to sign in page.
-            this.set('route.path', '/login/');
-          }
-        }
-      }
-
-      // Called when firebase-auth is done initializing
-      // Refer to https://github.com/firebase/polymerfire/pull/24
-      onStatusKnown(statusKnown){
-        console.log('statusKnown changed: ' + statusKnown);
-        console.log('signedIn: ' + this.signedIn);
-
-        // Call onAuthChange to handle user sign-in/sign-out
-        this.onAuthChange(this.signedIn);
-      }
-
       _showPage404() {
         this.page = 'not-found';
+        console.log('app view error 404');
       }
 
       signIn() {
@@ -377,43 +317,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.auth.signOut();
         //console.log("signedIn: " + this.signedIn);
       }
-
-      check() {
-        console.log("test");
-        console.log(this.signedIn);
-        this.$.doc.path = '/users/' + this.user.uid;
-        //this.$.doc.ref.push({fuck: 'alex'});
-
-        //this.$.doc.ref.child('/users/' + this.user.uid).set({testing: 'alex'});
-        //this.$.doc.data = {alex: 'cool'};
-        //save(path, key), by not giving a key firebase will generate one itself
-        //this.$.doc.saveValue();
-        //this.$.doc.path = '/users';
-        //this.$.doc.ref.set({data: 'alex'});
-        //this.$.doc.ref.set({testing: 'data'});
-          /*firebase.database().ref('users/' + this.user.uid).set({
-    username: "name",
-    email: "email",
-    profile_picture : "imageUrl"
-  });*/
-
-
-      }
-
-      check2() {
-        console.log("test2");
-        console.log("User login: " + this.signedIn);
-        /*this.$.doc.getStoredValue('/users/' + this.user.uid)
-        .then((response) => {
-          console.log(response);
-        });*/
-        this.$.doc.path = '/users/' + this.user.uid + '/love';
-        this.$.doc.ref.on('value', function(snapshot){
-          console.log(snapshot.val());
-        });
-      }
     }
 
-    window.customElements.define(MyApp.is, MyApp);
+    window.customElements.define(AppView.is, AppView);
   </script>
 </dom-module>

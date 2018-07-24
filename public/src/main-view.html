@@ -1,0 +1,186 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<!-- Imports -->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+
+<link rel="lazy-import" href="not-found-view.html">
+<link rel="lazy-import" href="src/app-view.html">
+<link rel="lazy-import" href="src/login-view.html">
+
+<dom-module id="main-view">
+  <template>
+    <firebase-auth
+      id="auth"
+      app-name="absolute-reborn"
+      provider="google"
+      signed-in="{{signedIn}}"
+      user="{{user}}"
+      status-known="{{statusKnown}}">
+    </firebase-auth>
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+    <firebase-query
+      id = "query"
+      app-name="absolute-reborn"
+      path = "/users"
+      data = "{{usersData}}">
+    </firebase-query>
+
+    <app-location
+        route="{{route}}"
+        url-space-regex="^[[rootPath]]">
+    </app-location>
+
+    <app-route
+        route="{{route}}"
+        pattern="[[rootPath]]:page"
+        data="{{routeData}}"
+        tail="{{subroute}}">
+    </app-route>
+
+    <iron-pages
+        selected="[[page]]"
+        attr-for-selected="name"
+        fallback-selection="not-found"
+        role="main">
+      <app-view name="app"></app-view>
+      <login-view name="login"></login-view>
+      <not-found-view name="not-found"></not-found-view>
+    </iron-pages>
+  </template>
+
+  <script>
+    class MainView extends Polymer.Element {
+      static get is() { return 'main-view'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged',
+          },
+          routeData: Object,
+          subroute: Object,
+          // This shouldn't be neccessary, but the Analyzer isn't picking up
+          // Polymer.Element#rootPath
+          rootPath: String,
+          signedIn: {
+            type: Boolean,
+            notify: true,
+            value: false,
+            observer: 'onAuthChange',
+          },
+          statusKnown: {
+            type: Boolean,
+            notify: true,
+            value: false,
+            observer: 'onStatusKnown',
+          }
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+        ];
+      }
+
+      ready(){
+        super.ready();
+        console.log("MainView is ready.");
+      }
+
+      _routePageChanged(page) {
+        // If no page was found in the route data, page will be an empty string.
+        // Default to 'view1' in that case.
+        this.page = page || 'app';
+      }
+
+      _pageChanged(page) {
+        // Load page import on demand. Show 404 page if fails
+        if(this.statusKnown){
+          switch(page) {
+          // Add new views here !!!!!!!!!!!!!!!!!!!!!!!!!
+          case "app":
+            break;
+
+          case "login":
+            if(this.signedIn) {
+              page = "app";
+            }
+            break;
+
+          default:
+            console.log('default case');
+            if(this.signedIn) {
+              page = "not-found";
+              this.set('route.path', '/not-found/');
+            }
+            else{
+              page = "login";
+              this.set('route.path', '/login/');
+            }
+            break;
+        }
+          const resolvedPageUrl = this.resolveUrl(page + '-view.html');
+          Polymer.importHref(
+              resolvedPageUrl,
+              null,
+              this._showPage404.bind(this),
+              true);
+      }
+    }
+
+      onAuthChange(signedIn) {
+        console.log('signedIn changed: ' + signedIn);
+        if(this.statusKnown){
+          if(signedIn){
+            console.log("User signed in.");
+            console.log(this.get('route.path'));
+            if (this.get('route.path') == '/login/'){
+              // Direct to home page.
+              this.set('route.path', '/app/');
+            }
+            else{
+              console.log("onAuthChange else case");
+            }
+          }
+          else{
+            console.log("User signed out.");
+            // Direct to sign in page.
+            this.set('route.path', '/login/');
+          }
+        }
+      }
+
+      // Called when firebase-auth is done initializing
+      // Refer to https://github.com/firebase/polymerfire/pull/24
+      onStatusKnown(statusKnown){
+        console.log('statusKnown changed: ' + statusKnown);
+        console.log('signedIn: ' + this.signedIn);
+
+        if (statusKnown){
+          // Call onAuthChange to handle user sign-in/sign-out
+          this.onAuthChange(this.signedIn);
+          this._pageChanged(this.page);
+        }
+      }
+
+      _showPage404() {
+        this.page = 'not-found';
+      }
+    }
+
+    window.customElements.define(MainView.is, MainView);
+  </script>
+</dom-module>
