@@ -27,6 +27,9 @@
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0",
     "polymerfire": "firebase/polymerfire#^2.2.1",
     "paper-button": "PolymerElements/paper-button#^2.1.1",
-    "iron-icons": "PolymerElements/iron-icons#^2.1.1"
+    "iron-icons": "PolymerElements/iron-icons#^2.1.1",
+    "paper-tabs": "PolymerElements/paper-tabs#^2.1.1",
+    "paper-dialog": "PolymerElements/paper-dialog#^2.1.1",
+    "paper-input": "PolymerElements/paper-input#^2.2.3"
   }
 }

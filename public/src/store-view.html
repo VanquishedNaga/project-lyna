@@ -1,14 +1,16 @@
 <!--
 @license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="store-view">
@@ -20,27 +22,76 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       signed-in="{{signedIn}}"
       user="{{user}}">
     </firebase-auth>
+
     <firebase-document
       id="doc"
       app-name="absolute-reborn">
     </firebase-document>
+
+    <firebase-query
+      id="query"
+      app-name="absolute-reborn"
+      path="/products"
+      data="{{prodItems}}">
+    </firebase-query>
+
     <style include="shared-styles">
       :host {
         display: block;
-
         padding: 10px;
       }
     </style>
 
-    <div class="card">
-      <h1>Store</h1>
-      <p>Store Product: </p>
-      <p>[[productName]]</p>
-      <paper-button on-tap="check2" disabled="[[disabled]]">
-        <iron-icon icon="account-circle"></iron-icon>
-        <span>debug2</span>
-      </paper-button>
-    </div>
+    <app-toolbar class="tabs-bar" hidden$="{{!wideLayout}}">
+      <paper-tabs selected="{{selected}}" attr-for-selected="name">
+        <template is="dom-repeat" items="{{tabItems}}">
+          <paper-tab name$="{{item}}">{{item}}</paper-tab>
+        </template>
+      </paper-tabs>
+    </app-toolbar>
+
+    <iron-pages selected="{{selected}}" attr-for-selected="page-name">
+      <div page-name="Product">
+        <paper-button on-tap="addProduct" disabled="[[disabled]]">
+          <iron-icon icon="add-circle-outline"></iron-icon>
+          <span>Add product</span>
+        </paper-button>
+        <template is="dom-repeat" items="{{prodItems}}">
+          <div class="card">
+            <h1>[[item.name]]</h1>
+            <p>Description: </p>
+            <p>[[item.description]]</p>
+            <div class="buttons">
+              <paper-button on-tap="editProd">Edit</paper-button>
+              <paper-button on-tap="delProd">Delete</paper-button>
+            </div>
+          </div>
+        </template>
+      </div>
+      <div page-name="Inventory">Page 2</div>
+      <div>Page 3</div>
+    </iron-pages>
+
+    <!-- Dialog to add new product -->
+    <paper-dialog
+      id="addprod"
+      on-iron-overlay-closed="closeThis">
+      <form is="iron-form" action="" id="new-prod-form">
+        <h2>Add product</h2>
+        <paper-input always-float-label required
+          error-message="Field required!"
+          id="new-prod-name"
+          label="Product Name">
+        </paper-input>
+        <paper-textarea always-float-label id="new-prod-desc" label="Product Description"></paper-textarea>
+        <div class="buttons">
+          <paper-button>Upload photo</paper-button>
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button on-tap="saveNewProd" autofocus>Save</paper-button>
+        </div>
+      </form>
+    </paper-dialog>
+
   </template>
 
   <script>
@@ -48,39 +99,90 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get is() { return 'store-view'; }
       static get properties() {
         return {
-          productName: String
+          productName: String,
+          
+          selected: {type: String, value: 'Product'},
+
+          tabItems: {
+            type: Array,
+            value: function() {
+              return ['Product', 'Inventory'];
+            }
+          },
+
+          prodItems: {
+            type: Array
+          }
         };
       }
+
       ready() {
         super.ready();
         console.log("StoreView ready.");
-        //this.$.doc.path = '/users/' + this.user.uid + '/love';
-        //this.productName = this.$.doc.data;
+
+        this.dlAddProduct = this.shadowRoot.querySelector('#addprod');
+        this.prodName = this.shadowRoot.querySelector('#new-prod-name');
+        this.prodDesc = this.shadowRoot.querySelector('#new-prod-desc');
+        this.newProdForm = this.shadowRoot.querySelector('#new-prod-form');
+
+        // init to null to solve error
+        this.prodKey = null;
+        this.prodName.value = null;
+        this.prodDesc.value = null;
       }
 
+      addProduct() {
+        Polymer.dom(document.body).appendChild(this.dlAddProduct);
 
+        this.dlAddProduct.toggle();
+        this.dlAddProduct.constrain();
+      }
 
+      closeThis() {
+        //Polymer.dom(document.body).removeChild(this.dlAddProduct);
+        this.prodName.value = null;
+        this.prodDesc.value = null;
+        this.prodName.invalid = false;
+      }
 
-      check2() {
-        //var productName = document.getElementById("productName");
-        //console.log(productName);
-        var test;
-        //this.productName  = 'lololo';
-        this.$.doc.path = '/users/' + this.user.uid + '/love';
-        this.productName = this.$.doc.data;
-        console.log(this.$.doc.data);
-        //this.productName = test;
+      saveNewProd() {
+        var valid = this.prodName.validate();
+        if (valid)
+        {
+          if (this.prodKey){
+            this.$.doc.path = '/products/' + this.prodKey;
+            this.$.doc.ref.set({
+              name: this.prodName.value,
+              description: this.prodDesc.value
+            });
+            this.prodKey = null;
+            console.log(this.prodName.value + ' edited.');
+          }
+          else{
+            this.$.doc.path = '/products';
+            this.$.doc.ref.push({
+              name: this.prodName.value,
+              description: this.prodDesc.value
+            });
+            console.log(this.prodName.value + ' saved.');
+          }
+          this.dlAddProduct.close();
+        }
+      }
+
+      delProd(e) {
+        this.$.doc.path = '/products/'+ e.model.item.$key;
+        this.$.doc.ref.remove();
+        console.log(e.model.item.name + ' deleted from database.');
+      }
+
+      editProd(e) {
+        this.prodKey = e.model.item.$key;
+        this.prodName.value = e.model.item.name || null;
+        this.prodDesc.value = e.model.item.description || null;
+        this.addProduct();
       }
     }
-
-
-    /*var productID = "1234567";
-    var productName = document.getElementById("productName");
-    var productNameRef = firebase.database().ref('/Store/' + productID);
-    productNameRef.on('value',function(snapshot) {
-      productName.innerText = snapshot.val().productName;
-      console.log("Log:" + snapshot.val());
-    });*/
 
     window.customElements.define(StoreView.is, StoreView);
   </script>
