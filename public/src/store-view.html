@@ -203,7 +203,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         {
           if (this.prodKey){
             this.$.doc.path = '/products/' + this.prodKey;
-            this.$.doc.ref.set({
+            this.$.doc.ref.update({
               name: this.prodName.value,
               description: this.prodDesc.value
             });
