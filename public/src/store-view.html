@@ -4,7 +4,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
@@ -35,6 +37,28 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       data="{{prodItems}}">
     </firebase-query>
 
+    <firebase-storage-ref
+      id="storage"
+      app-name="absolute-reborn"
+      path="/products"
+      metadata="{{metadata}}"
+      storage-uri="{{gsUri}}"
+      download-url="{{downloadUrl}}"
+      force-unique>
+    </firebase-storage-ref>
+
+    <firebase-storage-upload-task
+      id="task"
+      app-name="absolute-reborn"
+      task="[[task]]"
+      bytes-transferred="{{bytesTransferred}}"
+      total-bytes="{{totalBytes}}"
+      state="{{state}}"
+      download-url="{{downloadUrl}}"
+      metadata="{{metadata}}"
+      path="{{path}}">
+    </firebase-storage-upload-task>
+
     <style include="shared-styles">
       :host {
         display: block;
@@ -52,20 +76,42 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <iron-pages selected="{{selected}}" attr-for-selected="page-name">
       <div page-name="Product">
-        <paper-button on-tap="addProduct" disabled="[[disabled]]">
-          <iron-icon icon="add-circle-outline"></iron-icon>
-          <span>Add product</span>
-        </paper-button>
+
+        <app-toolbar hidden$="{{!wideLayout}}">
+          <paper-button on-tap="addProduct" disabled="[[disabled]]">
+            <iron-icon icon="add-circle-outline"></iron-icon>
+            <span>Add product</span>
+          </paper-button>
+        </app-toolbar>
+
         <template is="dom-repeat" items="{{prodItems}}">
-          <div class="card">
-            <h1>[[item.name]]</h1>
-            <p>Description: </p>
-            <p>[[item.description]]</p>
-            <div class="buttons">
+          <paper-card
+            class="cyan"
+            heading="[[item.name]]">
+            <!-- style="width: 100%;" -->
+            <div class="card-content">
+              <div>
+                <iron-image
+                  src="[[item.images.downloadUrl]]"
+                  style="
+                    width:200px;
+                    height:200px;
+                    margin-left: auto;
+                    margin-right: auto;
+                    display: block;"
+                  sizing="contain">
+                </iron-image>
+              </div>
+              <h4>Description: </h4>
+              <p>[[item.description]]</p>
+            </div>
+            <div class="card-actions">
+              <paper-button on-tap="restock">Restock</paper-button>
               <paper-button on-tap="editProd">Edit</paper-button>
               <paper-button on-tap="delProd">Delete</paper-button>
             </div>
-          </div>
+          </paper-card>
+
         </template>
       </div>
       <div page-name="Inventory">Page 2</div>
@@ -76,20 +122,19 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <paper-dialog
       id="addprod"
       on-iron-overlay-closed="closeThis">
-      <form is="iron-form" action="" id="new-prod-form">
-        <h2>Add product</h2>
-        <paper-input always-float-label required
-          error-message="Field required!"
-          id="new-prod-name"
-          label="Product Name">
-        </paper-input>
-        <paper-textarea always-float-label id="new-prod-desc" label="Product Description"></paper-textarea>
-        <div class="buttons">
-          <paper-button>Upload photo</paper-button>
-          <paper-button dialog-dismiss>Cancel</paper-button>
-          <paper-button on-tap="saveNewProd" autofocus>Save</paper-button>
-        </div>
-      </form>
+      <h2>Add product</h2>
+      <paper-input always-float-label required
+        error-message="Field required!"
+        id="new-prod-name"
+        label="Product Name">
+      </paper-input>
+      <paper-textarea always-float-label id="new-prod-desc" label="Product Description"></paper-textarea>
+      <div class="buttons">
+        <paper-input type="file" id="prod-pic" accept="image/jpeg"></paper-input>
+        <!-- <paper-button on-tap="uploadProdPic" >Upload photo</paper-button> -->
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-tap="saveNewProd" autofocus>Save</paper-button>
+      </div>
     </paper-dialog>
 
   </template>
@@ -100,7 +145,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get properties() {
         return {
           productName: String,
-          
+
           selected: {type: String, value: 'Product'},
 
           tabItems: {
@@ -112,6 +157,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
           prodItems: {
             type: Array
+          },
+
+          state: {
+            type: Object,
+            observer: 'stateChanged'
           }
         };
       }
@@ -123,7 +173,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.dlAddProduct = this.shadowRoot.querySelector('#addprod');
         this.prodName = this.shadowRoot.querySelector('#new-prod-name');
         this.prodDesc = this.shadowRoot.querySelector('#new-prod-desc');
-        this.newProdForm = this.shadowRoot.querySelector('#new-prod-form');
+        this.prodPic = this.shadowRoot.querySelector('#prod-pic');
 
         // init to null to solve error
         this.prodKey = null;
@@ -143,10 +193,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.prodName.value = null;
         this.prodDesc.value = null;
         this.prodName.invalid = false;
+        this.prodPic.value = null;
       }
 
       saveNewProd() {
         var valid = this.prodName.validate();
+
         if (valid)
         {
           if (this.prodKey){
@@ -155,23 +207,45 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               name: this.prodName.value,
               description: this.prodDesc.value
             });
-            this.prodKey = null;
             console.log(this.prodName.value + ' edited.');
           }
           else{
             this.$.doc.path = '/products';
-            this.$.doc.ref.push({
+
+            // Save the key.
+            this.prodKey = this.$.doc.ref.push({
               name: this.prodName.value,
-              description: this.prodDesc.value
-            });
+              description: this.prodDesc.value,
+            }).key;
             console.log(this.prodName.value + ' saved.');
+            console.log('Key: ' + this.prodKey);
           }
+
+          // Upload product pic.
+          var file = this.prodPic.inputElement.inputElement.files[0];
+          if (file){
+            this.$.storage.path = '/products';
+            this.$.task.task = this.$.storage.put(this.prodPic.inputElement.inputElement.files[0]);
+          }
+          else{
+            this.prodKey = null;
+          }
+
+          // Close the dialog.
           this.dlAddProduct.close();
         }
       }
 
       delProd(e) {
         this.$.doc.path = '/products/'+ e.model.item.$key;
+
+        if (e.model.item.images != null){
+          // Delete product images.
+          this.$.storage.path = '/' + e.model.item.images.path;
+          this.$.storage.ref.delete();
+        }
+
+        // Remove product entry.
         this.$.doc.ref.remove();
         console.log(e.model.item.name + ' deleted from database.');
       }
@@ -181,6 +255,26 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.prodName.value = e.model.item.name || null;
         this.prodDesc.value = e.model.item.description || null;
         this.addProduct();
+      }
+
+      uploadProdPic() {
+      }
+
+      stateChanged() {
+        console.log(this.$.task.state);
+        if (this.$.task.state == 'success'){
+          console.log(this.$.task.downloadUrl);
+          console.log(this.$.task.path);
+
+          // Add image path to product entry.
+          this.$.doc.path = '/products/' + this.prodKey + '/images';
+          this.$.doc.ref.set({
+            path: this.$.task.path,
+            downloadUrl: this.$.task.downloadUrl,
+          });
+
+          this.prodKey = null;
+        }
       }
     }
 

@@ -30,6 +30,8 @@
     "iron-icons": "PolymerElements/iron-icons#^2.1.1",
     "paper-tabs": "PolymerElements/paper-tabs#^2.1.1",
     "paper-dialog": "PolymerElements/paper-dialog#^2.1.1",
-    "paper-input": "PolymerElements/paper-input#^2.2.3"
+    "paper-input": "PolymerElements/paper-input#^2.2.3",
+    "paper-card": "PolymerElements/paper-card#^2.1.0",
+    "iron-image": "PolymerElements/iron-image#^2.2.1"
   }
 }
