@@ -174,7 +174,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <div class = "profile-pic">
           <img id="user-pic" src="../images/AlexP.png" alt="profilePic"/>
           <h3>Alex Phoon</h3>
-          <h4>VIP ZHONG DAI</h4> 
+          <h4>VIP ZHONG DAI</h4>
         </div>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="homepage" href="[[rootPath]]app/homepage">
@@ -185,10 +185,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </a>
           <a name="people" href="[[rootPath]]people">
             <iron-icon icon="icons:face"></iron-icon> People
-          </a> 
+          </a>
           <a name="team" href="[[rootPath]]team">
             <iron-icon icon="icons:supervisor-account"></iron-icon> Team
-          </a> 
+          </a>
           <a name="sales" href="[[rootPath]]sales">
             <iron-icon icon="icons:trending-up"></iron-icon> Sales
           </a>
@@ -205,7 +205,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       <!-- Main content -->
       <app-header-layout has-scrolling-region hidden >
-        <app-header hidden slot="header" condenses shadow fixed effects="resize-title waterfall" > 
+        <app-header hidden slot="header" condenses shadow fixed effects="resize-title waterfall" >
           <app-toolbar>
             <div condensed-title></div>
           </app-toolbar>
@@ -284,10 +284,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           case "homepage":
           case "store":
             break;
-    
-          default:
+          default: {
             page = "not-found";
+            this.set('route.path', '/not-found/');
             break;
+          }
         }
         const resolvedPageUrl = this.resolveUrl(page + '-view.html');
         Polymer.importHref(
