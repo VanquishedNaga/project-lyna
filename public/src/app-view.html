@@ -148,6 +148,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         background-size: 900px;
         -webkit-transform-origin: center top !important;
         transform-origin: center top !important;
+        z-index: -1;  /*not to cover drawer toggle button*/
 
         /* The difference in font size is used to calculate the scale of the title in the transition. */
         font-size: 10px;
@@ -204,10 +205,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <app-header-layout has-scrolling-region hidden >
         <app-header hidden slot="header" condenses shadow fixed effects="resize-title waterfall" >
           <app-toolbar>
+            <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div condensed-title></div>
           </app-toolbar>
           <app-toolbar>
-            <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div main-title></div>
           </app-toolbar>
         </app-header>
