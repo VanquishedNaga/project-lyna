@@ -45,22 +45,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       data = "{{usersData}}"
       app-name="absolute-reborn">
     </firebase-document>
-    <!-- <firebase-query
-      id = "query"
-      app-name="absolute-reborn"
-      path = "/users/[[user.uid]]"
-      data = "{{usersData}}">
-    </firebase-query> -->
     <style>
       :host {
         --app-primary-color: white;
         --app-secondary-color: white;
         --app-drawer-width: 220px;
+        --app-toolbar-height: 110px;
         display: block;
       }
 
       app-toolbar {
-        height: 150px;
+        height: var(--app-toolbar-height);
       }
 
       app-drawer-layout:not([narrow]) [drawer-toggle] {
@@ -69,7 +64,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       app-header {
         color: #fff;
-        background-color: #1A191F;
+        background-color: #000;
       }
 
       app-header paper-icon-button {
@@ -125,37 +120,38 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       [condensed-title] {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-size: 200px;
-      background-image: url('../images/small logo.png');
-      background-repeat: no-repeat;
-      background-position: center center;
-      /*background-size: 90px;*/
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        /*background-size: 220px;*/
+        background-size: calc(var(--app-toolbar-height) * 2);
+        background-image: url('../images/small logo.png');
+        background-repeat: no-repeat;
+        background-position: center center;
 
-      /* The difference in font size is used to calculate the scale of the title in the transition. */
-      font-size: 16px;
-    }
+        /* The difference in font size is used to calculate the scale of the title in the transition. */
+        font-size: 5px;
+      }
 
-    [main-title] {
-      position: absolute;
-      top: -150px;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-image: url('../images/banner.PNG');
-      background-repeat: no-repeat;
-      background-position: center center;
-      /*background-size: 800px;*/
-      -webkit-transform-origin: center top !important;
-      transform-origin: center top !important;
+      [main-title] {
+        position: absolute;
+        /*top: -110px;*/
+        top: calc(0px - var(--app-toolbar-height));
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-image: url('../images/banner.png');
+        background-repeat: no-repeat;
+        background-position: center 20%;
+        background-size: 900px;
+        -webkit-transform-origin: center top !important;
+        transform-origin: center top !important;
 
-      /* The difference in font size is used to calculate the scale of the title in the transition. */
-      font-size: 32px;
-    }
+        /* The difference in font size is used to calculate the scale of the title in the transition. */
+        font-size: 10px;
+      }
     </style>
 
     <app-location
