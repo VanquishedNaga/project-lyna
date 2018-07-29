@@ -107,39 +107,42 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       _pageChanged(page) {
-        // Load page import on demand. Show 404 page if fails
-        if(this.statusKnown){
-          switch(page) {
-          // Add new views here !!!!!!!!!!!!!!!!!!!!!!!!!
-          case "app":
-            break;
+        // Don't do routing if auth status is not known yet.
+        if (this.statusKnown) {
+          if (!this.signedIn && page != "login"){
+            // Set URL to login.
+            this.set('route.path', '/login/');
+            return;
+          }
+          else {
+            switch(page) {
+              case "not-found":
+              case "app": {
+                break;
+              }
+              case "login": {
+                if (this.signedIn) {
+                  page = "app";
+                }
+                break;
+              }
+              default:{
+                // Routing to 404 page.
+                page = "not-found";
+                console.log('Routing to 404 page.');
+                break;
+              }
+            }
+          }
 
-          case "login":
-            if(this.signedIn) {
-              page = "app";
-            }
-            break;
-
-          default:
-            console.log('default case');
-            if(this.signedIn) {
-              page = "not-found";
-              this.set('route.path', '/not-found/');
-            }
-            else{
-              page = "login";
-              this.set('route.path', '/login/');
-            }
-            break;
-        }
           const resolvedPageUrl = this.resolveUrl(page + '-view.html');
           Polymer.importHref(
-              resolvedPageUrl,
-              null,
-              this._showPage404.bind(this),
-              true);
+            resolvedPageUrl,
+            null,
+            this._showPage404.bind(this),
+            true);
+        }
       }
-    }
 
       onAuthChange(signedIn) {
         console.log('signedIn changed: ' + signedIn);
