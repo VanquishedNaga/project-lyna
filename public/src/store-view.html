@@ -64,6 +64,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         display: block;
         padding: 10px;
       }
+
+      .product-card {
+        /*background: linear-gradient(white, #b2ebf2);*/
+        background: #b2ebf2;
+        --paper-card-header-color: white;
+        --paper-card-header: {
+          background-color: var(--paper-blue-500);
+        };
+        --paper-card-actions: {
+          background-color: var(--paper-purple-500);
+        };
+      }
     </style>
 
     <app-toolbar class="tabs-bar" hidden$="{{!wideLayout}}">
@@ -86,7 +98,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
         <template is="dom-repeat" items="{{prodItems}}">
           <paper-card
-            class="cyan"
+            class="product-card"
             heading="[[item.name]]">
             <!-- style="width: 100%;" -->
             <div class="card-content">
