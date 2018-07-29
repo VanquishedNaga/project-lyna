@@ -18,6 +18,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       signed-in="{{signedIn}}"
       user="{{user}}">
     </firebase-auth>
+
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+
     <style include="shared-styles">
       :host {
         display: block;
@@ -40,7 +46,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get is() { return 'login-view'; }
       static get properties() {
         return {
-          productName: String
+          productName: String,
         };
       }
 
@@ -53,9 +59,24 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.auth.signInWithPopup()
           .then(function(response){
             console.log('Login successful.');
-          })
+            this.$.doc.path = '/users/' + response.user.uid;
+            //Check if user is first time login
+            var isUserExistInFirebase = false;
+            this.$.doc.ref.once("value")
+            .then(function(snapshot) {
+              isUserExistInFirebase = snapshot.exists();
+              console.log("signIn check: " + isUserExistInFirebase);
+              if(isUserExistInFirebase == false)
+              {
+                this.$.doc.ref.set({
+                  name: response.user.displayName,
+                  profilePic: response.user.photoURL
+                });
+              }
+            }.bind(this));
+          }.bind(this))
           .catch(function(error){
-            console.log('Login failed.');
+            console.log(error);
           });
       }
     }

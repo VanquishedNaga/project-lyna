@@ -41,14 +41,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </firebase-auth>
     <firebase-document
       id="doc"
+      path = "/users/[[user.uid]]"
+      data = "{{usersData}}"
       app-name="absolute-reborn">
     </firebase-document>
-    <firebase-query
+    <!-- <firebase-query
       id = "query"
       app-name="absolute-reborn"
-      path = "/users"
+      path = "/users/[[user.uid]]"
       data = "{{usersData}}">
-    </firebase-query>
+    </firebase-query> -->
     <style>
       :host {
         --app-primary-color: white;
@@ -115,7 +117,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         font-family: 'Roboto Condensed', sans-serif;
       }
 
-      .profile-pic h4{
+      .profile-pic p{
         position: relative;
         text-align: center;
         color: white;
@@ -172,9 +174,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" hidden$="[[!user]]">
         <div class = "profile-pic">
-          <img id="user-pic" src="../images/AlexP.png" alt="profilePic"/>
-          <h3>Alex Phoon</h3>
-          <h4>VIP ZHONG DAI</h4>
+          <img id="user-pic" src="[[usersData.profilePic]]" alt="profilePic"/>
+          <h3>[[usersData.name]]</h3>
+          <p>[[usersData.level]]</p> 
         </div>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="homepage" href="[[rootPath]]app/homepage">
@@ -193,10 +195,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <iron-icon icon="icons:trending-up"></iron-icon> Sales
           </a>
         </iron-selector>
-        <paper-button on-tap="signIn" disabled="[[disabled]]">
-          <iron-icon icon="icons:power-settings-new"></iron-icon>
-          <span>Sign in with Google</span>
-        </paper-button>
         <paper-button on-tap="signOut" disabled="[[disabled]]">
           <iron-icon icon="account-circle"></iron-icon>
           <span>Sign out</span>
@@ -251,6 +249,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           // This shouldn't be neccessary, but the Analyzer isn't picking up
           // Polymer.Element#rootPath
           rootPath: String,
+          usersData: Object,
+
         };
       }
 
@@ -303,20 +303,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         console.log('app view error 404');
       }
 
-      signIn() {
-        this.$.auth.signInWithPopup()
-          .then(function(response){
-            console.log('Login successful.');
-          })
-          .catch(function(error){
-            console.log('Login failed.');
-          });
-        //console.log("signedIn: " + this.signedIn);
-      }
-
       signOut() {
         this.$.auth.signOut();
-        //console.log("signedIn: " + this.signedIn);
       }
     }
 
