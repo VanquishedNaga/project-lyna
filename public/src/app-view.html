@@ -176,7 +176,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <div class = "profile-pic">
           <img id="user-pic" src="[[usersData.profilePic]]" alt="profilePic"/>
           <h3>[[usersData.name]]</h3>
-          <p>[[usersData.level]]</p> 
+          <p>[[usersData.level]]</p>
         </div>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="homepage" href="[[rootPath]]app/homepage">
@@ -185,14 +185,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <a name="store" href="[[rootPath]]app/store">
             <iron-icon icon="icons:store"></iron-icon> Store
           </a>
-          <a name="people" href="[[rootPath]]people">
+          <a name="sales" href="[[rootPath]]app/sales">
+            <iron-icon icon="icons:trending-up"></iron-icon> Sales
+          </a>
+          <a name="people" href="[[rootPath]]app/people">
             <iron-icon icon="icons:face"></iron-icon> People
           </a>
-          <a name="team" href="[[rootPath]]team">
+          <a name="team" href="[[rootPath]]app/team">
             <iron-icon icon="icons:supervisor-account"></iron-icon> Team
           </a>
-          <a name="sales" href="[[rootPath]]sales">
-            <iron-icon icon="icons:trending-up"></iron-icon> Sales
+          <a name="profile" href="[[rootPath]]app/profile">
+            <iron-icon icon="icons:account-circle"></iron-icon> Profile
           </a>
         </iron-selector>
         <paper-button on-tap="signOut" disabled="[[disabled]]">
@@ -220,6 +223,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             role="main">
           <homepage-view name="homepage"></homepage-view>
           <store-view name="store"></store-view>
+          <sales-view name="sales"></sales-view>
+          <people-view name="people"></people-view>
+          <team-view name="team"></store-team>
+          <profile-view name="profile"></profile-view>
           <login-view name="login"></login-view>
           <not-found-view name="not-found"></not-found-view>
         </iron-pages>
@@ -283,6 +290,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           // Add new views here !!!!!!!!!!!!!!!!!!!!!!!!!
           case "homepage":
           case "store":
+          case "sales":
+          case "people":
+          case "team":
+          case "profile":
             break;
           default: {
             page = "not-found";
