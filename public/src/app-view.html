@@ -119,6 +119,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         font-family: 'Roboto Condensed', sans-serif;
       }
 
+      paper-button.custom{
+        color: white;
+        text-transform: none;
+        font-family: 'Roboto Condensed', sans-serif;
+      }
+
+      paper-button.custom:hover {
+        background-color: #A0A0A0;
+        color: #81040A;
+        font-weight: bold;
+      }
+
       [condensed-title] {
         position: absolute;
         top: 0;
@@ -153,6 +165,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         /* The difference in font size is used to calculate the scale of the title in the transition. */
         font-size: 10px;
       }
+
+      hr{
+        background-color: #7C2529;
+        height: 3px;
+        border: none;
+      }
     </style>
 
     <app-location
@@ -169,41 +187,44 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <app-drawer-layout fullbleed narrow="{{narrow}}">
       <!-- Drawer content -->
-      <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" hidden$="[[!user]]">
-        <div class = "profile-pic">
-          <img id="user-pic" src="[[usersData.profilePic]]" alt="profilePic"/>
-          <h3>[[usersData.name]]</h3>
-          <p>[[usersData.level]]</p>
-        </div>
-        <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="homepage" href="[[rootPath]]app/homepage">
-            <iron-icon icon="icons:home"></iron-icon> Homepage
-          </a>
-          <a name="store" href="[[rootPath]]app/store">
-            <iron-icon icon="icons:store"></iron-icon> Store
-          </a>
-          <a name="sales" href="[[rootPath]]app/sales">
-            <iron-icon icon="icons:trending-up"></iron-icon> Sales
-          </a>
-          <a name="people" href="[[rootPath]]app/people">
-            <iron-icon icon="icons:face"></iron-icon> People
-          </a>
-          <a name="team" href="[[rootPath]]app/team">
-            <iron-icon icon="icons:supervisor-account"></iron-icon> Team
-          </a>
-          <a name="profile" href="[[rootPath]]app/profile">
-            <iron-icon icon="icons:account-circle"></iron-icon> Profile
-          </a>
-        </iron-selector>
-        <paper-button on-tap="signOut" disabled="[[disabled]]">
-          <iron-icon icon="account-circle"></iron-icon>
-          <span>Sign out</span>
-        </paper-button>
+      <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
+        <div style="height: 100%; overflow: auto;">
+          <div class = "profile-pic">
+            <img id="user-pic" src="[[usersData.profilePic]]" alt="profilePic"/>
+            <h3>[[usersData.name]]</h3>
+            <p>[[usersData.level]]</p>
+          </div>
+          <hr>
+          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+            <a name="homepage" href="[[rootPath]]app/homepage">
+              <iron-icon icon="icons:home"></iron-icon> Homepage
+            </a>
+            <a name="store" href="[[rootPath]]app/store">
+              <iron-icon icon="icons:store"></iron-icon> Store
+            </a>
+            <a name="sales" href="[[rootPath]]app/sales">
+              <iron-icon icon="icons:trending-up"></iron-icon> Sales
+            </a>
+            <a name="people" href="[[rootPath]]app/people">
+              <iron-icon icon="icons:face"></iron-icon> People
+            </a>
+            <a name="team" href="[[rootPath]]app/team">
+              <iron-icon icon="icons:supervisor-account"></iron-icon> Team
+            </a>
+            <a name="profile" href="[[rootPath]]app/profile">
+              <iron-icon icon="icons:account-circle"></iron-icon> Profile
+            </a>
+          </iron-selector>
+          <hr>
+          <paper-button on-tap="signOut" class="custom">
+            <iron-icon icon="icons:power-settings-new" style="padding:0 3px 0 0"></iron-icon>Sign out
+          </paper-button>
+      </div>
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout has-scrolling-region hidden >
-        <app-header hidden slot="header" condenses shadow fixed effects="resize-title waterfall" >
+      <app-header-layout has-scrolling-region>
+        <app-header slot="header" condenses shadow fixed effects="resize-title waterfall" >
           <app-toolbar>
             <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
             <div condensed-title></div>
