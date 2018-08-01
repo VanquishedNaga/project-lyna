@@ -1,0 +1,119 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="profile-view">
+  <template>
+    <firebase-auth
+      id="auth"
+      app-name="absolute-reborn"
+      user="{{user}}">
+    </firebase-auth>
+    <firebase-document
+      id="user"
+      app-name="absolute-reborn"
+      path="/users/[[user.uid]]"
+      data="{{userData}}">
+    </firebase-document>
+    <firebase-document
+      id="request"
+      app-name="absolute-reborn">
+    </firebase-document>
+    <firebase-query
+      id="users-list"
+      app-name="absolute-reborn"
+      path="/users"
+      data="{{userList}}">
+    </firebase-query>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 16px;
+      }
+    </style>
+
+    <div>Status: [[userData.status]]</div>
+    <paper-dropdown-menu label="Select upline" id="uplinemenu" required auto-validate>
+      <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key">
+        <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
+          <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
+        </template>
+      </paper-listbox>
+    </paper-dropdown-menu>
+
+    <paper-button id="submitButton" on-tap="submitRequest">Submit</paper-button>
+  </template>
+
+  <script>
+    class ProfileView extends Polymer.Element {
+      static get is() { return 'profile-view'; }
+
+      static get properties() {
+        return {
+          user: Object,
+          userData: Object,
+          userList: Array,
+        };
+      }
+
+      static get observers() {
+        return [
+          'userDataChanged(userData.status)',
+        ];
+      }
+
+      ready() {
+        super.ready();
+        console.log("ProfileView ready.");
+      }
+
+      // Used to filter own entry from upline list.
+      isNotSelf(item) {
+        return (this.user.uid != item.$key);
+      }
+
+      // To only allow one request at a time.
+      userDataChanged(status) {
+        if (status == "Pending approval") {
+          this.$.submitButton.disabled = true;
+        }
+        else {
+          this.$.submitButton.disabled = false;
+        }
+      }
+
+      submitRequest() {
+        // Verify that an upline is selected.
+        if (this.$.uplinelist.selected != undefined) {
+          // Clear invalid.
+          this.$.uplinemenu.invalid = false;
+
+          // Push request to requested upline.
+          this.$.request.path = '/users/' + this.$.uplinelist.selected + '/requests';
+          this.$.request.ref.push({
+            user: this.user.uid
+          });
+
+          // Set own status to pending approval.
+          this.$.user.ref.update({
+            status: "Pending approval"
+          });
+        }
+        else {
+            this.$.uplinemenu.invalid = true;
+        }
+      }
+    }
+
+    window.customElements.define(ProfileView.is, ProfileView);
+  </script>
+</dom-module>

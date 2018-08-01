@@ -110,7 +110,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               {
                 this.$.doc.ref.set({
                   name: response.user.displayName,
-                  profilePic: response.user.photoURL
+                  profilePic: response.user.photoURL,
+                  status: "Inactive"
                 });
               }
             }.bind(this));

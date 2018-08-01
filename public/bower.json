@@ -32,6 +32,11 @@
     "paper-dialog": "PolymerElements/paper-dialog#^2.1.1",
     "paper-input": "PolymerElements/paper-input#^2.2.3",
     "paper-card": "PolymerElements/paper-card#^2.1.0",
-    "iron-image": "PolymerElements/iron-image#^2.2.1"
+    "iron-image": "PolymerElements/iron-image#^2.2.1",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.1.0",
+    "paper-listbox": "PolymerElements/paper-listbox#^2.1.1",
+    "paper-item": "PolymerElements/paper-item#^2.1.1",
+    "neon-animation": "PolymerElements/neon-animation#^2.2.1",
+    "web-animations-js": "^2.3.1"
   }
 }
