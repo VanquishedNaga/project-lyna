@@ -42,7 +42,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </style>
 
     <div>Status: [[userData.status]]</div>
-    <paper-dropdown-menu label="Select upline" id="uplinemenu" required auto-validate>
+    <paper-dropdown-menu label="Select upline" id="uplinemenu">
       <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key">
         <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
           <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
