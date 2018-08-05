@@ -37,6 +37,7 @@
     "paper-listbox": "PolymerElements/paper-listbox#^2.1.1",
     "paper-item": "PolymerElements/paper-item#^2.1.1",
     "neon-animation": "PolymerElements/neon-animation#^2.2.1",
-    "web-animations-js": "^2.3.1"
+    "web-animations-js": "^2.3.1",
+    "paper-tooltip": "PolymerElements/paper-tooltip#^2.1.1"
   }
 }

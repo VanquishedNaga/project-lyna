@@ -3,24 +3,94 @@
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="people-view">
   <template>
+
+    <firebase-query
+      id="requestData"
+      app-name="absolute-reborn"
+      path="/users/[[user.uid]]/requests"
+      data="{{requestList}}">
+    </firebase-query>
+
+    <firebase-document
+      id="users-list"
+      app-name="absolute-reborn"
+      path="/users"
+      data="{{userList}}">
+    </firebase-document>
+
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+
     <style include="shared-styles">
       :host {
         display: block;
         padding: 16px;
       }
+      paper-icon-item paper-item-body {
+        color: blue;
+        display: inline-block;
+        width: 100%;
+      }
+      paper-icon-item paper-icon-button {
+        color: green;
+      }
+      .avatar {
+        display: inline-block;
+        box-sizing: border-box;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-size: contain;
+      }
+      ./*avatar {
+        color: red;
+        background-color: black;
+      }*/
     </style>
 
+    <!-- Visible contents -->
+    <div>You have [[requestList.length]] pending downline requests.</div>
     <paper-listbox id="request">
       <template is="dom-repeat" items="{{requestList}}">
-        <paper-item>[[item.name]]</paper-item>
+        <paper-icon-item>
+          <div class="avatar" slot="item-icon"
+          style="background-image: url([[getRequestPic(userList.*, item.user)]]);"></div>
+          <paper-item-body two-line>
+            <div>[[getRequestName(userList.*, item.user)]]</div>
+            <div secondary>Description here.</div>
+          </paper-item-body>
+          <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Accept" on-tap="openDialog">
+          </paper-icon-button>
+          <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Accept</paper-tooltip>
+          <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="reject">
+          </paper-icon-button>
+          <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
+        </paper-icon-item>
       </template>
     </paper-listbox>
+    <paper-button id="debug" on-tap="debug">debug</paper-button>
+
+    <paper-dialog id="approveDialog">
+      <h2>Accept Downline Request</h2>
+      <p>Are you sure you want to accept the downline request from [[requestor]]?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button dialog-confirm autofocus>Yes</paper-button>
+      </div>
+    </paper-dialog>
+
   </template>
 
   <script>
@@ -28,15 +98,76 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get is() { return 'people-view'; }
       static get properties() {
         return {
+          requestList: Array,
           user: Object,
-          userData: Object,
-          usersList: Array,
+          userList: Object,
+          requestor: Object,
         };
       }
 
       ready() {
         super.ready();
         console.log("PeopleView ready.");
+      }
+
+      getRequestName(change, user) {
+        if (change.base[user] != undefined){
+          return change.base[user]['name'];
+        }
+      }
+
+      getRequestPic(change, user) {
+        if (change.base[user] != undefined){
+          return change.base[user]['profilePic'];
+        }
+      }
+
+      getBtnID(string, index) {
+        return string + index;
+      }
+
+      openDialog(e) {
+        this.requester = this.userList[e.model.item.user]['name'];
+        console.log(this.requester);
+        Polymer.dom(document.body).appendChild(this.$.approveDialog);
+        this.$.approveDialog.open();
+      }
+
+      approve(e) {
+        // TODO: Prompt dialog for confirmation.
+
+        // Change requester's status.
+        this.$.doc.path = '/users/'+ e.model.item.user;
+        this.$.doc.ref.update({
+          status: "Accepted"
+        });
+
+        // Remove request.
+        this.$.doc.path = '/users/'+ this.user.uid + '/requests/' + e.model.item.$key;
+        this.$.doc.ref.remove();
+      }
+
+      reject(e) {
+        // // TODO: Prompt dialog for confirmation.
+
+        // // Change requester's status.
+        // this.$.doc.path = '/users/'+ e.model.item.user;
+        // this.$.doc.ref.update({
+        //   status: "Rejected"
+        // });
+
+        // // Remove request.
+        // this.$.doc.path = '/users/'+ this.user.uid + '/requests/' + e.model.item.$key;
+        // this.$.doc.ref.remove();
+      }
+
+      debug() {
+        console.log('length: ' + this.requestList.length);
+        console.log('Path: ' + this.$.requestData.path);
+        console.log(this.userList);
+        console.log(this.userList['BDSZTDB68iN1eLFjlAnGYGCK5U82']);
+        console.log(this.userList['BDSZTDB68iN1eLFjlAnGYGCK5U82']['name']);
+        console.log("change.base[user]: " + change.base[user]);
       }
     }
 

@@ -43,7 +43,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <div>Status: [[userData.status]]</div>
     <paper-dropdown-menu label="Select upline" id="uplinemenu">
-      <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key">
+      <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
         <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
           <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
         </template>
@@ -85,9 +85,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       userDataChanged(status) {
         if (status == "Pending approval") {
           this.$.submitButton.disabled = true;
+          this.$.uplinemenu.disabled = true;
         }
         else {
           this.$.submitButton.disabled = false;
+          this.$.uplinemenu.disabled = false;
         }
       }
 
@@ -105,7 +107,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
           // Set own status to pending approval.
           this.$.user.ref.update({
-            status: "Pending approval"
+            status: "Pending approval",
+            upline: this.$.uplinelist.selected,
           });
         }
         else {
