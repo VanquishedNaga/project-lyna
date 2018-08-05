@@ -54,10 +54,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         border-radius: 50%;
         background-size: contain;
       }
-      ./*avatar {
-        color: red;
-        background-color: black;
-      }*/
     </style>
 
     <!-- Visible contents -->
@@ -74,17 +70,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Accept" on-tap="openDialog">
           </paper-icon-button>
           <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Accept</paper-tooltip>
-          <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="reject">
+          <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
           </paper-icon-button>
           <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
         </paper-icon-item>
       </template>
     </paper-listbox>
-    <paper-button id="debug" on-tap="debug">debug</paper-button>
 
-    <paper-dialog id="approveDialog">
-      <h2>Accept Downline Request</h2>
-      <p>Are you sure you want to accept the downline request from [[requestor]]?</p>
+    <!-- To confirm accepting/rejecting a downline request -->
+    <paper-dialog id="approveDialog" on-iron-overlay-closed="onDialogClosed">
+      <h2>[[getActionType(event, 1)]] Downline Request</h2>
+      <p>Are you sure you want to [[getActionType(event, 0)]] the downline request from [[getRequestName(userList.*, event.model.item.user)]]?</p>
       <div class="buttons">
         <paper-button dialog-dismiss>No</paper-button>
         <paper-button dialog-confirm autofocus>Yes</paper-button>
@@ -101,7 +97,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           requestList: Array,
           user: Object,
           userList: Object,
-          requestor: Object,
+          event: Object,
         };
       }
 
@@ -126,48 +122,82 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return string + index;
       }
 
+      getDialogName() {
+        if (this.userList != undefined){
+          return this.userList['BDSZTDB68iN1eLFjlAnGYGCK5U82']['name'];
+        }
+      }
+
+      getActionType(e, num) {
+        if (e) {
+          var retVal;
+          if (e.target.id.indexOf("apr") >= 0){
+            if (num) {
+              retVal = 'Accept';
+            }
+            else {
+              retVal = 'accept';
+            }
+          }
+          else {
+            if (num) {
+              retVal = 'Reject';
+            }
+            else {
+              retVal = 'reject';
+            }
+          }
+          return retVal;
+        }
+      }
+
       openDialog(e) {
-        this.requester = this.userList[e.model.item.user]['name'];
-        console.log(this.requester);
+        this.event = e;
+        if (this.event.target.id.indexOf("apr") >= 0) {
+          this.event.isAccept = true;
+        }
+        else {
+          this.event.isAccept = false;
+        }
+
         Polymer.dom(document.body).appendChild(this.$.approveDialog);
         this.$.approveDialog.open();
       }
 
-      approve(e) {
-        // TODO: Prompt dialog for confirmation.
+      onDialogClosed() {
+
+        if (!this.$.approveDialog.closingReason.canceled) {
+          if (this.$.approveDialog.closingReason.confirmed) {
+            if (this.event.isAccept) {
+              this.processDownlineRequest(true);
+            }
+            else {
+              this.processDownlineRequest(false);
+            }
+          }
+        }
+        this.event = null;
+        Polymer.dom(document.body).removeChild(this.$.approveDialog);
+      }
+
+      processDownlineRequest(isAccept) {
+        var status;
+        if (isAccept) {
+          status = "Accepted";
+        }
+        else {
+          status = "Rejected";
+        }
 
         // Change requester's status.
-        this.$.doc.path = '/users/'+ e.model.item.user;
+        this.$.doc.path = '/users/'+ this.event.model.item.user;
         this.$.doc.ref.update({
-          status: "Accepted"
+          status: status,
         });
 
         // Remove request.
-        this.$.doc.path = '/users/'+ this.user.uid + '/requests/' + e.model.item.$key;
+        this.$.doc.path = '/users/'+ this.user.uid + '/requests/' + this.event.model.item.$key;
         this.$.doc.ref.remove();
-      }
-
-      reject(e) {
-        // // TODO: Prompt dialog for confirmation.
-
-        // // Change requester's status.
-        // this.$.doc.path = '/users/'+ e.model.item.user;
-        // this.$.doc.ref.update({
-        //   status: "Rejected"
-        // });
-
-        // // Remove request.
-        // this.$.doc.path = '/users/'+ this.user.uid + '/requests/' + e.model.item.$key;
-        // this.$.doc.ref.remove();
-      }
-
-      debug() {
-        console.log('length: ' + this.requestList.length);
-        console.log('Path: ' + this.$.requestData.path);
-        console.log(this.userList);
-        console.log(this.userList['BDSZTDB68iN1eLFjlAnGYGCK5U82']);
-        console.log(this.userList['BDSZTDB68iN1eLFjlAnGYGCK5U82']['name']);
-        console.log("change.base[user]: " + change.base[user]);
       }
     }
 
