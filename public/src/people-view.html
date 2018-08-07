@@ -3,9 +3,12 @@
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
@@ -36,7 +39,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <style include="shared-styles">
       :host {
         display: block;
-        padding: 16px;
       }
       paper-icon-item paper-item-body {
         color: blue;
@@ -45,6 +47,25 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
       paper-icon-item paper-icon-button {
         color: green;
+      }
+      app-toolbar {
+        background-color: silver;
+      }
+      paper-tabs {
+        --paper-tabs-selection-bar-color: maroon;
+      }
+      paper-tab {
+        font-family: 'Roboto Condensed', sans-serif;
+        font-weight: bold;
+        /*font-size: 1.5em;*/
+        text-transform: uppercase;
+        --paper-tab-ink: grey;
+      }
+      paper-tabs paper-tab.iron-selected {
+        color: maroon;
+      }
+      .page {
+        padding: 16px;
       }
       .avatar {
         display: inline-block;
@@ -57,28 +78,49 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </style>
 
     <!-- Visible contents -->
-    <div>You have [[requestList.length]] pending downline requests.</div>
-    <paper-listbox id="request">
-      <template is="dom-repeat" items="{{requestList}}">
-        <paper-icon-item>
-          <div class="avatar" slot="item-icon"
-          style="background-image: url([[getRequestPic(userList.*, item.user)]]);"></div>
-          <paper-item-body two-line>
-            <div>[[getRequestName(userList.*, item.user)]]</div>
-            <div secondary>Description here.</div>
-          </paper-item-body>
-          <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Accept" on-tap="openDialog">
-          </paper-icon-button>
-          <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Accept</paper-tooltip>
-          <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
-          </paper-icon-button>
-          <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
-        </paper-icon-item>
-      </template>
-    </paper-listbox>
+    <app-header-layout has-scrolling-region>
+      <app-header>
+        <app-toolbar>
+          <paper-tabs selected="{{selected}}" attr-for-selected="name">
+            <template is="dom-repeat" items="{{tabItems}}">
+              <paper-tab name$="{{item}}">{{item}}</paper-tab>
+            </template>
+          </paper-tabs>
+        </app-toolbar>
+      </app-header>
+
+      <iron-pages selected="{{selected}}" attr-for-selected="page-name">
+        <div page-name="Requests" class="page">
+
+          <div>You have [[requestList.length]] pending downline requests.</div>
+          <paper-listbox id="request">
+            <template is="dom-repeat" items="{{requestList}}">
+              <paper-icon-item>
+                <div class="avatar" slot="item-icon"
+                style="background-image: url([[getRequestPic(userList.*, item.user)]]);"></div>
+                <paper-item-body two-line>
+                  <div>[[getRequestName(userList.*, item.user)]]</div>
+                  <div secondary>Description here.</div>
+                </paper-item-body>
+                <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Accept" on-tap="openDialog">
+                </paper-icon-button>
+                <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Accept</paper-tooltip>
+                <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
+                </paper-icon-button>
+                <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
+              </paper-icon-item>
+            </template>
+          </paper-listbox>
+
+        </div>
+        <div page-name="Inventory" class="page">Page 2</div>
+        <div>Page 3</div>
+      </iron-pages>
+    </app-header-layout>
+
 
     <!-- To confirm accepting/rejecting a downline request -->
-    <paper-dialog id="approveDialog" on-iron-overlay-closed="onDialogClosed">
+    <paper-dialog id="approveDialog" on-iron-overlay-closed="onDialogClosed" modal>
       <h2>[[getActionType(event, 1)]] Downline Request</h2>
       <p>Are you sure you want to [[getActionType(event, 0)]] the downline request from [[getRequestName(userList.*, event.model.item.user)]]?</p>
       <div class="buttons">
@@ -98,6 +140,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           user: Object,
           userList: Object,
           event: Object,
+          tabItems: {
+            type: Array,
+            value: function() {
+              return ['Requests', 'Inventory'];
+            }
+          },
+          selected: {type: String, value: 'Requests'},
         };
       }
 
@@ -184,6 +233,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         var status;
         if (isAccept) {
           status = "Accepted";
+
+          // Update downline list.
+          this.$.doc.path = '/users/' + this.user.uid + '/downlines';
+          this.$.doc.ref.update({
+            [this.event.model.item.user]: true,
+          });
         }
         else {
           status = "Rejected";
