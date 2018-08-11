@@ -191,7 +191,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <app-drawer-layout fullbleed narrow="{{narrow}}">
       <!-- Drawer content -->
-      <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
+      <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" no-focus-trap="true">
         <div style="height: 100%; overflow: auto;">
           <div class = "profile-pic">
             <img id="user-pic" src="[[usersData.profilePic]]" alt="profilePic"/>
