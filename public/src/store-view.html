@@ -3,6 +3,12 @@
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
@@ -10,10 +16,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="shared-styles.html">
+
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
 <dom-module id="store-view">
   <template>
@@ -30,11 +41,46 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-document>
 
+    <firebase-document
+      id="user"
+      path = "/users/[[user.uid]]"
+      data = "{{usersData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="user"
+      path = "/users/[[uplineUid]]"
+      data = "{{uplineUsersData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="user"
+      path = "/products"
+      data = "{{productsData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="user"
+      path = "/products/[[prodKey]]"
+      data = "{{productsData2}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
     <firebase-query
       id="query"
       app-name="absolute-reborn"
       path="/products"
       data="{{prodItems}}">
+    </firebase-query>
+
+    <firebase-query
+      id="products-list"
+      app-name="absolute-reborn"
+      path="/products"
+      data="{{productsList}}">
     </firebase-query>
 
     <firebase-storage-ref
@@ -62,19 +108,29 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <style include="shared-styles">
       :host {
         display: block;
-        padding: 10px;
+        /*padding: 10px;*/
       }
 
       .product-card {
         /*background: linear-gradient(white, #b2ebf2);*/
-        background: #b2ebf2;
-        --paper-card-header-color: white;
-        --paper-card-header: {
-          background-color: var(--paper-blue-500);
-        };
-        --paper-card-actions: {
-          background-color: var(--paper-purple-500);
-        };
+        width: 75%;
+        /*min-width: 250px;*/
+        padding: 16px;
+        margin: 16px;
+        display: flex;
+        /*background: gray;*/
+        font-family: 'Roboto Condensed', sans-serif;
+
+      }
+
+       .horizontal {
+        @apply(--layout-horizontal);
+      }
+
+      @media only screen and (max-width: 600px) {
+          #productImage{
+          min-width:150px;
+        }
       }
     </style>
 
@@ -88,7 +144,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <iron-pages selected="{{selected}}" attr-for-selected="page-name">
       <div page-name="Product">
-
         <app-toolbar hidden$="{{!wideLayout}}">
           <paper-button on-tap="addProduct" disabled="[[disabled]]">
             <iron-icon icon="add-circle-outline"></iron-icon>
@@ -97,33 +152,36 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </app-toolbar>
 
         <template is="dom-repeat" items="{{prodItems}}">
-          <paper-card
-            class="product-card"
-            heading="[[item.name]]">
-            <!-- style="width: 100%;" -->
+          <paper-card class="product-card horizontal ">
+            <iron-image
+              src="[[item.images.downloadUrl]]"
+              id="productImage"
+              style="
+                width:250px;
+                min-width: 250px;
+                height:auto;
+                /*--iron-image-width: 100%;*/
+                /*position: absolute;*/
+                top: 0;
+                bottom: 0;
+                left: 0;
+                display: inline-block;"
+              sizing="cover">
+            </iron-image>
             <div class="card-content">
-              <div>
-                <iron-image
-                  src="[[item.images.downloadUrl]]"
-                  style="
-                    width:200px;
-                    height:200px;
-                    margin-left: auto;
-                    margin-right: auto;
-                    display: block;"
-                  sizing="contain">
-                </iron-image>
-              </div>
-              <h4>Description: </h4>
-              <p>[[item.description]]</p>
+              <span style="display: inline-block; width: 100%;">
+                <div>[[item.name]]</div>
+              <p>Description: </p>
+              <div>[[item.description]]</div>
             </div>
-            <div class="card-actions">
-              <paper-button on-tap="restock">Restock</paper-button>
-              <paper-button on-tap="editProd">Edit</paper-button>
-              <paper-button on-tap="delProd">Delete</paper-button>
+            <div style="float: right;" >
+              <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
+              <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
+              <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
             </div>
-          </paper-card>
+              </span>
 
+          </paper-card>
         </template>
       </div>
       <div page-name="Inventory">Page 2</div>
@@ -133,19 +191,52 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <!-- Dialog to add new product -->
     <paper-dialog
       id="addprod"
+      modal
       on-iron-overlay-closed="closeThis">
       <h2>Add product</h2>
-      <paper-input always-float-label required
-        error-message="Field required!"
-        id="new-prod-name"
-        label="Product Name">
-      </paper-input>
-      <paper-textarea always-float-label id="new-prod-desc" label="Product Description"></paper-textarea>
-      <div class="buttons">
+      <paper-dialog-scrollable >
+        <paper-input always-float-label required
+          error-message="Field required!"
+          id="new-prod-name"
+          label="Product Name">
+        </paper-input>
+        <paper-textarea always-float-label id="new-prod-desc" label="Product Description"></paper-textarea>
         <paper-input type="file" id="prod-pic" accept="image/jpeg"></paper-input>
+    </paper-dialog-scrollable >
+      <div class="buttons">
         <!-- <paper-button on-tap="uploadProdPic" >Upload photo</paper-button> -->
         <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button on-tap="saveNewProd" autofocus>Save</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="restockprod" on-iron-overlay-closed="closeThis" modal>
+      <h2>Restock Request</h2>
+      <paper-dialog-scrollable>
+        <!-- <p>Product: [[productsData2.name]]</p> -->
+        <p>Upline: [[uplineUsersData.name]]</p>
+        <p>Current Stock Left Quantity: //TODO: Update quantity</p>
+        <span style="display: inline;">
+          <paper-dropdown-menu label="Select product" id="productMenu">
+          <paper-listbox id="productList" slot="dropdown-content" attr-for-selected="key" selected="{{prodKey}}">
+            <template is="dom-repeat" items="{{productsList}}">
+              <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <paper-input always-float-label required auto-validate
+          type="number"
+          min="1"
+          error-message="Field required!"
+          id="prod-quantity"
+          label="Product Quantity">
+        </paper-input>
+        </span>
+        </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-tap="debug">Debug</paper-button>
+        <paper-button dialog-confirm on-tap="submitProdRequest">Submit Request</paper-button>
       </div>
     </paper-dialog>
 
@@ -157,9 +248,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get properties() {
         return {
           productName: String,
-
+          usersData: Object,
+          uplineUsersData: Object,
+          productsData: Object,
+          productsList: Array,
           selected: {type: String, value: 'Product'},
-
+          prodKey: String,
           tabItems: {
             type: Array,
             value: function() {
@@ -183,21 +277,29 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         console.log("StoreView ready.");
 
         this.dlAddProduct = this.shadowRoot.querySelector('#addprod');
+        this.dlRestockProduct = this.shadowRoot.querySelector('#restockprod')
         this.prodName = this.shadowRoot.querySelector('#new-prod-name');
         this.prodDesc = this.shadowRoot.querySelector('#new-prod-desc');
         this.prodPic = this.shadowRoot.querySelector('#prod-pic');
+        this.prodQuan = this.shadowRoot.querySelector('#prod-quantity');
 
         // init to null to solve error
         this.prodKey = null;
         this.prodName.value = null;
         this.prodDesc.value = null;
+        //this.prodQuan.value = null;
       }
 
       addProduct() {
         Polymer.dom(document.body).appendChild(this.dlAddProduct);
 
-        this.dlAddProduct.toggle();
-        this.dlAddProduct.constrain();
+        this.dlAddProduct.open();
+      }
+
+      restockProd(){
+        Polymer.dom(document.body).appendChild(this.dlRestockProduct);
+
+        this.dlRestockProduct.open();
       }
 
       closeThis() {
@@ -269,24 +371,53 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.addProduct();
       }
 
-      uploadProdPic() {
+      restock(e){
+        this.prodKey = e.model.item.$key;
+        this.prodName.value = e.model.item.name || null;
+        this.uplineUid = this.usersData.upline;
+        this.restockProd();
       }
 
       stateChanged() {
         console.log(this.$.task.state);
         if (this.$.task.state == 'success'){
-          console.log(this.$.task.downloadUrl);
-          console.log(this.$.task.path);
-
-          // Add image path to product entry.
-          this.$.doc.path = '/products/' + this.prodKey + '/images';
-          this.$.doc.ref.set({
-            path: this.$.task.path,
-            downloadUrl: this.$.task.downloadUrl,
-          });
-
-          this.prodKey = null;
+          this.$.task.ref.getDownloadURL()
+            .then(function(url){
+              this.downloadUrl = url;
+              console.log(this.downloadUrl);
+               console.log("product key:" + this.prodKey);
+              // Add image path to product entry.
+              this.$.doc.path = '/products/' + this.prodKey + '/images';
+              this.$.doc.ref.set({
+                path: this.$.task.path,
+                downloadUrl: this.downloadUrl,
+              });
+              console.log(this.$.task.path);
+              this.prodKey = null;
+            }.bind(this));
         }
+      }
+
+      submitProdRequest(){
+
+        var valid = this.prodQuan.validate();
+
+        if(valid){
+          if(this.prodKey){
+            this.$.doc.path = '/productRequests';
+            this.$.doc.ref.push({
+              productID: this.prodKey,
+              quantity: this.prodQuan.value,
+              requestor: this.user.uid,
+              upline: this.uplineUid
+            });
+          }
+          this.dlRestockProduct.close();
+        }
+      }
+
+      debug(){
+        console.log("prodKey: " + this.prodKey);
       }
     }
 
