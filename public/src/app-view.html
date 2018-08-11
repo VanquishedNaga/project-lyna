@@ -24,6 +24,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="my-icons.html">
+<link rel="import" href="shared-styles.html">
 
 <link rel="lazy-import" href="homepage-view.html">
 <link rel="lazy-import" href="store-view.html">
@@ -47,7 +48,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       data = "{{usersData}}"
       app-name="absolute-reborn">
     </firebase-document>
-    <style>
+    <style include="shared-styles">
       :host {
         --app-primary-color: white;
         --app-secondary-color: white;
@@ -237,16 +238,28 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </app-toolbar>
         </app-header>
 
+        <template is="dom-if" if="[[!isAccepted(usersData.status)]]">
+          <!-- Put restricted pages here -->
+          <div class="content">
+            You are seeing this because you are an inactive member currently. Please contact your upline for more information.
+            To request for an upline, submit your request at the Profile page.
+          </div>
+        </template>
+
         <iron-pages
-            selected="[[page]]"
-            attr-for-selected="name"
-            fallback-selection="not-found"
-            role="main">
-          <homepage-view name="homepage"></homepage-view>
-          <store-view name="store"></store-view>
-          <sales-view name="sales"></sales-view>
-          <people-view name="people" user="[[user]]"></people-view>
-          <team-view name="team"></team-view>
+          selected="[[page]]"
+          attr-for-selected="name"
+          fallback-selection="not-found"
+          role="main">
+          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+            <!-- Put restricted pages here -->
+            <homepage-view name="homepage"></homepage-view>
+            <sales-view name="sales"></sales-view>
+            <people-view name="people" user="[[user]]"></people-view>
+            <team-view name="team"></team-view>
+            <store-view name="store"></store-view>
+          </template>
+
           <profile-view name="profile"></profile-view>
           <login-view name="login"></login-view>
           <not-found-view name="not-found"></not-found-view>
@@ -278,7 +291,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           // Polymer.Element#rootPath
           rootPath: String,
           usersData: Object,
-
         };
       }
 
@@ -337,6 +349,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       signOut() {
         this.$.auth.signOut();
+      }
+
+      isAccepted(status) {
+        console.log(status);
+        return (status == "Accepted");
       }
     }
 
