@@ -251,15 +251,32 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           attr-for-selected="name"
           fallback-selection="not-found"
           role="main">
-          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
-            <!-- Put restricted pages here -->
-            <homepage-view name="homepage"></homepage-view>
-            <sales-view name="sales"></sales-view>
-            <people-view name="people" user="[[user]]"></people-view>
-            <team-view name="team"></team-view>
-            <store-view name="store"></store-view>
-          </template>
-
+          <div name="homepage">
+            <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+              <homepage-view></homepage-view>
+            </template>
+          </div>
+          <div name="sales">
+            <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+              <sales-view></sales-view>
+            </template>
+          </div>
+          <div name="people">
+            <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+              <people-view user="[[user]]"></people-view>
+            </template>
+          </div>
+          <div name="team">
+            <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+              <team-view></team-view>
+            </template>
+          </div>
+          <div name="store">
+            <!-- <store-view></store-view> -->
+            <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+              <store-view></store-view>
+            </template>
+          </div>
           <profile-view name="profile"></profile-view>
           <login-view name="login"></login-view>
           <not-found-view name="not-found"></not-found-view>
