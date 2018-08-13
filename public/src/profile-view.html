@@ -3,6 +3,9 @@
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
@@ -37,20 +40,28 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <style include="shared-styles">
       :host {
         display: block;
-        padding: 16px;
       }
     </style>
 
-    <div>Status: [[userData.status]]</div>
-    <paper-dropdown-menu label="Select upline" id="uplinemenu">
-      <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
-        <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
-          <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
-        </template>
-      </paper-listbox>
-    </paper-dropdown-menu>
-
-    <paper-button id="submitButton" on-tap="submitRequest">Submit</paper-button>
+    <app-header-layout>
+      <app-header slot="header" condenses shadow fixed>
+        <app-toolbar class="header">
+          <slot name="drawer-toggle"></slot>
+          <div>Profile</div>
+        </app-toolbar>
+      </app-header>
+      <div class="content">
+        <div>Status: [[userData.status]]</div>
+        <paper-dropdown-menu label="Select upline" id="uplinemenu">
+          <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
+            <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
+              <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <paper-button id="submitButton" on-tap="submitRequest">Submit</paper-button>
+      </div>
+    </app-header-layout>
   </template>
 
   <script>

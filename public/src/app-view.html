@@ -7,10 +7,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
-<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
@@ -26,7 +22,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
 
-<link rel="lazy-import" href="homepage-view.html">
+<!-- Lazy imports -->
+<link rel="lazy-import" href="home-view.html">
 <link rel="lazy-import" href="store-view.html">
 <link rel="lazy-import" href="people-view.html">
 <link rel="lazy-import" href="profile-view.html">
@@ -52,8 +49,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       :host {
         --app-primary-color: white;
         --app-secondary-color: white;
-        --app-drawer-width: 220px;
-        --app-toolbar-height: 110px;
+        --app-drawer-width: 210px;
+        --app-toolbar-height: 70px;
         display: block;
       }
 
@@ -65,12 +62,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         display: none;
       }
 
-      app-header {
-        color: #fff;
-        background-color: #000;
-      }
-
-      app-header paper-icon-button {
+      paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
 
@@ -135,41 +127,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         font-weight: bold;
       }
 
-      [condensed-title] {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        /*background-size: 220px;*/
-        background-size: calc(var(--app-toolbar-height) * 2);
-        background-image: url('../images/small logo.png');
-        background-repeat: no-repeat;
-        background-position: center center;
-
-        /* The difference in font size is used to calculate the scale of the title in the transition. */
-        font-size: 5px;
-      }
-
-      [main-title] {
-        position: absolute;
-        /*top: -110px;*/
-        top: calc(0px - var(--app-toolbar-height));
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-image: url('../images/banner.png');
-        background-repeat: no-repeat;
-        background-position: center 20%;
-        background-size: 900px;
-        -webkit-transform-origin: center top !important;
-        transform-origin: center top !important;
-        z-index: -1;  /*not to cover drawer toggle button*/
-
-        /* The difference in font size is used to calculate the scale of the title in the transition. */
-        font-size: 10px;
-      }
-
       hr{
         background-color: #7C2529;
         height: 3px;
@@ -200,7 +157,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </div>
           <hr>
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-            <a name="homepage" href="[[rootPath]]app/homepage">
+            <a name="home" href="[[rootPath]]app/home">
               <iron-icon icon="icons:home"></iron-icon> Homepage
             </a>
             <a name="store" href="[[rootPath]]app/store">
@@ -227,61 +184,59 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout has-scrolling-region>
-        <app-header slot="header" condenses shadow fixed effects="resize-title waterfall" >
-          <app-toolbar>
-            <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
-            <div condensed-title></div>
-          </app-toolbar>
-          <app-toolbar>
-            <div main-title></div>
-          </app-toolbar>
-        </app-header>
+      <template is="dom-if" if="[[!isAccepted(usersData.status)]]">
+        <!-- Put restricted pages here -->
+        <div class="content">
+          You are seeing this because you are an inactive member currently. Please contact your upline for more information.
+          To request for an upline, submit your request at the Profile page.
+        </div>
+      </template>
 
-        <template is="dom-if" if="[[!isAccepted(usersData.status)]]">
-          <!-- Put restricted pages here -->
-          <div class="content">
-            You are seeing this because you are an inactive member currently. Please contact your upline for more information.
-            To request for an upline, submit your request at the Profile page.
-          </div>
-        </template>
-
-        <iron-pages
-          selected="[[page]]"
-          attr-for-selected="name"
-          fallback-selection="not-found"
-          role="main">
-          <div name="homepage">
-            <template is="dom-if" if="[[isAccepted(usersData.status)]]">
-              <homepage-view></homepage-view>
-            </template>
-          </div>
-          <div name="sales">
-            <template is="dom-if" if="[[isAccepted(usersData.status)]]">
-              <sales-view></sales-view>
-            </template>
-          </div>
-          <div name="people">
-            <template is="dom-if" if="[[isAccepted(usersData.status)]]">
-              <people-view user="[[user]]"></people-view>
-            </template>
-          </div>
-          <div name="team">
-            <template is="dom-if" if="[[isAccepted(usersData.status)]]">
-              <team-view></team-view>
-            </template>
-          </div>
-          <div name="store">
-            <!-- <store-view></store-view> -->
-            <template is="dom-if" if="[[isAccepted(usersData.status)]]">
-              <store-view></store-view>
-            </template>
-          </div>
-          <profile-view name="profile"></profile-view>
-          <login-view name="login"></login-view>
-          <not-found-view name="not-found"></not-found-view>
-        </iron-pages>
-      </app-header-layout>
+      <iron-pages
+        selected="[[page]]"
+        attr-for-selected="name"
+        fallback-selection="not-found"
+        role="main">
+        <div name="home">
+          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+            <home-view>
+              <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
+            </home-view>
+          </template>
+        </div>
+        <div name="sales">
+          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+            <sales-view>
+              <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
+            </sales-view>
+          </template>
+        </div>
+        <div name="people">
+          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+            <people-view user="[[user]]">
+              <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
+            </people-view>
+          </template>
+        </div>
+        <div name="team">
+          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+            <team-view>
+              <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
+            </team-view>
+          </template>
+        </div>
+        <div name="store">
+          <!-- <store-view></store-view> -->
+          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+            <store-view>
+              <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
+            </store-view>
+          </template>
+        </div>
+        <profile-view name="profile"></profile-view>
+        <login-view name="login"></login-view>
+        <not-found-view name="not-found"></not-found-view>
+      </iron-pages>
     </app-drawer-layout>
   </template>
 
@@ -325,8 +280,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       _routePageChanged(page) {
         // If no page was found in the route data, page will be an empty string.
-        // Default to 'homepage' in that case.
-        this.page = page || 'homepage';
+        // Default to 'home' in that case.
+        this.page = page || 'home';
 
         // Close a non-persistent drawer when the page & route are changed.
         if (!this.$.drawer.persistent) {
@@ -338,7 +293,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         // Load page import on demand. Show 404 page if fails
         switch(page) {
           // Add new views here !!!!!!!!!!!!!!!!!!!!!!!!!
-          case "homepage":
+          case "home":
           case "store":
           case "sales":
           case "people":

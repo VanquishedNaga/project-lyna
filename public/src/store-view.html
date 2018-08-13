@@ -3,22 +3,23 @@
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
-<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
-<link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
-<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
@@ -108,7 +109,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <style include="shared-styles">
       :host {
         display: block;
-        /*padding: 10px;*/
       }
 
       .product-card {
@@ -134,52 +134,59 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
     </style>
 
-    <app-toolbar class="tabs-bar" hidden$="{{!wideLayout}}">
-      <paper-tabs selected="{{selected}}" attr-for-selected="name">
-        <template is="dom-repeat" items="{{tabItems}}">
-          <paper-tab name$="{{item}}">{{item}}</paper-tab>
-        </template>
-      </paper-tabs>
-    </app-toolbar>
-
-    <iron-pages selected="{{selected}}" attr-for-selected="page-name">
-      <div page-name="Product">
-        <app-toolbar hidden$="{{!wideLayout}}">
-          <paper-button on-tap="addProduct" disabled="[[disabled]]">
-            <iron-icon icon="add-circle-outline"></iron-icon>
-            <span>Add product</span>
-          </paper-button>
+    <app-header-layout>
+      <app-header slot="header" condenses shadow fixed effect="waterfall">
+        <app-toolbar class="header">
+          <slot name="drawer-toggle"></slot>
+          <div>Store</div>
         </app-toolbar>
+        <app-toolbar class="tabs-bar" hidden$="{{!wideLayout}}" sticky>
+          <paper-tabs id="tabs" selected="{{selected}}" attr-for-selected="name">
+            <template is="dom-repeat" items="{{tabItems}}">
+              <paper-tab name$="{{item}}">{{item}}</paper-tab>
+            </template>
+          </paper-tabs>
+        </app-toolbar>
+      </app-header>
 
-        <template is="dom-repeat" items="{{prodItems}}">
-          <paper-card class="product-card horizontal ">
-            <iron-image
+      <iron-pages selected="{{selected}}" attr-for-selected="page-name">
+        <div page-name="Product">
+          <app-toolbar hidden$="{{!wideLayout}}">
+            <paper-button on-tap="addProduct" disabled="[[disabled]]">
+              <iron-icon icon="add-circle-outline"></iron-icon>
+              <span>Add product</span>
+            </paper-button>
+          </app-toolbar>
+
+          <template is="dom-repeat" items="{{prodItems}}">
+            <paper-card class="product-card horizontal ">
+              <iron-image
               src="[[item.images.downloadUrl]]"
               id="productImage"
               style="
-                width:250px;
-                min-width: 250px;
-                height:auto;
-                /*--iron-image-width: 100%;*/
-                /*position: absolute;*/
-                top: 0;
-                bottom: 0;
-                left: 0;
-                display: inline-block;"
+              width:250px;
+              min-width: 250px;
+              height:auto;
+              /*--iron-image-width: 100%;*/
+              /*position: absolute;*/
+              top: 0;
+              bottom: 0;
+              left: 0;
+              display: inline-block;"
               sizing="cover">
             </iron-image>
             <div class="card-content">
               <span style="display: inline-block; width: 100%;">
                 <div>[[item.name]]</div>
-              <p>Description: </p>
-              <div>[[item.description]]</div>
-            </div>
-            <div style="float: right;" >
-              <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
-              <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
-              <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
-            </div>
-              </span>
+                <p>Description: </p>
+                <div>[[item.description]]</div>
+              </div>
+              <div style="float: right;" >
+                <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
+                <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
+                <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
+              </div>
+            </span>
 
           </paper-card>
         </template>
@@ -187,6 +194,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <div page-name="Inventory">Page 2</div>
       <div>Page 3</div>
     </iron-pages>
+  </app-header-layout>
 
     <!-- Dialog to add new product -->
     <paper-dialog
@@ -268,7 +276,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           state: {
             type: Object,
             observer: 'stateChanged'
-          }
+          },
         };
       }
 

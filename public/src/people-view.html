@@ -3,8 +3,9 @@
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
-<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
@@ -48,22 +49,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       paper-icon-item paper-icon-button {
         color: green;
       }
-      app-toolbar {
-        background-color: silver;
-      }
-      paper-tabs {
-        --paper-tabs-selection-bar-color: maroon;
-      }
-      paper-tab {
-        font-family: 'Roboto Condensed', sans-serif;
-        font-weight: bold;
-        /*font-size: 1.5em;*/
-        text-transform: uppercase;
-        --paper-tab-ink: grey;
-      }
-      paper-tabs paper-tab.iron-selected {
-        color: maroon;
-      }
       .page {
         padding: 16px;
       }
@@ -78,9 +63,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </style>
 
     <!-- Visible contents -->
-    <app-header-layout has-scrolling-region>
-      <app-header>
-        <app-toolbar>
+    <app-header-layout>
+      <app-header slot="header" condenses shadow fixed>
+        <app-toolbar class="header">
+          <slot name="drawer-toggle"></slot>
+          <div>People</div>
+        </app-toolbar>
+        <app-toolbar class="tabs-bar" sticky>
           <paper-tabs selected="{{selected}}" attr-for-selected="name">
             <template is="dom-repeat" items="{{tabItems}}">
               <paper-tab name$="{{item}}">{{item}}</paper-tab>

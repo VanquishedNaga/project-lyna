@@ -36,8 +36,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .content {
-        font-family: 'Roboto Condensed', sans-serif;
         padding: 16px;
+      }
+
+      .header {
+        color: white;
+      }
+
+      .tabs-bar {
+        color: black;
+        background-color: silver;
+        height: 50px;
+      }
+
+      .tabs-bar paper-tabs{
+        --paper-tabs-selection-bar-color: maroon;
+      }
+
+      .tabs-bar paper-tab {
+        font-family: 'Roboto Condensed', sans-serif;
+        text-transform: uppercase;
+        --paper-tab-ink: grey;
+      }
+
+      .tabs-bar paper-tab.iron-selected {
+        color: maroon;
+        font-weight: bold;
+      }
+
+      app-header {
+        color: #fff;
+        background-color: #000;
       }
 
       h1 {

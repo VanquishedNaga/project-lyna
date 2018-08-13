@@ -1,0 +1,122 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="home-view">
+  <template>
+    <style include="shared-styles">
+      app-header {
+        color: #fff;
+        background-color: #000;
+      }
+
+      app-toolbar {
+        height: var(--app-toolbar-height);
+      }
+
+      [condensed-title] {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-size: 350px;
+        /*background-size: calc(var(--app-toolbar-height) * 2);*/
+        background-image: url('../images/small_banner.png');
+        background-repeat: no-repeat;
+        background-position: center center;
+
+        /* The difference in font size is used to calculate the scale of the title in the transition. */
+        font-size: 5px;
+      }
+
+      [main-title] {
+        position: absolute;
+        /*top: -110px;*/
+        top: calc(0px - 2 * var(--app-toolbar-height));
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-image: url('../images/banner.png');
+        background-repeat: no-repeat;
+        background-position: center 25%;
+        background-size: 900px;
+        -webkit-transform-origin: center top !important;
+        transform-origin: center top !important;
+        z-index: -1;  /*not to cover drawer toggle button*/
+
+        /* The difference in font size is used to calculate the scale of the title in the transition. */
+        font-size: 15px;
+      }
+
+    </style>
+    <app-header-layout>
+      <app-header slot="header" condenses shadow fixed effects="resize-title waterfall" >
+        <app-toolbar>
+          <slot name="drawer-toggle"></slot>
+          <div condensed-title></div>
+        </app-toolbar>
+        <app-toolbar></app-toolbar>
+        <app-toolbar>
+          <div main-title></div>
+        </app-toolbar>
+      </app-header>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+      <p>Home view content</p>
+    </app-header-layout>
+  </template>
+
+  <script>
+    class HomeView extends Polymer.Element {
+      static get is() { return 'home-view'; }
+      static get properties() {
+        return {
+          requestList: Array,
+          user: Object,
+          userList: Object,
+          event: Object,
+          tabItems: {
+            type: Array,
+            value: function() {
+              return ['Requests', 'Inventory'];
+            }
+          },
+          selected: {type: String, value: 'Requests'},
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("HomeView ready.");
+      }
+    }
+
+    window.customElements.define(HomeView.is, HomeView);
+  </script>
+</dom-module>
