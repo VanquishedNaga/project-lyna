@@ -202,15 +202,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       modal
       on-iron-overlay-closed="closeThis">
       <h2>Add product</h2>
+      <paper-input always-float-label required
+        error-message="Field required!"
+        id="new-prod-name"
+        label="Product Name">
+      </paper-input>
       <paper-dialog-scrollable >
-        <paper-input always-float-label required
-          error-message="Field required!"
-          id="new-prod-name"
-          label="Product Name">
-        </paper-input>
-        <paper-textarea always-float-label id="new-prod-desc" label="Product Description"></paper-textarea>
-        <paper-input type="file" id="prod-pic" accept="image/jpeg"></paper-input>
-    </paper-dialog-scrollable >
+        <paper-textarea always-float-label id="new-prod-desc" label="Product Description" value={{value}}></paper-textarea>
+      </paper-dialog-scrollable >
+      <paper-input type="file" id="prod-pic" accept="image/jpeg"></paper-input>
       <div class="buttons">
         <!-- <paper-button on-tap="uploadProdPic" >Upload photo</paper-button> -->
         <paper-button dialog-dismiss>Cancel</paper-button>
@@ -277,6 +277,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             type: Object,
             observer: 'stateChanged'
           },
+
+          value: {
+            type: Object,
+            observer: 'valueChanged'
+          },
         };
       }
 
@@ -296,6 +301,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.prodName.value = null;
         this.prodDesc.value = null;
         //this.prodQuan.value = null;
+      }
+
+      valueChanged() {
+        this.dlAddProduct.notifyResize();
       }
 
       addProduct() {
