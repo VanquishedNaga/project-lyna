@@ -1,0 +1,137 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="import" href="shared-styles.html">
+
+<!-- <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"> -->
+
+<dom-module id="inventory-view">
+  <template>
+    <firebase-auth
+      id="auth"
+      app-name="absolute-reborn"
+      provider="google"
+      signed-in="{{signedIn}}"
+      user="{{user}}">
+    </firebase-auth>
+
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-query
+      id="inventoryData"
+      app-name="absolute-reborn"
+      path="/users/[[user.uid]]/inventory"
+      data="{{inventoryList}}">
+    </firebase-query>
+
+    <firebase-document
+      id="user"
+      path = "/users/[[user.uid]]"
+      data = "{{userData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="products"
+      path = "/users/[[user.uid]]/inventory"
+      data = "{{productsData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="product-lists"
+      path = "/products"
+      data = "{{productsList}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 16px;
+      }
+
+      .product{
+        display: inline-block;
+        box-sizing: border-box;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-size: contain;
+      }
+
+      .inventoryList{
+        padding: 16px;
+      }
+    </style>
+
+    <paper-listbox class="inventoryList" id="availableStock">
+      <template is="dom-repeat" items="{{inventoryList}}">
+        <paper-icon-item>
+          <div class="product" slot="item-icon"
+          style="background-image: url([[getRequestPic(productsList.*, item.$key)]]);"></div>
+          <div style="width: 60%;">[[getRequestName(productsList.*, item.$key)]]</div>
+          <div style="width: 30%;">Quantity: [[getInventoryQuantity(productsData.*, item.$key)]]</div>
+        </paper-icon-item>
+      </template>
+    </paper-listbox>
+
+  </template>
+
+
+  <script>
+    class InventoryView extends Polymer.Element {
+      static get is() { return 'inventory-view'; }
+      static get properties() {
+        return {
+          inventoryList: Array,
+          productsData: Object,
+          user: Object,
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("InventoryView ready.");
+      }
+
+      getRequestPic(change, user) {
+        if (change.base[user] != undefined){
+          return change.base[user]['images']['downloadUrl'];
+        }
+      }
+
+      getRequestName(change, user) {
+        if (change.base[user] != undefined){
+          return change.base[user]['name'];
+        }
+      }
+
+      getInventoryQuantity(change, user) {
+        if (change.base[user] != undefined){
+          return change.base[user];
+        }
+      }
+    }
+
+    window.customElements.define(InventoryView.is, InventoryView);
+  </script>
+</dom-module>

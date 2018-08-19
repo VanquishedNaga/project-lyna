@@ -24,6 +24,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="inventory-view.html">
 
 <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
@@ -117,7 +118,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         /*min-width: 250px;*/
         padding: 16px;
         margin: 16px;
-        display: flex;
+        display: inline-block;
         /*background: gray;*/
         font-family: 'Roboto Condensed', sans-serif;
 
@@ -159,7 +160,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </app-toolbar>
 
           <template is="dom-repeat" items="{{prodItems}}">
-            <paper-card class="product-card horizontal ">
+            <paper-card class="product-card horizontal">
               <iron-image
               src="[[item.images.downloadUrl]]"
               id="productImage"
@@ -167,31 +168,29 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               width:250px;
               min-width: 250px;
               height:auto;
-              /*--iron-image-width: 100%;*/
-              /*position: absolute;*/
               top: 0;
               bottom: 0;
               left: 0;
               display: inline-block;"
               sizing="cover">
             </iron-image>
-            <div class="card-content">
-              <span style="display: inline-block; width: 100%;">
+
+            <span style="display: inline;">
+              <div class="card-content">
                 <div>[[item.name]]</div>
                 <p>Description: </p>
                 <div>[[item.description]]</div>
               </div>
-              <div style="float: right;" >
-                <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
-                <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
-                <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
-              </div>
             </span>
-
+            <div style="float: right;" >
+              <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
+              <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
+              <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
+            </div>
           </paper-card>
         </template>
       </div>
-      <div page-name="Inventory">Page 2</div>
+      <inventory-view page-name="Inventory"></inventory-view>
       <div>Page 3</div>
     </iron-pages>
   </app-header-layout>
@@ -243,7 +242,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button on-tap="debug">Debug</paper-button>
         <paper-button dialog-confirm on-tap="submitProdRequest">Submit Request</paper-button>
       </div>
     </paper-dialog>
@@ -295,6 +293,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.prodDesc = this.shadowRoot.querySelector('#new-prod-desc');
         this.prodPic = this.shadowRoot.querySelector('#prod-pic');
         this.prodQuan = this.shadowRoot.querySelector('#prod-quantity');
+        this.pages = this.shadowRoot.querySelector('#iron-pages');
 
         // init to null to solve error
         this.prodKey = null;
@@ -416,7 +415,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       submitProdRequest(){
-
         var valid = this.prodQuan.validate();
 
         if(valid){
@@ -431,10 +429,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           }
           this.dlRestockProduct.close();
         }
-      }
-
-      debug(){
-        console.log("prodKey: " + this.prodKey);
       }
     }
 
