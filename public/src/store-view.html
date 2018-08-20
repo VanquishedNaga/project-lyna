@@ -22,6 +22,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="inventory-view.html">
@@ -153,7 +154,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <iron-pages selected="{{selected}}" attr-for-selected="page-name">
         <div page-name="Product">
           <app-toolbar hidden$="{{!wideLayout}}">
-            <paper-button on-tap="addProduct" disabled="[[disabled]]">
+            <paper-button on-tap="addProduct" disabled="[[disabled]]" class="custom">
               <iron-icon icon="add-circle-outline"></iron-icon>
               <span>Add product</span>
             </paper-button>

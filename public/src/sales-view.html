@@ -1,0 +1,178 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<!-- <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html"> -->
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="sales-view">
+  <template>
+    <firebase-document
+      id="sales"
+      app-name="absolute-reborn"
+      path="/sales">
+    </firebase-document>
+
+    <firebase-query
+      id="inventoryData"
+      app-name="absolute-reborn"
+      path="/users/[[user.uid]]/inventory"
+      data="{{inventoryList}}">
+    </firebase-query>
+
+    <firebase-document
+      id="product-lists"
+      path = "/products"
+      data = "{{productsList}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <!-- Visible contents -->
+    <app-header-layout>
+      <app-header slot="header" condenses shadow fixed>
+        <app-toolbar class="header">
+          <slot name="drawer-toggle"></slot>
+          <div>Sales</div>
+        </app-toolbar>
+        <app-toolbar class="tabs-bar" sticky>
+          <paper-button class="custom" on-tap="placeOrder">
+            <iron-icon icon="credit-card"></iron-icon>
+            <span>Place an order</span>
+          </paper-button>
+        </app-toolbar>
+      </app-header>
+      <div class="content">Content here.</div>
+    </app-header-layout>
+
+    <!-- To place a sales order -->
+    <paper-dialog id="placeOrder" on-iron-overlay-closed="onPlaceOrderClosed" modal>
+      <h2>Sales Order</h2>
+
+      <paper-input
+        id="custName"
+        label="Customer Name"
+        error-message="Field required!"
+        always-float-label required auto-validate>
+      </paper-input>
+
+      <paper-input
+        id="custAddr"
+        label="Delivery Address"
+        error-message="Field required!"
+        always-float-label required auto-validate>
+      </paper-input>
+
+      <paper-dropdown-menu label="Select product" id="prodMenu" required error-message="Field required!">
+        <paper-listbox id="prodList" slot="dropdown-content" attr-for-selected="key" selected="{{prodKey}}">
+          <template is="dom-repeat" items="{{inventoryList}}">
+            <paper-item key="[[item.$key]]">[[getProdName(productsList.*, item.$key)]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+
+      <paper-input always-float-label required auto-validate
+        type="number"
+        min="1"
+        error-message="Field required!"
+        id="prodQuan"
+        label="Product Quantity"
+        style="display: inline-block;">
+      </paper-input>
+
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button autofocus on-tap="submitOrder">Yes</paper-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+
+  <script>
+    class SalesView extends Polymer.Element {
+      static get is() { return 'sales-view'; }
+      static get properties() {
+        return {
+          inventoryList: Array,
+          productsList: Array,
+          user: Object,
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("SalesView ready.");
+      }
+
+      placeOrder() {
+        Polymer.dom(document.body).appendChild(this.$.placeOrder);
+        this.$.placeOrder.open();
+
+        console.log(this.inventoryList);
+        console.log(this.productsList);
+      }
+
+      submitOrder() {
+        // Check all inputs are valid, add new fields here.
+        var valid = this.$.custName.validate();
+        valid = this.$.custAddr.validate() && valid;
+        valid = this.$.prodMenu.validate() && valid;
+        valid = this.$.prodQuan.validate() && valid;
+
+        if (valid) {
+          this.$.sales.ref.push({
+            custname: this.$.custName.value,
+            custaddr: this.$.custAddr.value,
+            prod: this.$.prodMenu.value,
+            qty: this.$.prodQuan.value,
+            time: {".sv":"timestamp"},
+          });
+          this.$.placeOrder.close();
+        }
+      }
+
+      onPlaceOrderClosed(event) {
+        // To prevent paper-dropdown-menu from closing paper-dialog.
+        if (event.target == this.$.placeOrder) {
+          // Reset all fields.
+          this.$.custName.value = null;
+          this.$.custName.invalid = false;
+          this.$.custAddr.value = null;
+          this.$.custAddr.invalid = false;
+          this.$.prodMenu.value = null;
+          this.$.prodMenu.invalid = false;
+          this.$.prodQuan.value = null;
+          this.$.prodQuan.invalid = false;
+          this.$.prodList.selected = null;
+
+          Polymer.dom(document.body).removeChild(this.$.placeOrder);
+        }
+      }
+
+      getProdName(change, prod) {
+        if (change.base[prod] != undefined){
+          return change.base[prod]['name'];
+        }
+      }
+    }
+
+    window.customElements.define(SalesView.is, SalesView);
+  </script>
+</dom-module>

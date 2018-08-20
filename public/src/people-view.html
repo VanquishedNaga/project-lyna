@@ -49,9 +49,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       paper-icon-item paper-icon-button {
         color: green;
       }
-      .page {
-        padding: 16px;
-      }
       .avatar {
         display: inline-block;
         box-sizing: border-box;
@@ -79,7 +76,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-header>
 
       <iron-pages selected="{{selected}}" attr-for-selected="page-name">
-        <div page-name="Requests" class="page">
+        <div page-name="Requests" class="content">
 
           <div>You have [[requestList.length]] pending downline requests.</div>
           <paper-listbox id="request">
@@ -102,7 +99,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </paper-listbox>
 
         </div>
-        <div page-name="Inventory" class="page">Page 2</div>
+        <div page-name="Inventory" class="content">Page 2</div>
         <div>Page 3</div>
       </iron-pages>
     </app-header-layout>

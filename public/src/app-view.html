@@ -115,13 +115,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         font-family: 'Roboto Condensed', sans-serif;
       }
 
-      paper-button.custom{
+      paper-button.drawerButton{
         color: white;
         text-transform: none;
         font-family: 'Roboto Condensed', sans-serif;
       }
 
-      paper-button.custom:hover {
+      paper-button.drawerButton:hover {
         background-color: #A0A0A0;
         color: #81040A;
         font-weight: bold;
@@ -177,7 +177,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </a>
           </iron-selector>
           <hr>
-          <paper-button on-tap="signOut" class="custom">
+          <paper-button on-tap="signOut" class="drawerButton">
             <iron-icon icon="icons:power-settings-new" style="padding:0 3px 0 0"></iron-icon>Sign out
           </paper-button>
       </div>
@@ -206,7 +206,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </div>
         <div name="sales">
           <template is="dom-if" if="[[isAccepted(usersData.status)]]">
-            <sales-view>
+            <sales-view user="[[user]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </sales-view>
           </template>
