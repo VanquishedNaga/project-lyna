@@ -10,12 +10,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <!-- <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html"> -->
 <link rel="import" href="shared-styles.html">
+
+<script src="../bower_components/strftime/strftime-min.js"></script>
 
 <dom-module id="sales-view">
   <template>
@@ -25,6 +28,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       path="/sales">
     </firebase-document>
 
+    <firebase-document
+      id="product-lists"
+      path = "/products"
+      data = "{{productsList}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
     <firebase-query
       id="inventoryData"
       app-name="absolute-reborn"
@@ -32,12 +42,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       data="{{inventoryList}}">
     </firebase-query>
 
-    <firebase-document
-      id="product-lists"
-      path = "/products"
-      data = "{{productsList}}"
-      app-name="absolute-reborn">
-    </firebase-document>
+    <firebase-query
+      id="sales"
+      app-name="absolute-reborn"
+      path="/sales"
+      order-by-child="seller"
+      equal-to="[[user.uid]]"
+      data="{{sales}}">
+    </firebase-query>
 
     <style include="shared-styles">
       :host {
@@ -59,7 +71,29 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </paper-button>
         </app-toolbar>
       </app-header>
-      <div class="content">Content here.</div>
+      <div class="content">
+        <paper-listbox id="request" class="custom">
+          <template is="dom-repeat" items="{{sales}}">
+            <paper-icon-item>
+              <div class="avatar" slot="item-icon"
+              style="background-image: url([[getRequestPic(userList.*, item.user)]]);"></div>
+              <paper-item-body two-line style="width: 30%;">
+                <div>[[item.prod]]</div>
+                <div secondary>[[item.qty]]</div>
+              </paper-item-body>
+              <paper-item-body two-line style="width: 30%;">
+                <div>[[item.custname]]</div>
+                <div secondary>[[item.custaddr]]</div>
+              </paper-item-body>
+              <div style="width: 20%;">[[item.stat]]</div>
+              <paper-item-body two-line style="width: 20%;">
+                <div>[[_formatEpochDate(item.time)]]</div>
+                <div secondary>[[_formatEpochTime(item.time)]]</div>
+              </paper-item-body>
+            </paper-icon-item>
+          </template>
+        </paper-listbox>
+      </div>
     </app-header-layout>
 
     <!-- To place a sales order -->
@@ -112,6 +146,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return {
           inventoryList: Array,
           productsList: Array,
+          sales: Array,
           user: Object,
         };
       }
@@ -124,9 +159,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       placeOrder() {
         Polymer.dom(document.body).appendChild(this.$.placeOrder);
         this.$.placeOrder.open();
-
-        console.log(this.inventoryList);
-        console.log(this.productsList);
       }
 
       submitOrder() {
@@ -143,6 +175,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             prod: this.$.prodMenu.value,
             qty: this.$.prodQuan.value,
             time: {".sv":"timestamp"},
+            seller: this.user.uid,
+            stat: "Processing",
           });
           this.$.placeOrder.close();
         }
@@ -170,6 +204,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         if (change.base[prod] != undefined){
           return change.base[prod]['name'];
         }
+      }
+
+      _formatEpochDate(eTS) {
+        return strftime('%D', new Date(eTS));
+      }
+
+      _formatEpochTime(eTS) {
+        return strftime('%I:%M %P', new Date(eTS));
       }
     }
 

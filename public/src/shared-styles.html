@@ -14,6 +14,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="shared-styles">
   <template>
     <style>
+      :root {
+        --cream: #FCEAB0;
+      }
+
       .card {
         margin: 24px;
         padding: 16px;
@@ -41,6 +45,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .header {
         color: white;
+        text-transform: uppercase;
       }
 
       .tabs-bar {
@@ -89,6 +94,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: 16px 0;
         color: #212121;
         font-size: 22px;
+      }
+
+      paper-listbox.custom {
+        background-color: var(--cream);
+      }
+
+      paper-listbox.custom paper-icon-item {
+        background-color: white;
+        border: solid var(--cream);
+        border-radius: 10px;
       }
     </style>
   </template>
