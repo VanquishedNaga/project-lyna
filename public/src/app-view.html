@@ -31,14 +31,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
 <dom-module id="app-view">
   <template>
-    <firebase-auth
-      id="auth"
-      app-name="absolute-reborn"
-      provider="google"
-      signed-in="{{signedIn}}"
-      user="{{user}}"
-      status-known="{{statusKnown}}">
-    </firebase-auth>
     <firebase-document
       id="doc"
       path = "/users/[[user.uid]]"
@@ -184,7 +176,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-drawer>
 
       <!-- Main content -->
-      <template is="dom-if" if="[[!isAccepted(usersData.status)]]">
+      <template is="dom-if" if="[[isBlocked(usersData.status)]]">
         <!-- Put restricted pages here -->
         <div class="content">
           You are seeing this because you are an inactive member currently. Please contact your upline for more information.
@@ -324,8 +316,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       isAccepted(status) {
-        console.log(status);
         return (status == "Accepted");
+      }
+
+      isBlocked(status) {
+        return (status != "Accepted" && status != undefined);
       }
     }
 
