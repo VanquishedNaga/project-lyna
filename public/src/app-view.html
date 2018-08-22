@@ -31,12 +31,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
 <dom-module id="app-view">
   <template>
-    <firebase-document
-      id="doc"
-      path = "/users/[[user.uid]]"
-      data = "{{usersData}}"
-      app-name="absolute-reborn">
-    </firebase-document>
     <style include="shared-styles">
       :host {
         --app-primary-color: white;
@@ -143,9 +137,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" no-focus-trap="true">
         <div style="height: 100%; overflow: auto;">
           <div class = "profile-pic">
-            <img id="user-pic" src="[[usersData.profilePic]]" alt="profilePic"/>
-            <h3>[[usersData.name]]</h3>
-            <p>[[usersData.level]]</p>
+            <img id="user-pic" src="[[userdata.profilePic]]" alt="profilePic"/>
+            <h3>[[userdata.name]]</h3>
+            <p>[[userdata.level]]</p>
           </div>
           <hr>
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
@@ -176,7 +170,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-drawer>
 
       <!-- Main content -->
-      <template is="dom-if" if="[[isBlocked(usersData.status)]]">
+      <template is="dom-if" if="[[isBlocked(userdata.status)]]">
         <!-- Put restricted pages here -->
         <div class="content">
           You are seeing this because you are an inactive member currently. Please contact your upline for more information.
@@ -190,28 +184,28 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         fallback-selection="not-found"
         role="main">
         <div name="home">
-          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+          <template is="dom-if" if="[[isAccepted(userdata.status)]]">
             <home-view>
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </home-view>
           </template>
         </div>
         <div name="sales">
-          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+          <template is="dom-if" if="[[isAccepted(userdata.status)]]">
             <sales-view user="[[user]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </sales-view>
           </template>
         </div>
         <div name="people">
-          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+          <template is="dom-if" if="[[isAccepted(userdata.status)]]">
             <people-view user="[[user]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </people-view>
           </template>
         </div>
         <div name="team">
-          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+          <template is="dom-if" if="[[isAccepted(userdata.status)]]">
             <team-view>
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </team-view>
@@ -219,7 +213,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </div>
         <div name="store">
           <!-- <store-view></store-view> -->
-          <template is="dom-if" if="[[isAccepted(usersData.status)]]">
+          <template is="dom-if" if="[[isAccepted(userdata.status)]]">
             <store-view>
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </store-view>
@@ -254,7 +248,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           // This shouldn't be neccessary, but the Analyzer isn't picking up
           // Polymer.Element#rootPath
           rootPath: String,
-          usersData: Object,
+          userdata: Object,
         };
       }
 

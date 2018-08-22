@@ -24,16 +24,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       user="{{user}}"
       status-known="{{statusKnown}}">
     </firebase-auth>
+
     <firebase-document
       id="doc"
+      path="/users/[[user.uid]]"
+      data="{{userdata}}"
       app-name="absolute-reborn">
     </firebase-document>
-    <firebase-query
-      id = "query"
-      app-name="absolute-reborn"
-      path = "/users"
-      data = "{{usersData}}">
-    </firebase-query>
 
     <app-location
         route="{{route}}"
@@ -52,7 +49,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         attr-for-selected="name"
         fallback-selection="not-found"
         role="main">
-      <app-view name="app" user="[[user]]"></app-view>
+      <app-view name="app" user="[[user]]" userdata="[[userdata]]"></app-view>
       <login-view name="login"></login-view>
       <not-found-view name="not-found"></not-found-view>
     </iron-pages>
@@ -85,7 +82,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             notify: true,
             value: false,
             observer: 'onStatusKnown',
-          }
+          },
+          userdata: Object
         };
       }
 
