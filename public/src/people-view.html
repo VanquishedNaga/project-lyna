@@ -75,7 +75,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </app-toolbar>
       </app-header>
 
-      <iron-pages selected="{{selected}}" attr-for-selected="page-name">
+      <iron-pages selected="[[selected]]" attr-for-selected="page-name">
         <div page-name="Requests" class="content">
 
           <div>You have [[requestList.length]] pending downline requests.</div>
@@ -83,9 +83,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <template is="dom-repeat" items="{{requestList}}">
               <paper-icon-item>
                 <div class="avatar" slot="item-icon"
-                style="background-image: url([[getRequestPic(userList.*, item.user)]]);"></div>
+                style="background-image: url([[getUserInfo(userList.*, item.user, 'profilePic')]]);"></div>
                 <paper-item-body two-line>
-                  <div>[[getRequestName(userList.*, item.user)]]</div>
+                  <div>[[getUserInfo(userList.*, item.user, 'name')]]</div>
                   <div secondary>Description here.</div>
                 </paper-item-body>
                 <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Accept" on-tap="openDialog">
@@ -99,7 +99,21 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </paper-listbox>
 
         </div>
-        <div page-name="Inventory" class="content">Page 2</div>
+        <div page-name="Users" class="content">
+          <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
+            <paper-listbox>
+              <template is="dom-repeat" items="{{toArray(userList.*)}}">
+                <paper-icon-item>
+                  <div class="avatar" slot="item-icon"
+                    style="background-image: url([[getUserInfo(userList.*, item.key, 'profilePic')]]);"></div>
+                    <paper-item-body two-line>
+                      <div>[[getUserInfo(userList.*, item.key, 'name')]]</div>
+                    </paper-item-body>
+                  <div>[[getUserInfo(userList.*, item.key, 'status')]]</div>
+                </template>
+              </paper-listbox>
+            </template>
+        </div>
         <div>Page 3</div>
       </iron-pages>
     </app-header-layout>
@@ -108,7 +122,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <!-- To confirm accepting/rejecting a downline request -->
     <paper-dialog id="approveDialog" on-iron-overlay-closed="onDialogClosed" modal>
       <h2>[[getActionType(event, 1)]] Downline Request</h2>
-      <p>Are you sure you want to [[getActionType(event, 0)]] the downline request from [[getRequestName(userList.*, event.model.item.user)]]?</p>
+      <p>Are you sure you want to [[getActionType(event, 0)]] the downline request from [[getUserInfo(userList.*, event.model.item.user, 'name')]]?</p>
       <div class="buttons">
         <paper-button dialog-dismiss>No</paper-button>
         <paper-button dialog-confirm autofocus>Yes</paper-button>
@@ -129,16 +143,32 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           tabItems: {
             type: Array,
             value: function() {
-              return ['Requests', 'Inventory'];
+              return ['Requests'];
             }
           },
           selected: {type: String, value: 'Requests'},
+          userdata: Object,
         };
+      }
+      static get observers() {
+        return [
+          'onPrivilegeChanged(userdata.privilege)'
+        ]
       }
 
       ready() {
         super.ready();
         console.log("PeopleView ready.");
+      }
+
+      onPrivilegeChanged(privilege) {
+        if (privilege == "Admin") {
+          this.tabItems = ['Requests', 'Users'];
+        }
+        else {
+          this.tabItems = ['Requests'];
+          this.selected = 'Requests';
+        }
       }
 
       getRequestName(change, user) {
@@ -147,20 +177,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      getRequestPic(change, user) {
+      getUserInfo(change, user, data) {
         if (change.base[user] != undefined){
-          return change.base[user]['profilePic'];
+          return change.base[user][data];
         }
       }
 
       getBtnID(string, index) {
         return string + index;
-      }
-
-      getDialogName() {
-        if (this.userList != undefined){
-          return this.userList['BDSZTDB68iN1eLFjlAnGYGCK5U82']['name'];
-        }
       }
 
       getActionType(e, num) {
@@ -218,7 +242,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       processDownlineRequest(isAccept) {
         var status;
         if (isAccept) {
-          status = "Accepted";
+          status = "Approved";
 
           // Update downline list.
           this.$.doc.path = '/users/' + this.user.uid + '/downlines';
@@ -239,6 +263,21 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         // Remove request.
         this.$.doc.path = '/users/'+ this.user.uid + '/requests/' + this.event.model.item.$key;
         this.$.doc.ref.remove();
+      }
+
+      toArray(input) {
+        var obj = input.base;
+        console.log(obj);
+        return Object.keys(obj).map(function(key) {
+          return {
+            key: key,
+            value: obj[key]
+          };
+        });
+      }
+
+      isAdmin(privilege){
+        return (privilege == "Admin");
       }
     }
 

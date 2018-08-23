@@ -153,12 +153,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       <iron-pages selected="{{selected}}" attr-for-selected="page-name">
         <div page-name="Product">
-          <app-toolbar hidden$="{{!wideLayout}}">
-            <paper-button on-tap="addProduct" disabled="[[disabled]]" class="custom">
-              <iron-icon icon="add-circle-outline"></iron-icon>
-              <span>Add product</span>
-            </paper-button>
-          </app-toolbar>
+          <template is="dom-if" if="[[isAdmin(usersData.privilege)]]">
+            <app-toolbar>
+              <paper-button on-tap="addProduct" class="custom">
+                <iron-icon icon="add-circle-outline"></iron-icon>
+                <span>Add product</span>
+              </paper-button>
+            </app-toolbar>
+          </template>
 
           <template is="dom-repeat" items="{{prodItems}}">
             <paper-card class="product-card horizontal">
@@ -430,6 +432,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           }
           this.dlRestockProduct.close();
         }
+      }
+
+      isAdmin(privilege){
+        return (privilege == "Admin");
       }
     }
 

@@ -74,7 +74,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       .drawer-list a.iron-selected {
         font-weight: bold;
         color: #81040A;
-        background-color: #A0A0A0;
+        background-color: var(--selected-grey);
       }
 
       .profile-pic img{
@@ -108,7 +108,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       paper-button.drawerButton:hover {
-        background-color: #A0A0A0;
+        background-color: var(--selected-grey);
         color: #81040A;
         font-weight: bold;
       }
@@ -184,28 +184,28 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         fallback-selection="not-found"
         role="main">
         <div name="home">
-          <template is="dom-if" if="[[isAccepted(userdata.status)]]">
+          <template is="dom-if" if="[[isApproved(userdata.status)]]">
             <home-view>
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </home-view>
           </template>
         </div>
         <div name="sales">
-          <template is="dom-if" if="[[isAccepted(userdata.status)]]">
+          <template is="dom-if" if="[[isApproved(userdata.status)]]">
             <sales-view user="[[user]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </sales-view>
           </template>
         </div>
         <div name="people">
-          <template is="dom-if" if="[[isAccepted(userdata.status)]]">
-            <people-view user="[[user]]">
+          <template is="dom-if" if="[[isApproved(userdata.status)]]">
+            <people-view user="[[user]]" userdata="[[userdata]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </people-view>
           </template>
         </div>
         <div name="team">
-          <template is="dom-if" if="[[isAccepted(userdata.status)]]">
+          <template is="dom-if" if="[[isApproved(userdata.status)]]">
             <team-view>
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </team-view>
@@ -213,7 +213,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </div>
         <div name="store">
           <!-- <store-view></store-view> -->
-          <template is="dom-if" if="[[isAccepted(userdata.status)]]">
+          <template is="dom-if" if="[[isApproved(userdata.status)]]">
             <store-view>
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </store-view>
@@ -309,12 +309,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.auth.signOut();
       }
 
-      isAccepted(status) {
-        return (status == "Accepted");
+      isApproved(status) {
+        return (status == "Approved");
       }
 
       isBlocked(status) {
-        return (status != "Accepted" && status != undefined);
+        return (status != "Approved" && status != undefined);
       }
     }
 
