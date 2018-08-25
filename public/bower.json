@@ -41,6 +41,7 @@
     "paper-tooltip": "PolymerElements/paper-tooltip#^2.1.1",
     "iron-overlay-behavior": "PolymerElements/iron-overlay-behavior#^2.3.4",
     "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.2.1",
-    "strftime": "^0.10.0"
+    "strftime": "^0.10.0",
+    "paper-toast": "PolymerElements/paper-toast#^2.1.2"
   }
 }

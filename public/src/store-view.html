@@ -24,6 +24,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="inventory-view.html">
 
@@ -31,44 +32,36 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
 <dom-module id="store-view">
   <template>
-    <firebase-auth
-      id="auth"
-      app-name="absolute-reborn"
-      provider="google"
-      signed-in="{{signedIn}}"
-      user="{{user}}">
-    </firebase-auth>
-
     <firebase-document
       id="doc"
       app-name="absolute-reborn">
     </firebase-document>
 
     <firebase-document
-      id="user"
+      id="users"
       path = "/users/[[user.uid]]"
       data = "{{usersData}}"
       app-name="absolute-reborn">
     </firebase-document>
 
     <firebase-document
-      id="user"
+      id="upline"
       path = "/users/[[uplineUid]]"
       data = "{{uplineUsersData}}"
       app-name="absolute-reborn">
     </firebase-document>
 
     <firebase-document
-      id="user"
+      id="product"
       path = "/products"
       data = "{{productsData}}"
       app-name="absolute-reborn">
     </firebase-document>
 
     <firebase-document
-      id="user"
-      path = "/products/[[prodKey]]"
-      data = "{{productsData2}}"
+      id="stock"
+      path = "/users/[[user.uid]]/inventory"
+      data = "{{stockData}}"
       app-name="absolute-reborn">
     </firebase-document>
 
@@ -193,7 +186,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </paper-card>
         </template>
       </div>
-      <inventory-view page-name="Inventory"></inventory-view>
+      <inventory-view
+        user="[[user]]"
+        page-name="Inventory">
+      </inventory-view>
       <div>Page 3</div>
     </iron-pages>
   </app-header-layout>
@@ -225,7 +221,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <paper-dialog-scrollable>
         <!-- <p>Product: [[productsData2.name]]</p> -->
         <p>Upline: [[uplineUsersData.name]]</p>
-        <p>Current Stock Left Quantity: //TODO: Update quantity</p>
+        <p>Current Stock Left Quantity: [[getInventoryQuantity(prodKey)]]</p>
         <span style="display: inline;">
           <paper-dropdown-menu label="Select product" id="productMenu">
           <paper-listbox id="productList" slot="dropdown-content" attr-for-selected="key" selected="{{prodKey}}">
@@ -234,7 +230,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </template>
           </paper-listbox>
         </paper-dropdown-menu>
-        <paper-input always-float-label required auto-validate
+        <paper-input always-float-label
+          required
           type="number"
           min="1"
           error-message="Field required!"
@@ -245,7 +242,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm on-tap="submitProdRequest">Submit Request</paper-button>
+        <paper-button on-tap="submitProdRequest">Submit Request</paper-button>
+        <paper-button dialog-confirm on-tap="debug">Debug</paper-button>
       </div>
     </paper-dialog>
 
@@ -256,11 +254,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get is() { return 'store-view'; }
       static get properties() {
         return {
+          user: Object,
           productName: String,
           usersData: Object,
           uplineUsersData: Object,
           productsData: Object,
           productsList: Array,
+          stockData: Object,
           selected: {type: String, value: 'Product'},
           prodKey: String,
           tabItems: {
@@ -302,7 +302,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.prodKey = null;
         this.prodName.value = null;
         this.prodDesc.value = null;
-        //this.prodQuan.value = null;
+        this.prodQuan.value = null;
       }
 
       valueChanged() {
@@ -327,6 +327,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.prodDesc.value = null;
         this.prodName.invalid = false;
         this.prodPic.value = null;
+        this.prodQuan.value = null;
       }
 
       saveNewProd() {
@@ -427,11 +428,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               productID: this.prodKey,
               quantity: this.prodQuan.value,
               requestor: this.user.uid,
-              upline: this.uplineUid
+              upline: this.uplineUid,
+              status: "Processing"
             });
+
+            this.dlRestockProduct.close();
           }
-          this.dlRestockProduct.close();
         }
+      }
+
+      getInventoryQuantity(stockData) {
+        for (var key in this.stockData) {
+          if (key == stockData) {
+            return this.stockData[key];
+          }
+        }
+        return 0;
       }
 
       isAdmin(privilege){

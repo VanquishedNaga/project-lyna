@@ -16,7 +16,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/maps-icons.html">
 <link rel="import" href="../bower_components/iron-icons/social-icons.html">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Satisfy">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="my-icons.html">
@@ -212,9 +211,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </template>
         </div>
         <div name="store">
-          <!-- <store-view></store-view> -->
           <template is="dom-if" if="[[isApproved(userdata.status)]]">
-            <store-view>
+            <store-view user="[[user]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </store-view>
           </template>
