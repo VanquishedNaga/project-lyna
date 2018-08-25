@@ -23,6 +23,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <dom-module id="sales-view">
   <template>
     <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
       id="sales"
       app-name="absolute-reborn"
       path="/sales">
@@ -72,11 +77,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </app-toolbar>
       </app-header>
       <div class="content">
-        <paper-listbox id="request" class="custom">
+        <paper-listbox id="salesList" class="custom" attr-for-selected="key">
           <template is="dom-repeat" items="{{sales}}">
-            <paper-icon-item>
-              <div class="avatar" slot="item-icon"
-              style="background-image: url([[getRequestPic(userList.*, item.user)]]);"></div>
+            <paper-icon-item key="[[item.$key]]">
               <paper-item-body two-line style="width: 30%;">
                 <div>[[item.prod]]</div>
                 <div secondary>[[item.qty]]</div>
@@ -90,6 +93,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 <div>[[_formatEpochDate(item.time)]]</div>
                 <div secondary>[[_formatEpochTime(item.time)]]</div>
               </paper-item-body>
+
+              <paper-icon-button icon="check" alt="Accept" on-tap="openApproveSalesDialog">
+              </paper-icon-button>
+              <paper-icon-button icon="clear" alt="Reject" on-tap="openDialog">
+              </paper-icon-button>
+
             </paper-icon-item>
           </template>
         </paper-listbox>
@@ -132,8 +141,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-input>
 
       <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button autofocus on-tap="submitOrder">Confirm</paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- To confirm accepting/rejecting a sales request -->
+    <paper-dialog id="approveSalesDialog" on-iron-overlay-closed="onApproveSalesDialogClosed" modal>
+      <h2>Mark Order as Processed</h2>
+      <p>Are you sure you want to mark this order as processed?</p>
+      <div class="buttons">
         <paper-button dialog-dismiss>No</paper-button>
-        <paper-button autofocus on-tap="submitOrder">Yes</paper-button>
+        <paper-button dialog-confirm autofocus>Yes</paper-button>
       </div>
     </paper-dialog>
 
@@ -148,12 +167,45 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           productsList: Array,
           sales: Array,
           user: Object,
+          userdata: Object,
+          salesOrder: {
+            type: Object,
+            value: new Object(),
+          }
         };
+      }
+
+      static get observers() {
+        return [
+          'userPrivChanged(userdata.privilege)'
+        ]
       }
 
       ready() {
         super.ready();
         console.log("SalesView ready.");
+      }
+
+      userPrivChanged(priv) {
+        if (priv == 'Admin') {
+          this.$.sales.orderByChild = null;
+          this.$.sales.equalTo = null;
+        }
+        else {
+          this.$.sales.orderByChild = 'seller';
+          this.$.sales.equalTo = this.user.uid;
+        }
+      }
+
+      openApproveSalesDialog(e) {
+        this.salesOrder.key = e.model.__data.item.$key;
+        Polymer.dom(document.body).appendChild(this.$.approveSalesDialog);
+        this.$.approveSalesDialog.open();
+      }
+
+      onApproveSalesDialogClosed(event) {
+        Polymer.dom(document.body).removeChild(this.$.placeOrder);
+        this.salesOrder.key = null;
       }
 
       placeOrder() {
