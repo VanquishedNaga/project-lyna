@@ -41,6 +41,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-document>
 
+    <firebase-document
+      id="inventoryDataDoc"
+      app-name="absolute-reborn"
+      path="/users/[[user.uid]]/inventory"
+      data="{{inventoryListDoc}}">
+    </firebase-document>
+
     <firebase-query
       id="inventoryData"
       app-name="absolute-reborn"
@@ -169,6 +176,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <paper-toast id="actionFailedToast" text="You can't perform this action!"> </paper-toast>
 
+    <paper-toast id="insufficientAmountToast" text="You don't have enough in your inventory!"> </paper-toast>
+
   </template>
 
   <script>
@@ -177,6 +186,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get properties() {
         return {
           inventoryList: Array,
+          inventoryListDoc: Object,
           productsList: Array,
           sales: Array,
           user: Object,
@@ -277,20 +287,26 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         valid = this.$.prodQuan.validate() && valid;
 
         if (valid) {
-          var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSales');
-          addSales({
-            custname: this.$.custName.value,
-            custaddr: this.$.custAddr.value,
-            prod: this.$.prodList.selected,
-            qty: this.$.prodQuan.value,
-            time: {".sv":"timestamp"},
-            seller: this.user.uid,
-            stat: "Processing",
-          }).then(function(result) {
-          }).catch((err) => {
-          });
+          if (this.$.prodQuan.value > this.$.inventoryDataDoc.data[this.$.prodList.selected]) {
+            Polymer.dom(document.body).appendChild(this.$.insufficientAmountToast);
+            this.$.insufficientAmountToast.open();
+          }
+          else {
+            var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSales');
+            addSales({
+              custname: this.$.custName.value,
+              custaddr: this.$.custAddr.value,
+              prod: this.$.prodList.selected,
+              qty: this.$.prodQuan.value,
+              time: {".sv":"timestamp"},
+              seller: this.user.uid,
+              stat: "Processing",
+            }).then(function(result) {
+            }).catch((err) => {
+            });
 
-          this.$.placeOrder.close();
+            this.$.placeOrder.close();
+          }
         }
       }
 
