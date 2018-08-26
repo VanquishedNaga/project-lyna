@@ -87,7 +87,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <link rel="import" href="bower_components/polymerfire/firebase-app.html">
 
     <!-- Add any global styles for body, document, etc. -->
-    <style>
+    <style include="shared-styles">
       body {
         margin: 0;
         font-family: 'Roboto', 'Noto', sans-serif;
@@ -98,6 +98,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       paper-dialog {
         width: 800px;     /*To stop paper-textarea from resizing paper-dialog*/
         max-width: 90%;   /*To resize dialog when window shrinks*/
+      }
+      paper-toast {
+        width: 100%;
+        text-align: center;
+        border: solid white;
+        border-radius: 10px;
+        background-color: green;
       }
     </style>
   </head>

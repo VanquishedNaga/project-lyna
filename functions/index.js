@@ -65,6 +65,65 @@ exports.processRestock = functions.https.onCall((data, context) => {
 	}
 });
 
+exports.addSales = functions.https.onCall((data, context) => {
+	const custname = data.custname;
+	const custaddr = data.custaddr;
+	const prod = data.prod;
+	const qty = data.qty;
+	const time = data.time;
+	const seller = data.seller;
+	const stat = data.stat;
+
+	return admin.database().ref('/sales').push({
+		custname: custname,
+		custaddr: custaddr,
+		prod: prod,
+		qty: qty,
+		time: time,
+		seller: seller,
+		stat: stat,
+	}).then((snap) => {
+		var ref = admin.database().ref('/users/' + seller + '/inventory/' + prod);
+		ref.transaction(function(currentAmount) {
+			return (currentAmount - qty);
+		});
+		return snap.key;
+	});
+});
+
+exports.processSales = functions.https.onCall((data, context) => {
+	const key = data.key;
+	const action = data.action;
+
+	if (action == 'Processed') {
+		// Get sales order details.
+		admin.database().ref('/sales/' + key).once('value', (snapshot) => {
+			var status = snapshot.val().status;
+
+			// Only proceed if status is not processed already.
+			if (status != action && status != 'Rejected') {
+				// Update order status.
+				admin.database().ref('/sales/' + key).update({stat: action});
+			}
+		});
+	}
+	else if (action == 'Rejected') {
+		// Update order status.
+		admin.database().ref('/sales/' + key).update({stat: action});
+
+		// Return amount to seller inventory.
+		admin.database().ref('/sales/' + key).once('value', (snapshot) => {
+			var seller = snapshot.val().seller;
+			var prod = snapshot.val().prod;
+			var qty = snapshot.val().qty;
+
+			admin.database().ref('/users/' + seller + '/inventory/' + prod).transaction(function(currentAmount) {
+				return (currentAmount + parseFloat(qty));
+			});
+		});
+	}
+});
+
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //

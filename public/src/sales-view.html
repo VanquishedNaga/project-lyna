@@ -13,11 +13,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
-<!-- <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html"> -->
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
 <link rel="import" href="shared-styles.html">
 
+<script src="../bower_components/firebase/firebase-functions.js"></script>
 <script src="../bower_components/strftime/strftime-min.js"></script>
 
 <dom-module id="sales-view">
@@ -81,7 +83,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <template is="dom-repeat" items="{{sales}}">
             <paper-icon-item key="[[item.$key]]">
               <paper-item-body two-line style="width: 30%;">
-                <div>[[item.prod]]</div>
+                <div>[[getProdName(productsList.*, item.prod)]]</div>
                 <div secondary>[[item.qty]]</div>
               </paper-item-body>
               <paper-item-body two-line style="width: 30%;">
@@ -96,7 +98,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
               <paper-icon-button icon="check" alt="Accept" on-tap="openApproveSalesDialog">
               </paper-icon-button>
-              <paper-icon-button icon="clear" alt="Reject" on-tap="openDialog">
+              <paper-icon-button icon="clear" alt="Reject" on-tap="openRejectSalesDialog">
               </paper-icon-button>
 
             </paper-icon-item>
@@ -146,7 +148,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </div>
     </paper-dialog>
 
-    <!-- To confirm accepting/rejecting a sales request -->
+    <!-- To confirm accepting a sales request -->
     <paper-dialog id="approveSalesDialog" on-iron-overlay-closed="onApproveSalesDialogClosed" modal>
       <h2>Mark Order as Processed</h2>
       <p>Are you sure you want to mark this order as processed?</p>
@@ -155,6 +157,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <paper-button dialog-confirm autofocus>Yes</paper-button>
       </div>
     </paper-dialog>
+
+    <!-- To confirm rejecting a sales request -->
+    <paper-dialog id="rejectSalesDialog" on-iron-overlay-closed="onRejectSalesDialogClosed" modal>
+      <h2>Mark Order as Rejected</h2>
+      <p>Are you sure you want to mark this order as rejected?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button dialog-confirm autofocus>Yes</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-toast id="actionFailedToast" text="You can't perform this action!"> </paper-toast>
 
   </template>
 
@@ -198,13 +212,56 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       openApproveSalesDialog(e) {
-        this.salesOrder.key = e.model.__data.item.$key;
-        Polymer.dom(document.body).appendChild(this.$.approveSalesDialog);
-        this.$.approveSalesDialog.open();
+        if (e.model.__data.item.stat == 'Processing') {
+          this.salesOrder.key = e.model.__data.item.$key;
+          Polymer.dom(document.body).appendChild(this.$.approveSalesDialog);
+          this.$.approveSalesDialog.open();
+        }
+        else {
+          Polymer.dom(document.body).appendChild(this.$.actionFailedToast);
+          this.$.actionFailedToast.center();
+          this.$.actionFailedToast.refit();
+          this.$.actionFailedToast.open();
+        }
       }
 
       onApproveSalesDialogClosed(event) {
-        Polymer.dom(document.body).removeChild(this.$.placeOrder);
+        if (this.$.approveSalesDialog.closingReason.confirmed) {
+          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSales');
+          processSales({
+            key: this.salesOrder.key,
+            action: 'Processed',
+          }).then(function(result) {
+          }).catch((err) => {
+          });
+        }
+        Polymer.dom(document.body).removeChild(this.$.approveSalesDialog);
+        this.salesOrder.key = null;
+      }
+
+      openRejectSalesDialog(e) {
+        if (e.model.__data.item.stat == 'Processing') {
+          this.salesOrder.key = e.model.__data.item.$key;
+          Polymer.dom(document.body).appendChild(this.$.rejectSalesDialog);
+          this.$.rejectSalesDialog.open();
+        }
+        else {
+          Polymer.dom(document.body).appendChild(this.$.actionFailedToast);
+          this.$.actionFailedToast.open();
+        }
+      }
+
+      onRejectSalesDialogClosed(event) {
+        if (this.$.rejectSalesDialog.closingReason.confirmed) {
+          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSales');
+          processSales({
+            key: this.salesOrder.key,
+            action: 'Rejected',
+          }).then(function(result) {
+          }).catch((err) => {
+          });
+        }
+        Polymer.dom(document.body).removeChild(this.$.rejectSalesDialog);
         this.salesOrder.key = null;
       }
 
@@ -221,15 +278,19 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         valid = this.$.prodQuan.validate() && valid;
 
         if (valid) {
-          this.$.sales.ref.push({
+          var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSales');
+          addSales({
             custname: this.$.custName.value,
             custaddr: this.$.custAddr.value,
-            prod: this.$.prodMenu.value,
+            prod: this.$.prodList.selected,
             qty: this.$.prodQuan.value,
             time: {".sv":"timestamp"},
             seller: this.user.uid,
             stat: "Processing",
+          }).then(function(result) {
+          }).catch((err) => {
           });
+
           this.$.placeOrder.close();
         }
       }
