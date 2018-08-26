@@ -27,6 +27,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="inventory-view.html">
+<link rel="import" href="request-view.html">
 
 <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
@@ -190,7 +191,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         user="[[user]]"
         page-name="Inventory">
       </inventory-view>
-      <div>Page 3</div>
+      <request-view
+        user="[[user]]"
+        page-name="Request">
+      </request-view>
     </iron-pages>
   </app-header-layout>
 
@@ -266,7 +270,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           tabItems: {
             type: Array,
             value: function() {
-              return ['Product', 'Inventory'];
+              return ['Product', 'Inventory', 'Request'];
             }
           },
 
@@ -429,7 +433,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               quantity: this.prodQuan.value,
               requestor: this.user.uid,
               upline: this.uplineUid,
-              status: "Pending"
+              status: "Pending",
+              time: {".sv":"timestamp"}
             });
 
             this.dlRestockProduct.close();

@@ -1,0 +1,242 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="import" href="shared-styles.html">
+
+<!-- <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"> -->
+
+<dom-module id="request-view">
+  <template>
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="user-list"
+      path = "/users"
+      data = "{{usersList}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="products"
+      path = "/users/[[user.uid]]/inventory"
+      data = "{{inventoryData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="product-lists"
+      path = "/products"
+      data = "{{productsList}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-query
+      id="request-lists"
+      path = "/productRequests"
+      data = "{{requestList}}"
+      order-by-child="upline"
+      equal-to="[[user.uid]]"
+      app-name="absolute-reborn">
+    </firebase-query>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 16px;
+      }
+
+      .product{
+        display: inline-block;
+        box-sizing: border-box;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-size: contain;
+      }
+
+      .requestList{
+        padding: 16px;
+      }
+
+      h1 {
+        font-family: 'Roboto Condensed', sans-serif;
+      }
+    </style>
+
+    <h1>Downline Request</h1>
+    <paper-listbox class="requestList">
+      <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestApproved}}" observe="status item.status">
+        <paper-icon-item>
+          <div class="product" slot="item-icon"
+          style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
+          <div style="width: 40%;">[[getProductName(productsList.*, item.productID)]]</div>
+          <div style="width: 30%;">Requestor: [[getRequestorName(usersList.*, item.requestor)]]</div>
+          <div style="width: 20%;">Quantity: [[item.quantity]]</div>
+          <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Approve" on-tap="openDialog">
+          </paper-icon-button>
+          <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Approve</paper-tooltip>
+          <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
+          </paper-icon-button>
+          <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
+        </paper-icon-item>
+      </template>
+    </paper-listbox>
+
+    <!-- To confirm accepting/rejecting a stock request -->
+    <paper-dialog id="actionDialog" on-iron-overlay-closed="onDialogClosed" modal>
+      <h2>[[getActionType(event, 1)]] Restock Request</h2>
+      <p>Are you sure you want to [[getActionType(event, 0)]] the stock request from [[getRequestorName(usersList.*, event.model.item.requestor)]]?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button
+          autofocus
+          on-tap="processRestockRequest">Yes
+        </paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-toast id="toast" text="Insufficient units in your inventory!"> </paper-toast>
+  </template>
+
+
+  <script>
+    class RequestView extends Polymer.Element {
+      static get is() { return 'request-view'; }
+      static get properties() {
+        return {
+          inventoryData: Object,
+          requestList: Array,
+          user: Object,
+          requestKey:String,
+          productKey: String,
+          requestStockQuantity: Number,
+          availableStock: Number,
+          event: Object,
+          app: Object,
+          action: Boolean
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("RequestView ready.");
+      }
+
+      getRequestPic(change, productKey) {
+        if (change.base[productKey] != undefined){
+          return change.base[productKey]['images']['downloadUrl'];
+        }
+      }
+
+      getProductName(change, productKey) {
+        if (change.base[productKey] != undefined){
+          return change.base[productKey]['name'];
+        }
+      }
+
+      getRequestorName(change, requestorUid) {
+        if (change.base[requestorUid] != undefined){
+          return change.base[requestorUid]['name'];
+        }
+      }
+
+      getBtnID(string, index) {
+        return string + index;
+      }
+
+      openDialog(e) {
+        this.requestKey = e.model.item.$key;
+        this.productKey = e.model.item.productID;
+        this.requestStockQuantity = e.model.item.quantity;
+        this.availableStock = this.inventoryData[this.productKey];
+        this.event = e;
+
+        if (this.event.target.id.indexOf("apr") >= 0) {
+            //Check if user has enough stock for stock request
+            if (this.requestStockQuantity <= this.availableStock) {
+              this.isApprove = true;
+              Polymer.dom(document.body).appendChild(this.$.actionDialog);
+              this.$.actionDialog.open();
+            }
+            else {
+              //Prompt up screen to notify users don't have enough stock
+              Polymer.dom(document.body).appendChild(this.$.toast);
+              this.$.toast.open();
+            }
+        }
+        else {
+          this.isApprove = false;
+          Polymer.dom(document.body).appendChild(this.$.actionDialog);
+          this.$.actionDialog.open();
+        }
+      }
+
+      getActionType(e, num) {
+        if (e) {
+          var retVal;
+          if (e.target.id.indexOf("apr") >= 0){
+            if (num) {
+              retVal = 'Approve';
+            }
+            else {
+              retVal = 'approve';
+            }
+          }
+          else {
+            if (num) {
+              retVal = 'Reject';
+            }
+            else {
+              retVal = 'reject';
+            }
+          }
+          return retVal;
+        }
+      }
+
+      isRequestApproved(item) {
+        return (item.status == "Pending");
+      }
+
+      processRestockRequest(e) {
+        var action;
+        if (this.isApprove) {
+          action = 'Approved';
+        }
+        else {
+          action = 'Rejected';
+        }
+
+        var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestock');
+        processRestock({key: this.requestKey, action: action}).then(function(result) {
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+        this.$.actionDialog.close();
+        Polymer.dom(document.body).removeChild(this.$.actionDialog);
+      }
+    }
+
+    window.customElements.define(RequestView.is, RequestView);
+  </script>
+</dom-module>

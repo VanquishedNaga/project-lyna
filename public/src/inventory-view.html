@@ -18,6 +18,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="shared-styles.html">
 
+<script src="../bower_components/strftime/strftime-min.js"></script>
+
 <!-- <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"> -->
 
 <dom-module id="inventory-view">
@@ -28,18 +30,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </firebase-document>
 
     <firebase-query
+      reversed
       id="inventory-list"
       app-name="absolute-reborn"
       path="/users/[[user.uid]]/inventory"
       data="{{inventoryList}}">
     </firebase-query>
-
-    <firebase-document
-      id="user-list"
-      path = "/users"
-      data = "{{usersList}}"
-      app-name="absolute-reborn">
-    </firebase-document>
 
     <firebase-document
       id="products"
@@ -59,7 +55,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       id="request-lists"
       path = "/productRequests"
       data = "{{requestList}}"
-      order-by-child="upline"
+      order-by-child="requestor"
       equal-to="[[user.uid]]"
       app-name="absolute-reborn">
     </firebase-query>
@@ -83,10 +79,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         padding: 16px;
       }
 
-      .requestList{
-        padding: 16px;
-      }
-
       h1 {
         font-family: 'Roboto Condensed', sans-serif;
       }
@@ -106,43 +98,20 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <hr>
 
-    <h1>Request</h1>
+    <h1>Your Request</h1>
     <paper-listbox class="requestList">
-      <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestApproved}}">
+      <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestApproved}}" observe="status item.status">
         <paper-icon-item>
           <div class="product" slot="item-icon"
           style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
           <div style="width: 40%;">[[getProductName(productsList.*, item.productID)]]</div>
-          <div style="width: 30%;">Requestor: [[getRequestorName(usersList.*, item.requestor)]]</div>
           <div style="width: 20%;">Quantity: [[item.quantity]]</div>
-          <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Approve" on-tap="openDialog">
-          </paper-icon-button>
-          <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Approve</paper-tooltip>
-          <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
-          </paper-icon-button>
-          <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
+          <div style="width: 20%;">[[item.status]]</div>
+          <div style="width: 20%">[[_formatEpochDate(item.time)]]</div>
+          <div style="width: 20%">[[_formatEpochTime(item.time)]]</div>
         </paper-icon-item>
       </template>
     </paper-listbox>
-
-    <!-- To confirm accepting/rejecting a stock request -->
-    <paper-dialog id="actionDialog" on-iron-overlay-closed="onDialogClosed" modal>
-      <h2>[[getActionType(event, 1)]] Restock Request</h2>
-      <p>Are you sure you want to [[getActionType(event, 0)]] the stock request from [[getRequestorName(usersList.*, event.model.item.requestor)]]?</p>
-      <div class="buttons">
-        <paper-button dialog-dismiss>No</paper-button>
-        <paper-button
-          autofocus
-          on-tap="processRestockRequest"
-          data-item$="[[event.model.item.productID]]">Yes
-
-        </paper-button>
-      </div>
-    </paper-dialog>
-
-    <paper-toast id="toast" text="Insufficient units in your inventory!"> </paper-toast>
-
-    <paper-button on-tap="debug">Debug</paper-button>
   </template>
 
 
@@ -153,17 +122,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return {
           inventoryList: Array,
           inventoryData: Object,
-          requestList: Array,
           user: Object,
-          requestKey:String,
-          productKey: String,
-          requestor: String,
-          requestStockQuantity: Number,
-          availableStock: Number,
-          requestData: Object,
-          event: Object,
-          app: Object,
-          action: Boolean
         };
       }
 
@@ -190,99 +149,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      getRequestorName(change, requestorUid) {
-        if (change.base[requestorUid] != undefined){
-          return change.base[requestorUid]['name'];
-        }
+      _formatEpochDate(eTS) {
+        return strftime('%D', new Date(eTS));
       }
 
-      getBtnID(string, index) {
-        return string + index;
+      _formatEpochTime(eTS) {
+        return strftime('%I:%M %P', new Date(eTS));
       }
-
-      openDialog(e) {
-        // console.log(this.$.products.path);
-        this.requestKey = e.model.item.$key;
-        // this.requestor = e.model.item.requestor;
-        this.productKey = e.model.item.productID;
-        this.requestStockQuantity = e.model.item.quantity;
-        this.availableStock = this.inventoryData[this.productKey];
-        this.event = e;
-
-        if (this.event.target.id.indexOf("apr") >= 0) {
-            //Check if user has enough stock for stock request
-            if (this.requestStockQuantity <= this.availableStock) {
-              this.isApprove = true;
-              Polymer.dom(document.body).appendChild(this.$.actionDialog);
-              this.$.actionDialog.open();
-            }
-            else {
-              //Prompt up screen to notify users don't have enough stock
-              Polymer.dom(document.body).appendChild(this.$.toast);
-              this.$.toast.open();
-            }
-        }
-        else {
-          this.isApprove = false;
-          Polymer.dom(document.body).appendChild(this.$.actionDialog);
-          this.$.actionDialog.open();
-        }
-      }
-
-      getActionType(e, num) {
-        if (e) {
-          var retVal;
-          if (e.target.id.indexOf("apr") >= 0){
-            if (num) {
-              retVal = 'Approve';
-            }
-            else {
-              retVal = 'approve';
-            }
-          }
-          else {
-            if (num) {
-              retVal = 'Reject';
-            }
-            else {
-              retVal = 'reject';
-            }
-          }
-          return retVal;
-        }
-      }
-
-      isRequestApproved(item) {
-        return (item.status == "Pending");
-      }
-
-      processRestockRequest(e) {
-        var action;
-        if (this.isApprove) {
-          action = 'Approved';
-        }
-        else {
-          action = 'Rejected';
-        }
-
-        var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestock');
-        processRestock({key: this.requestKey, action: action}).then(function(result) {
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
-        this.$.actionDialog.close();
-        Polymer.dom(document.body).removeChild(this.$.actionDialog);
-      }
-
-      debug() {
-        this.productKey = '-LIpS1AQW9IKGKO2PKun';
-        console.log(this.productKey);
-        this.$.doc.path = '/users/' + this.requestor + '/inventory/' + this.productKey;
-        console.log(this.$.doc.value);
-      }
-
     }
 
     window.customElements.define(InventoryView.is, InventoryView);
