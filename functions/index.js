@@ -38,16 +38,31 @@ exports.processRestock = functions.https.onCall((data, context) => {
 	const key = data.key;
 	const action = data.action;
 
+	// Update request status
+	admin.database().ref('/productRequests/' + key).update({status:action});
+
 	if (action == 'Approved') {
-		return admin.database().ref('/productRequests/' + key).update({status:action});
+		// Retrieve restock request data
+		admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
+			var quantity = snapshot.val().quantity;
+			var requestor = snapshot.val().requestor;
+			var upline = snapshot.val().upline;
+			var product = snapshot.val().productID;
+
+			//Get and update requestor inventory quantity
+			var updateRequestorInventory = admin.database().ref('/users/' + requestor + '/inventory/' + product);
+			updateRequestorInventory.transaction(function(currentProduct) {
+				var total = currentProduct + parseFloat(quantity);
+				return currentProduct + parseFloat(quantity);
+			});
+
+			//Get and update upline inventory quantity
+			var updateUplineInventory = admin.database().ref('/users/' + upline + '/inventory/' + product);
+			updateUplineInventory.transaction(function(currentProduct) {
+				return currentProduct - quantity;
+			});
+		});
 	}
-	// else if (action == 'Rejected') {
-
-	// }
-	// else {
-	// 	return
-	// }
-
 });
 
 // // Create and Deploy Your First Cloud Functions

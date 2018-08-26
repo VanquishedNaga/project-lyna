@@ -164,6 +164,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           requestData: Object,
           event: Object,
           app: Object,
+          action: Boolean
         };
       }
 
@@ -201,30 +202,31 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       openDialog(e) {
-        console.log(this.$.products.path);
+        // console.log(this.$.products.path);
         this.requestKey = e.model.item.$key;
-        this.requestor = e.model.item.requestor;
+        // this.requestor = e.model.item.requestor;
         this.productKey = e.model.item.productID;
         this.requestStockQuantity = e.model.item.quantity;
         this.availableStock = this.inventoryData[this.productKey];
         this.event = e;
 
-        //Check if user has enough stock for stock request
-        if (this.requestStockQuantity <= this.availableStock) {
-
-          if (this.event.target.id.indexOf("apr") >= 0) {
-            this.event.isAccept = true;
-          }
-          else {
-            this.event.isAccept = false;
-          }
-
-          Polymer.dom(document.body).appendChild(this.$.actionDialog);
-          this.$.actionDialog.open();
+        if (this.event.target.id.indexOf("apr") >= 0) {
+            //Check if user has enough stock for stock request
+            if (this.requestStockQuantity <= this.availableStock) {
+              this.isApprove = true;
+              Polymer.dom(document.body).appendChild(this.$.actionDialog);
+              this.$.actionDialog.open();
+            }
+            else {
+              //Prompt up screen to notify users don't have enough stock
+              Polymer.dom(document.body).appendChild(this.$.toast);
+              this.$.toast.open();
+            }
         }
         else {
-          Polymer.dom(document.body).appendChild(this.$.toast);
-          this.$.toast.open();
+          this.isApprove = false;
+          Polymer.dom(document.body).appendChild(this.$.actionDialog);
+          this.$.actionDialog.open();
         }
       }
 
@@ -252,42 +254,26 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       isRequestApproved(item) {
-        return (item.status == "Processing");
+        return (item.status == "Pending");
       }
 
       processRestockRequest(e) {
+        var action;
+        if (this.isApprove) {
+          action = 'Approved';
+        }
+        else {
+          action = 'Rejected';
+        }
 
         var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestock');
-        processRestock({key: this.requestKey, action: 'Approved'}).then(function(result) {
+        processRestock({key: this.requestKey, action: action}).then(function(result) {
         })
         .catch((err) => {
           console.log(err);
         });
 
-        // //Get requestor inventory quantity
-        // this.$.doc.path = '/users/' + this.requestor + '/inventory/' + this.productKey;
-        // //console.log(this.$.doc.path);
-        // console.log(this.$.doc.data);
-        // var quantity = this.$.doc.data;
-
-        // // Update requestor inventory
-        // this.$.doc.path = '/users/' + this.requestor + '/inventory' ;
-        // this.$.doc.ref.update({
-        //   //[this.productKey] : this.productKey + this.requestStockQuantity
-        // });
-
-        // // Update upline inventory
-        // this.$.doc.path = '/users/' + this.user.uid + '/inventory' ;
-        // this.$.doc.ref.update({
-        //   [this.productKey]: this.availableStock - this.requestStockQuantity
-        // });
-
-        // // Update request status
-        // this.$.doc.path = '/q/' + this.requestKey ;
-        // this.$.doc.ref.update({
-        //   status: "Approved"
-        // });
-
+        this.$.actionDialog.close();
         Polymer.dom(document.body).removeChild(this.$.actionDialog);
       }
 
