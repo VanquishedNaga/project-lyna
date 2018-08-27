@@ -193,7 +193,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </div>
         <div name="sales">
           <template is="dom-if" if="[[isApproved(userdata.status)]]">
-            <sales-view user="[[user]]" userdata="[[userdata]]">
+            <sales-view user="[[user]]" userdata="[[userdata]]" narrow="[[narrow]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </sales-view>
           </template>

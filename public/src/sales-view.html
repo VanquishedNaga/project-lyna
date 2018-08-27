@@ -13,6 +13,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
@@ -29,9 +30,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </firebase-document>
 
     <firebase-document
-      id="sales"
+      id="salesDoc"
       app-name="absolute-reborn"
-      path="/sales">
+      path="/sales"
+      data="{{salesDoc}}">
     </firebase-document>
 
     <firebase-document
@@ -68,6 +70,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       :host {
         display: block;
       }
+      paper-listbox paper-button {
+        color: red;
+        display: block;
+      }
     </style>
 
     <!-- Visible contents -->
@@ -82,12 +88,30 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <iron-icon icon="credit-card"></iron-icon>
             <span>Place an order</span>
           </paper-button>
+          <div style="margin-left: auto; margin-right: 0;">
+            <paper-button class="small" on-tap="editSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+              <iron-icon icon="create"></iron-icon>
+              <span hidden="[[narrow]]">Edit</span>
+            </paper-button>
+            <paper-button class="small" on-tap="openCancelSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+              <iron-icon icon="delete"></iron-icon>
+              <span hidden="[[narrow]]">Cancel</span>
+            </paper-button>
+            <paper-button class="small" on-tap="openApproveSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+              <iron-icon icon="check"></iron-icon>
+              <span hidden="[[narrow]]">Accept</span>
+            </paper-button>
+            <paper-button class="small" on-tap="openRejectSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+              <iron-icon icon="clear"></iron-icon>
+              <span hidden="[[narrow]]">Reject</span>
+            </paper-button>
+          </div>
         </app-toolbar>
       </app-header>
       <div class="content">
-        <paper-listbox id="salesList" class="custom" attr-for-selected="key">
+        <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}">
           <template is="dom-repeat" items="{{sales}}">
-            <paper-icon-item key="[[item.$key]]">
+            <paper-item key="[[item.$key]]">
               <paper-item-body two-line style="width: 30%;">
                 <div>[[getProdName(productsList.*, item.prod)]]</div>
                 <div secondary>[[item.qty]]</div>
@@ -96,18 +120,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 <div>[[item.custname]]</div>
                 <div secondary>[[item.custaddr]]</div>
               </paper-item-body>
-              <div style="width: 20%;">[[item.stat]]</div>
+              <div style="width: 20%; min-width: 85px">[[item.stat]]</div>
               <paper-item-body two-line style="width: 20%;">
                 <div>[[_formatEpochDate(item.time)]]</div>
                 <div secondary>[[_formatEpochTime(item.time)]]</div>
               </paper-item-body>
-
-              <paper-icon-button icon="check" alt="Accept" on-tap="openApproveSalesDialog">
-              </paper-icon-button>
-              <paper-icon-button icon="clear" alt="Reject" on-tap="openRejectSalesDialog">
-              </paper-icon-button>
-
-            </paper-icon-item>
+            </paper-item>
           </template>
         </paper-listbox>
       </div>
@@ -132,7 +150,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-input>
 
       <paper-dropdown-menu label="Select product" id="prodMenu" required error-message="Field required!">
-        <paper-listbox id="prodList" slot="dropdown-content" attr-for-selected="key" selected="{{prodKey}}">
+        <paper-listbox id="prodList" slot="dropdown-content" attr-for-selected="key">
           <template is="dom-repeat" items="{{inventoryList}}">
             <paper-item key="[[item.$key]]">[[getProdName(productsList.*, item.$key)]]</paper-item>
           </template>
@@ -174,9 +192,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </div>
     </paper-dialog>
 
-    <paper-toast id="actionFailedToast" text="You can't perform this action!"> </paper-toast>
-
-    <paper-toast id="insufficientAmountToast" text="You don't have enough in your inventory!"> </paper-toast>
+    <!-- Toasts -->
+    <paper-toast id="invalidToast" class="bad" text="You can't perform this action!"> </paper-toast>
+    <paper-toast id="insufficientAmountToast" class="bad" text="You don't have enough in your inventory!"> </paper-toast>
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
 
   </template>
 
@@ -191,9 +211,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           sales: Array,
           user: Object,
           userdata: Object,
-          salesOrder: {
+          narrow: Object,
+          selectedOrder: {
             type: Object,
-            value: new Object(),
+            value: null,
           }
         };
       }
@@ -209,6 +230,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         console.log("SalesView ready.");
       }
 
+      isSelected(order) {
+        if (order) {
+          return true;
+        }
+        else {
+          return false;
+        }
+      }
+
       userPrivChanged(priv) {
         if (priv == 'Admin') {
           this.$.sales.orderByChild = null;
@@ -221,16 +251,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       openApproveSalesDialog(e) {
-        if (e.model.__data.item.stat == 'Processing') {
-          this.salesOrder.key = e.model.__data.item.$key;
+        if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
           Polymer.dom(document.body).appendChild(this.$.approveSalesDialog);
           this.$.approveSalesDialog.open();
         }
         else {
-          Polymer.dom(document.body).appendChild(this.$.actionFailedToast);
-          this.$.actionFailedToast.center();
-          this.$.actionFailedToast.refit();
-          this.$.actionFailedToast.open();
+          this.promptToast(this.$.invalidToast);
         }
       }
 
@@ -238,25 +264,24 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         if (this.$.approveSalesDialog.closingReason.confirmed) {
           var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSales');
           processSales({
-            key: this.salesOrder.key,
+            key: this.selectedOrder,
             action: 'Processed',
           }).then(function(result) {
-          }).catch((err) => {
+            this.promptToast(this.$.successToast);
+          }.bind(this)).catch((err) => {
+            this.promptToast(this.$.failToast);
           });
         }
         Polymer.dom(document.body).removeChild(this.$.approveSalesDialog);
-        this.salesOrder.key = null;
       }
 
       openRejectSalesDialog(e) {
-        if (e.model.__data.item.stat == 'Processing') {
-          this.salesOrder.key = e.model.__data.item.$key;
+        if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
           Polymer.dom(document.body).appendChild(this.$.rejectSalesDialog);
           this.$.rejectSalesDialog.open();
         }
         else {
-          Polymer.dom(document.body).appendChild(this.$.actionFailedToast);
-          this.$.actionFailedToast.open();
+          this.promptToast(this.$.invalidToast);
         }
       }
 
@@ -264,14 +289,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         if (this.$.rejectSalesDialog.closingReason.confirmed) {
           var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSales');
           processSales({
-            key: this.salesOrder.key,
+            key: this.selectedOrder,
             action: 'Rejected',
           }).then(function(result) {
-          }).catch((err) => {
+            this.promptToast(this.$.successToast);
+          }.bind(this)).catch((err) => {
+            this.promptToast(this.$.failToast);
           });
+
         }
         Polymer.dom(document.body).removeChild(this.$.rejectSalesDialog);
-        this.salesOrder.key = null;
       }
 
       placeOrder() {
@@ -340,6 +367,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       _formatEpochTime(eTS) {
         return strftime('%I:%M %P', new Date(eTS));
+      }
+
+      editSalesDialog(eTS) {
+        console.log('editSalesDialog');
+      }
+
+      promptToast(element) {
+        Polymer.dom(document.body).appendChild(element);
+        element.center();
+        element.refit();
+        element.open();
       }
     }
 
