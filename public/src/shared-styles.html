@@ -75,13 +75,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: #000;
       }
 
+      paper-button {
+        padding: 0.25em;
+        margin: 0;
+        min-width: 0;
+      }
       paper-button.custom {
         color: black;
         background-color: white;
         font-family: 'Roboto Condensed', sans-serif;
         font-size: 14px;
         font-weight: bold;
-        border: solid black;
         border-radius: 5px;
       }
       paper-button.custom iron-icon {
@@ -91,39 +95,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: #A0A0A0;
         color: #81040A;
       }
-
-      paper-button.small {
-        color: black;
-        background-color: white;
-        font-family: 'Roboto Condensed', sans-serif;
-        font-size: 14px;
-        font-weight: bold;
-        border: solid black;
-        border-radius: 5px;
-
-        padding: 0;
-        margin: 0;
-        min-width: 0;
-      }
-
-      paper-button.small[disabled] {
+      paper-button.custom[disabled] {
         --disabled: whitesmoke;
         color: silver;
         background-color: var(--disabled);
         font-family: 'Roboto Condensed', sans-serif;
         font-size: 14px;
         font-weight: bold;
-        border: solid var(--disabled);
         border-radius: 5px;
-
-        padding: 0;
-        margin: 0;
-        min-width: 0;
-      }
-
-      paper-button.small:hover {
-        background-color: #A0A0A0;
-        color: #81040A;
       }
 
       h1 {
@@ -152,8 +131,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       paper-listbox.custom paper-item.iron-selected {
-        background-color: gold;
-        color: brown;
+        background-color: LemonChiffon;
+        color: SaddleBrown;
       }
     </style>
   </template>

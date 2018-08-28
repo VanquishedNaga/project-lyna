@@ -86,22 +86,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <app-toolbar class="tabs-bar" sticky>
           <paper-button class="custom" on-tap="placeOrder">
             <iron-icon icon="credit-card"></iron-icon>
-            <span>Place an order</span>
+            <span>New order</span>
           </paper-button>
           <div style="margin-left: auto; margin-right: 0;">
-            <paper-button class="small" on-tap="editSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+            <paper-button class="custom" on-tap="openEditSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
               <iron-icon icon="create"></iron-icon>
               <span hidden="[[narrow]]">Edit</span>
             </paper-button>
-            <paper-button class="small" on-tap="openCancelSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+            <paper-button class="custom" on-tap="openCancelSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
               <iron-icon icon="delete"></iron-icon>
               <span hidden="[[narrow]]">Cancel</span>
             </paper-button>
-            <paper-button class="small" on-tap="openApproveSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+            <paper-button class="custom" on-tap="openApproveSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
               <iron-icon icon="check"></iron-icon>
               <span hidden="[[narrow]]">Accept</span>
             </paper-button>
-            <paper-button class="small" on-tap="openRejectSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+            <paper-button class="custom" on-tap="openRejectSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
               <iron-icon icon="clear"></iron-icon>
               <span hidden="[[narrow]]">Reject</span>
             </paper-button>
@@ -184,8 +184,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <!-- To confirm rejecting a sales request -->
     <paper-dialog id="rejectSalesDialog" on-iron-overlay-closed="onRejectSalesDialogClosed" modal>
-      <h2>Mark Order as Rejected</h2>
-      <p>Are you sure you want to mark this order as rejected?</p>
+      <h2>Reject Sales Order</h2>
+      <p>Are you sure you want to reject this order?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button dialog-confirm autofocus>Yes</paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- To confirm cancelling a sales request -->
+    <paper-dialog id="cancelSalesDialog" on-iron-overlay-closed="onCancelSalesDialogClosed" modal>
+      <h2>Cancel Sales Order</h2>
+      <p>Are you sure you want to cancel this order?</p>
       <div class="buttons">
         <paper-button dialog-dismiss>No</paper-button>
         <paper-button dialog-confirm autofocus>Yes</paper-button>
@@ -230,6 +240,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         console.log("SalesView ready.");
       }
 
+      // To disable buttons when nothing is selected.
       isSelected(order) {
         if (order) {
           return true;
@@ -296,12 +307,37 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           }.bind(this)).catch((err) => {
             this.promptToast(this.$.failToast);
           });
-
         }
         Polymer.dom(document.body).removeChild(this.$.rejectSalesDialog);
       }
 
+      openCancelSalesDialog(e) {
+        if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
+          Polymer.dom(document.body).appendChild(this.$.cancelSalesDialog);
+          this.$.cancelSalesDialog.open();
+        }
+        else {
+          this.promptToast(this.$.invalidToast);
+        }
+      }
+
+      onCancelSalesDialogClosed(event) {
+        if (this.$.cancelSalesDialog.closingReason.confirmed) {
+          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSales');
+          processSales({
+            key: this.selectedOrder,
+            action: 'Cancelled',
+          }).then(function(result) {
+            this.promptToast(this.$.successToast);
+          }.bind(this)).catch((err) => {
+            this.promptToast(this.$.failToast);
+          });
+        }
+        Polymer.dom(document.body).removeChild(this.$.cancelSalesDialog);
+      }
+
       placeOrder() {
+        this.selectedOrder = null;
         Polymer.dom(document.body).appendChild(this.$.placeOrder);
         this.$.placeOrder.open();
       }
@@ -314,25 +350,42 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         valid = this.$.prodQuan.validate() && valid;
 
         if (valid) {
-          if (this.$.prodQuan.value > this.$.inventoryDataDoc.data[this.$.prodList.selected]) {
-            Polymer.dom(document.body).appendChild(this.$.insufficientAmountToast);
-            this.$.insufficientAmountToast.open();
-          }
-          else {
-            var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSales');
-            addSales({
+          // Update existing order.
+          if (this.selectedOrder) {
+            this.$.doc.path = '/sales/' + this.selectedOrder;
+            this.$.doc.ref.update({
               custname: this.$.custName.value,
               custaddr: this.$.custAddr.value,
-              prod: this.$.prodList.selected,
-              qty: this.$.prodQuan.value,
-              time: {".sv":"timestamp"},
-              seller: this.user.uid,
-              stat: "Processing",
             }).then(function(result) {
-            }).catch((err) => {
+              this.promptToast(this.$.successToast);
+            }.bind(this)).catch((err) => {
+              this.promptToast(this.$.failToast);
             });
 
             this.$.placeOrder.close();
+          }
+          else {
+            // Check if have enough units.
+            if (this.$.prodQuan.value > this.$.inventoryDataDoc.data[this.$.prodList.selected]) {
+              Polymer.dom(document.body).appendChild(this.$.insufficientAmountToast);
+              this.$.insufficientAmountToast.open();
+            }
+            else {
+              var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSales');
+              addSales({
+                custname: this.$.custName.value,
+                custaddr: this.$.custAddr.value,
+                prod: this.$.prodList.selected,
+                qty: this.$.prodQuan.value,
+                time: {".sv":"timestamp"},
+                seller: this.user.uid,
+                stat: "Processing",
+              }).then(function(result) {
+              }).catch((err) => {
+              });
+
+              this.$.placeOrder.close();
+            }
           }
         }
       }
@@ -350,6 +403,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.prodQuan.value = null;
           this.$.prodQuan.invalid = false;
           this.$.prodList.selected = null;
+
+          // Reset disabled fields.
+          this.$.prodMenu.disabled = false;
+          this.$.prodQuan.disabled = false;
 
           Polymer.dom(document.body).removeChild(this.$.placeOrder);
         }
@@ -369,8 +426,24 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return strftime('%I:%M %P', new Date(eTS));
       }
 
-      editSalesDialog(eTS) {
-        console.log('editSalesDialog');
+      openEditSalesDialog(eTS) {
+        if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
+          // Disable some fields.
+          this.$.prodMenu.disabled = true;
+          this.$.prodQuan.disabled = true;
+
+          // Populate fields.
+          this.$.custName.value = this.salesDoc[this.selectedOrder].custname;
+          this.$.custAddr.value = this.salesDoc[this.selectedOrder].custaddr;
+          this.$.prodQuan.value = this.salesDoc[this.selectedOrder].qty;
+          this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
+
+          Polymer.dom(document.body).appendChild(this.$.placeOrder);
+          this.$.placeOrder.open();
+        }
+        else {
+          this.promptToast(this.$.invalidToast);
+        }
       }
 
       promptToast(element) {

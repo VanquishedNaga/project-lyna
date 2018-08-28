@@ -107,7 +107,7 @@ exports.processSales = functions.https.onCall((data, context) => {
 			}
 		});
 	}
-	else if (action == 'Rejected') {
+	else if ((action == 'Rejected') || (action == 'Cancelled')) {
 		// Update order status.
 		admin.database().ref('/sales/' + key).update({stat: action});
 
