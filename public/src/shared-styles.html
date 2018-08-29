@@ -15,10 +15,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style>
       :root {
-        --cream: #F9F2AE;
-        --selected-grey: #A0A0A0;
+        --app-primary-color: #81040A;
+        --app-primary-color-l: #b73f31;
+        --app-primary-color-d: #500000;
+        --app-secondary-color: #813c04;
+        --app-secondary-color-l: #b66831;
+        --app-secondary-color-d: #511100;
+        /*--app-primary-color: #ad1d1d;
+        --app-primary-color-l: #e55446;
+        --app-primary-color-d: #760000;
+        --app-secondary-color: #ae661e;
+        --app-secondary-color-l: #e4944c;
+        --app-secondary-color-d: #7a3b00;*/
       }
 
+      /*not used*/
       .card {
         margin: 24px;
         padding: 16px;
@@ -28,6 +39,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
       }
 
+      /*not used*/
       .circle {
         display: inline-block;
         width: 64px;
@@ -50,29 +62,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .tabs-bar {
-        color: black;
-        background-color: silver;
+        color: white;
+        background-color: var(--app-primary-color-l);
         height: 50px;
       }
 
       .tabs-bar paper-tabs {
-        --paper-tabs-selection-bar-color: maroon;
+        --paper-tabs-selection-bar-color: var(--app-secondary-color);
       }
 
       .tabs-bar paper-tab {
         font-family: 'Roboto Condensed', sans-serif;
         text-transform: uppercase;
-        --paper-tab-ink: grey;
+        --paper-tab-ink: var(--app-secondary-color-l);
       }
 
       .tabs-bar paper-tab.iron-selected {
-        color: maroon;
-        font-weight: bold;
+        background-color: var(--app-secondary-color);
       }
 
       app-header {
         color: #fff;
-        background-color: #000;
+        background-color: var(--app-primary-color-d);
       }
 
       paper-button {
@@ -82,12 +93,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       paper-button.custom {
-        color: black;
-        background-color: white;
+        color: white;
+        background-color: var(--app-secondary-color);
         font-family: 'Roboto Condensed', sans-serif;
         font-size: 14px;
         font-weight: bold;
         border-radius: 5px;
+      }
+
+      paper-button.side {
+        margin: 0 0.29em;
+        padding: 0.7em 0.57em;
       }
 
       paper-button.custom iron-icon {
@@ -95,14 +111,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       paper-button.custom:hover {
-        background-color: #A0A0A0;
-        color: #81040A;
+        background-color: var(--app-secondary-color-d);
       }
 
       paper-button.custom[disabled] {
-        --disabled: whitesmoke;
-        color: silver;
-        background-color: var(--disabled);
+        color: grey;
+        background-color: var(--app-secondary-color-l);
         font-family: 'Roboto Condensed', sans-serif;
         font-size: 14px;
         font-weight: bold;
@@ -120,18 +134,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       paper-listbox.custom {
-        background-color: var(--cream);
+        background-color: var(--app-primary-color);
       }
 
       paper-listbox.custom paper-icon-item {
         background-color: white;
-        border: solid var(--cream);
+        border: solid var(--app-primary-color);
         border-radius: 10px;
       }
 
       paper-listbox.custom paper-item {
         background-color: white;
-        border: solid var(--cream);
+        border: solid var(--app-primary-color);
         border-radius: 10px;
         --paper-item-focused-before: {
           background-color: transparent;
@@ -139,8 +153,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       paper-listbox.custom paper-item.iron-selected {
-        background-color: LemonChiffon;
-        color: SaddleBrown;
+        background-color: var(--app-secondary-color);
+        color: white;
       }
     </style>
   </template>

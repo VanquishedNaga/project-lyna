@@ -34,8 +34,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
   <template>
     <style include="shared-styles">
       :host {
-        --app-primary-color: white;
-        --app-secondary-color: white;
         --app-drawer-width: 210px;
         --app-toolbar-height: 70px;
         display: block;
@@ -55,7 +53,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       app-drawer {
         --app-drawer-content-container: {
-          background-color: #81040A
+          background-color: var(--app-primary-color)
         };
       }
 
@@ -67,15 +65,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         display: block;
         padding: 0 16px;
         text-decoration: none;
-        color: var(--app-secondary-color);
+        color: white;
         line-height: 40px;
         font-family: 'Roboto Condensed', sans-serif;
       }
 
       .drawer-list a.iron-selected {
-        font-weight: bold;
-        color: #81040A;
-        background-color: var(--selected-grey);
+        color: white;
+        background-color: var(--app-secondary-color);
       }
 
       .profile-pic img{
@@ -109,13 +106,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       paper-button.drawerButton:hover {
-        background-color: var(--selected-grey);
-        color: #81040A;
-        font-weight: bold;
+        background-color: var(--app-secondary-color-d);
       }
 
       hr{
-        background-color: #7C2529;
+        background-color: var(--app-primary-color-l);
         height: 3px;
         border: none;
       }
@@ -156,15 +151,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <a name="people" href="[[rootPath]]app/people">
               <iron-icon icon="icons:face"></iron-icon> People
             </a>
-            <a name="team" href="[[rootPath]]app/team">
-              <iron-icon icon="icons:supervisor-account"></iron-icon> Team
-            </a>
             <a name="profile" href="[[rootPath]]app/profile">
               <iron-icon icon="icons:account-circle"></iron-icon> Profile
             </a>
           </iron-selector>
           <hr>
-          <paper-button on-tap="signOut" class="drawerButton">
+          <paper-button on-tap="signOut" class="drawerButton side">
             <iron-icon icon="icons:power-settings-new" style="padding:0 3px 0 0"></iron-icon>Sign out
           </paper-button>
       </div>
@@ -203,13 +195,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <people-view user="[[user]]" userdata="[[userdata]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </people-view>
-          </template>
-        </div>
-        <div name="team">
-          <template is="dom-if" if="[[isApproved(userdata.status)]]">
-            <team-view>
-              <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
-            </team-view>
           </template>
         </div>
         <div name="store">
@@ -283,7 +268,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           case "store":
           case "sales":
           case "people":
-          case "team":
           case "profile":
             break;
           default: {
