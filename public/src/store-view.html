@@ -110,13 +110,21 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       .product-card {
         /*background: linear-gradient(white, #b2ebf2);*/
         width: 75%;
-        /*min-width: 250px;*/
+        min-width: 282px;
         padding: 16px;
         margin: 16px;
         display: inline-block;
         /*background: gray;*/
         font-family: 'Roboto Condensed', sans-serif;
+      }
 
+      img{
+        width: 250px;
+        height: 250px;
+        background-repeat: no-repeat;
+        object-fit: cover;
+        background-color: black;
+        background-size: cover;
       }
 
        .horizontal {
@@ -158,7 +166,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
           <template is="dom-repeat" items="{{prodItems}}">
             <paper-card class="product-card horizontal">
-              <iron-image
+              <!-- <iron-image
               src="[[item.images.downloadUrl]]"
               id="productImage"
               style="
@@ -170,20 +178,20 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               left: 0;
               display: inline-block;"
               sizing="cover">
-            </iron-image>
-
-            <span style="display: inline;">
-              <div class="card-content">
-                <div>[[item.name]]</div>
-                <p>Description: </p>
-                <div>[[item.description]]</div>
+              </iron-image> -->
+              <div style="display: inline-block;">
+                <img src="[[item.images.downloadUrl]]" alt="profilePic"/>
+                <div class="card-content">
+                  <div>[[item.name]]</div>
+                  <p>Description: </p>
+                  <div>[[item.description]]</div>
+                </div>
+                <div style="float: right;" >
+                  <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
+                  <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
+                  <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
+                </div>
               </div>
-            </span>
-            <div style="float: right;" >
-              <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
-              <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
-              <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
-            </div>
           </paper-card>
         </template>
       </div>
