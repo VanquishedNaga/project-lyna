@@ -107,15 +107,29 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         display: block;
       }
 
-      .product-card {
-        /*background: linear-gradient(white, #b2ebf2);*/
-        width: 75%;
+      .prod-card {
+        width: 80%;
         min-width: 282px;
-        padding: 16px;
+        padding: 8px;
         margin: 16px;
         display: inline-block;
-        /*background: gray;*/
         font-family: 'Roboto Condensed', sans-serif;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .prod-desc {
+        display: inline-block;
+        min-width: 250px;
+        max-width: calc(100% - 460px);
+        word-break: break-word;
+        hyphens: manual;
+        vertical-align: top;
+        padding: 8px;
+      }
+
+      .prod-act {
+        float: right;
       }
 
       img{
@@ -123,16 +137,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         height: 250px;
         background-repeat: no-repeat;
         object-fit: cover;
-        background-color: black;
+        background-color: white;
         background-size: cover;
+        padding: 8px;
       }
 
-       .horizontal {
+      .horizontal {
         @apply(--layout-horizontal);
       }
 
       @media only screen and (max-width: 600px) {
-          #productImage{
+        #productImage {
           min-width:150px;
         }
       }
@@ -165,7 +180,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </template>
 
           <template is="dom-repeat" items="{{prodItems}}">
-            <paper-card class="product-card horizontal">
+            <paper-card class="prod-card horizontal">
               <!-- <iron-image
               src="[[item.images.downloadUrl]]"
               id="productImage"
@@ -179,17 +194,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               display: inline-block;"
               sizing="cover">
               </iron-image> -->
-              <div style="display: inline-block;">
-                <img src="[[item.images.downloadUrl]]" alt="profilePic"/>
-                <div class="card-content">
-                  <div>[[item.name]]</div>
-                  <p>Description: </p>
-                  <div>[[item.description]]</div>
-                </div>
-                <div style="float: right;" >
+              <div style="width: 100%;">
+                <div class="prod-act">
+                  <paper-icon-button icon="icons:input" on-tap="adminRestock"></paper-icon-button>
                   <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
                   <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
                   <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
+                </div>
+                <img src="[[item.images.downloadUrl]]" alt="profilePic"/>
+                <div class="card-content prod-desc">
+                  <div>[[item.name]]</div>
+                  <p>Description: </p>
+                  <div>[[item.description]]</div>
                 </div>
               </div>
           </paper-card>
@@ -255,7 +271,32 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button on-tap="submitProdRequest">Submit Request</paper-button>
-        <paper-button dialog-confirm on-tap="debug">Debug</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="adminRestockDialog" on-iron-overlay-closed="onAdminRestockDialogClosed" modal>
+      <h2>Admin Restock</h2>
+      <paper-dropdown-menu label="Select product" id="productMenu">
+        <paper-listbox id="productList" slot="dropdown-content" attr-for-selected="key" selected="{{prodKey}}">
+          <template is="dom-repeat" items="{{productsList}}">
+            <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <p>Current Stock Left Quantity: [[getInventoryQuantity(prodKey)]]</p>
+      <p>Current Stock Left Quantity: [[getInventoryQuantity(prodKey)]]</p>
+      <paper-input
+        id="adminRestockQty"
+        always-float-label
+        required
+        type="number"
+        error-message="Field required!"
+        id="prod-quantity"
+        label="Product Quantity">
+      </paper-input>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Submit</paper-button>
       </div>
     </paper-dialog>
 
@@ -410,6 +451,24 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.restockProd();
       }
 
+      adminRestock(e){
+        // Setup.
+        this.prodKey = e.model.item.$key;
+        this.prodName.value = e.model.item.name || null;
+
+        // Open dialog.
+        Polymer.dom(document.body).appendChild(this.$.adminRestockDialog);
+        this.$.adminRestockDialog.open();
+      }
+
+      onAdminRestockDialogClosed(event) {
+        if (event.target == this.$.adminRestockDialog) {
+          if (this.$.adminRestockDialog.closingReason.confirmed) {
+          }
+          Polymer.dom(document.body).removeChild(this.$.adminRestockDialog);
+        }
+      }
+
       stateChanged() {
         console.log(this.$.task.state);
         if (this.$.task.state == 'success'){
@@ -453,6 +512,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       getInventoryQuantity(stockData) {
         for (var key in this.stockData) {
           if (key == stockData) {
+            return this.stockData[key];
+          }
+        }
+        return 0;
+      }
+
+      getProdStoreQuantity(prodKey) {
+        for (var key in this.stockData) {
+          if (key == prodKey) {
             return this.stockData[key];
           }
         }
