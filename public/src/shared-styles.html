@@ -29,27 +29,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         --app-secondary-color-d: #7a3b00;*/
       }
 
-      /*not used*/
-      .card {
+      /*For login and 404*/
+      app-header-layout.welcome {
+        background-color: var(--app-primary-color);
+      }
+      app-header-layout.welcome app-header {
+        height: 220px;
+        background-color: #000;
+        background-image: url('../images/banner.png');
+        background-size: 900px;
+        background-repeat: no-repeat;
+        background-position: center 20%;
+      }
+      .login-card {
         margin: 24px;
         padding: 16px;
-        color: #757575;
         border-radius: 5px;
-        background-color: #fff;
+        background-color: #EDE9E6;
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-      }
-
-      /*not used*/
-      .circle {
-        display: inline-block;
-        width: 64px;
-        height: 64px;
+        width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 100px;
         text-align: center;
-        color: #555;
-        border-radius: 50%;
-        background: #ddd;
-        font-size: 30px;
-        line-height: 64px;
       }
 
       .content {
