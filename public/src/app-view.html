@@ -163,7 +163,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-drawer>
 
       <!-- Main content -->
-      <template is="dom-if" if="[[isBlocked(userdata.status)]]">
+      <template is="dom-if" if="[[isBlocked(userdata.status, page)]]">
         <!-- Put restricted pages here -->
         <div class="content">
           You are seeing this because you are an inactive member currently. Please contact your upline for more information.
@@ -297,8 +297,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return (status == "Approved");
       }
 
-      isBlocked(status) {
-        return (status != "Approved" && status != undefined);
+      isBlocked(status, page) {
+        return (status != "Approved" && status != undefined && page != 'profile');
       }
     }
 
