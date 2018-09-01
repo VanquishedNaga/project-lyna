@@ -110,26 +110,49 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       .prod-card {
         width: 80%;
         min-width: 282px;
-        padding: 8px;
         margin: 16px;
-        display: inline-block;
         font-family: 'Roboto Condensed', sans-serif;
         margin-left: auto;
         margin-right: auto;
       }
 
+      .prod-header {
+        background-color: var(--app-primary-color);
+        color: white;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .header {
+        padding: 8px;
+        font-size: 1.1em;
+      }
+
       .prod-desc {
-        display: inline-block;
+        overflow: auto;
+      }
+
+      .prod-content {
+        clear: right;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .prod-info {
         min-width: 250px;
-        max-width: calc(100% - 460px);
         word-break: break-word;
         hyphens: manual;
         vertical-align: top;
-        padding: 8px;
+        margin: 16px;
+        max-height: 250px;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 250px;
       }
 
       .prod-act {
         float: right;
+        margin-left: auto;
       }
 
       img{
@@ -139,7 +162,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         object-fit: cover;
         background-color: white;
         background-size: cover;
-        padding: 8px;
+        margin: 16px 0 0 16px;
       }
 
       .horizontal {
@@ -181,31 +204,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
           <template is="dom-repeat" items="{{prodItems}}">
             <paper-card class="prod-card horizontal">
-              <!-- <iron-image
-              src="[[item.images.downloadUrl]]"
-              id="productImage"
-              style="
-              width:250px;
-              min-width: 250px;
-              height:auto;
-              top: 0;
-              bottom: 0;
-              left: 0;
-              display: inline-block;"
-              sizing="cover">
-              </iron-image> -->
               <div style="width: 100%;">
-                <div class="prod-act">
-                  <paper-icon-button icon="icons:input" on-tap="adminRestock"></paper-icon-button>
-                  <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
-                  <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
-                  <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
+                <div class="prod-header">
+                  <span class="header">[[item.name]]</span>
+                  <div class="prod-act">
+                    <paper-icon-button icon="icons:input" on-tap="adminRestock"></paper-icon-button>
+                    <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
+                    <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
+                    <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
+                  </div>
                 </div>
-                <img src="[[item.images.downloadUrl]]" alt="profilePic"/>
-                <div class="card-content prod-desc">
-                  <div>[[item.name]]</div>
-                  <p>Description: </p>
-                  <div>[[item.description]]</div>
+                <div class="prod-content">
+                  <img src="[[item.images.downloadUrl]]" alt="profilePic"/>
+                  <div class="card-content prod-info">
+                    <span style="font-weight: bold;">Description: </span>
+                    <div class="prod-desc">[[item.description]]</div>
+                  </div>
                 </div>
               </div>
           </paper-card>
