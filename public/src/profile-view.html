@@ -2,7 +2,13 @@
 @license
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
@@ -23,7 +29,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       data="{{userData}}">
     </firebase-document>
     <firebase-document
+      id="upline"
+      app-name="absolute-reborn"
+      path="/users"
+      data="{{uplineData}}">
+    </firebase-document>
+    <firebase-document
       id="request"
+      app-name="absolute-reborn">
+    </firebase-document>
+    <firebase-document
+      id="doc"
       app-name="absolute-reborn">
     </firebase-document>
     <firebase-query
@@ -36,27 +52,167 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       :host {
         display: block;
       }
+      .infoTable {
+        margin: auto;
+        font-family: 'Roboto Condensed', sans-serif;
+        text-transform: uppercase;
+      }
+      td.label {
+        text-align: right;
+      }
+      td.value {
+        text-align: left;
+      }
+      td {
+        padding: 0 15px;
+      }
+      paper-fab.edit {
+        --paper-fab-background: var(--app-primary-color-l);
+        position: absolute;
+        right: 0;
+        margin: 0 16px;
+      }
+      [main-title] {
+        position: absolute;
+        /*top: -110px;*/
+        top: calc(0px - 2 * var(--app-toolbar-height));
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-image: url('../images/banner.png');
+        background-repeat: no-repeat;
+        background-position: center ;
+        background-size: cover;
+        -webkit-transform-origin: center top !important;
+        transform-origin: center top !important;
+        z-index: -1;  /*not to cover drawer toggle button*/
+
+        /* The difference in font size is used to calculate the scale of the title in the transition. */
+        font-size: 15px;
+      }
     </style>
 
     <app-header-layout>
       <app-header slot="header" condenses shadow fixed>
-        <app-toolbar class="header">
+        <!-- <app-toolbar class="header">
           <slot name="drawer-toggle"></slot>
           <div>Profile</div>
+        </app-toolbar> -->
+        <app-toolbar></app-toolbar>
+        <app-toolbar></app-toolbar>
+        <app-toolbar>
+          <div main-title></div>
         </app-toolbar>
       </app-header>
+
       <div class="content">
-        <div>Status: [[userData.status]]</div>
-        <paper-dropdown-menu label="Select upline" id="uplinemenu">
-          <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
-            <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
-              <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
-            </template>
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <paper-button id="submitButton" class="custom" on-tap="submitRequest">Submit</paper-button>
+        <paper-material elevation="3">
+          <div>Status: [[userData.status]]</div>
+          <paper-dropdown-menu label="Select upline" id="uplinemenu">
+            <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
+              <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
+                <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
+              </template>
+            </paper-listbox>
+          </paper-dropdown-menu>
+          <paper-button id="submitButton" class="custom" on-tap="submitRequest">Submit</paper-button>
+        </paper-material>
       </div>
+
+      <template is="dom-if" if="[[!isFirstTimeLogin(userData.status)]]">
+        <div style="position: relative; padding: 16px;">
+          <paper-material elevation="3" style="position: absolute;">
+            <paper-fab mini class="edit" icon="icons:create" on-tap="editInfo"></paper-fab>
+            <table width="100%" class="infoTable">
+              <tr>
+                <td class="label">Name</td>
+                <td class="value">[[userData.name]]</td>
+              </tr>
+              <tr>
+                <td class="label">Level</td>
+                <td class="value">[[userData.level]]</td>
+              </tr>
+              <tr>
+                <td class="label">Upline</td>
+                <td class="value">[[getUplineName(uplineData.*, userData.upline)]]</td>
+              </tr>
+              <tr>
+                <td class="label">Email</td>
+                <td class="value">[[userData.email]]</td>
+              </tr>
+              <tr>
+                <td class="label">Phone</td>
+                <td class="value">[[userData.phone]]</td>
+              </tr>
+              <tr>
+                <td class="label">Address</td>
+                <td class="value">[[userData.address]]</td>
+              </tr>
+            </table>
+          </paper-material>
+        </div>
+      </template>
     </app-header-layout>
+
+    <paper-dialog id="editInfo" on-iron-overlay-closed="onEditInfoClose" modal>
+      <paper-dialog-scrollable>
+        <div style="
+          display: block;
+          padding: 16px;
+          width: 80%;
+          margin: auto;">
+          <h1 style="text-align: center;">Update Information</h1>
+          <paper-input
+            required
+            error-message="Field required!"
+            id="userName"
+            label="Name"
+            value="[[userData.name]]"
+            always-float-label>
+          </paper-input>
+          <paper-input
+            disabled
+            label="Level"
+            value="[[userData.level]]"
+            always-float-label>
+          </paper-input>
+          <paper-input
+            disabled
+            label="Email"
+            value="[[userData.email]]"
+            always-float-label>
+          </paper-input>
+          <paper-input
+            required
+            allowed-pattern="[0-9]"
+            error-message="Invalid Field"
+            id="userPhone"
+            label="Phone"
+            char-counter
+            minlength="10"
+            maxlength="11"
+            value="[[userData.phone]]"
+            always-float-label>
+          </paper-input>
+          <paper-input
+            required
+            error-message="Field required!"
+            id="userAddress"
+            label="Address"
+            value="[[userData.address]]"
+            always-float-label>
+          </paper-input>
+        </div>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button disabled$="[[isFirstTimeLogin(userData.status)]]" dialog-dismiss>Cancel</paper-button>
+        <paper-button on-tap="submitInfo">Submit</paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- Toasts -->
+    <paper-toast id="submitRequestToast" class="good" text="Request Submitted. Please wait for approval."> </paper-toast>
+
   </template>
 
   <script>
@@ -68,6 +224,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           user: Object,
           userData: Object,
           userList: Array,
+          uplineData: Object,
+          uplineUid: String,
         };
       }
 
@@ -102,24 +260,79 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       submitRequest() {
         // Verify that an upline is selected.
         if (this.$.uplinelist.selected != undefined) {
+
           // Clear invalid.
           this.$.uplinemenu.invalid = false;
 
-          // Push request to requested upline.
-          this.$.request.path = '/users/' + this.$.uplinelist.selected + '/requests';
-          this.$.request.ref.push({
-            user: this.user.uid
-          });
-
-          // Set own status to pending approval.
-          this.$.user.ref.update({
-            status: "Pending approval",
-            upline: this.$.uplinelist.selected,
-          });
+          if (this.userData.status == "Inactive") {
+            Polymer.dom(document.body).appendChild(this.$.editInfo);
+            this.$.editInfo.open();
+          }
         }
         else {
             this.$.uplinemenu.invalid = true;
         }
+      }
+
+      isFirstTimeLogin(status) {
+        console.log(status);
+        return (status == "Inactive");
+      }
+
+      getUplineName(change, upline) {
+        if (change.base[upline] != undefined){
+          return change.base[upline]['name'];
+        }
+      }
+
+      editInfo(e) {
+        Polymer.dom(document.body).appendChild(this.$.editInfo);
+        this.$.editInfo.open();
+      }
+
+      submitInfo(e) {
+        // Check all inputs are valid, add new fields here.
+        var valid = this.$.userName.validate();
+        valid = this.$.userPhone.validate() && valid;
+        valid = this.$.userAddress.validate() && valid;
+
+        if (valid) {
+          this.$.doc.path = '/users/' + this.user.uid;
+          this.$.doc.ref.update({
+              name: this.$.userName.value,
+              phone: this.$.userPhone.value,
+              address: this.$.userAddress.value
+            });
+
+          if (this.userData.status == "Inactive") {
+            // Push request to requested upline.
+            this.$.request.path = '/users/' + this.$.uplinelist.selected + '/requests';
+            this.$.request.ref.push({
+              user: this.user.uid
+            });
+
+            // Set own status to pending approval.
+            this.$.user.ref.update({
+              status: "Pending approval",
+              upline: this.$.uplinelist.selected,
+            });
+
+            Polymer.dom(document.body).appendChild(this.$.submitRequestToast);
+            this.$.submitRequestToast.open();
+          }
+          this.$.editInfo.close();
+        }
+      }
+
+      onEditInfoClose() {
+        this.$.userName.value = this.userData.name;
+        this.$.userName.invalid = false;
+        this.$.userPhone.value = this.userData.phone;
+        this.$.userPhone.invalid = false;
+        this.$.userAddress.value = this.userData.address;
+        this.$.userAddress.invalid = false;
+
+        Polymer.dom(document.body).removeChild(this.$.editInfo);
       }
     }
 

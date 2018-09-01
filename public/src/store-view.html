@@ -523,9 +523,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      getInventoryQuantity(stockData) {
+      getInventoryQuantity(prodKey) {
         for (var key in this.stockData) {
-          if (key == stockData) {
+          if (key == prodKey) {
             return this.stockData[key];
           }
         }
