@@ -8,6 +8,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
@@ -58,7 +59,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         display: block;
       }
       paper-icon-item paper-item-body {
-        color: blue;
         display: inline-block;
         width: 100%;
       }
@@ -72,6 +72,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         height: 40px;
         border-radius: 50%;
         background-size: contain;
+      }
+      .expandInfo {
+        background-color: var(--app-primary-color);
+        color: white;
       }
     </style>
 
@@ -146,15 +150,41 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               <template is="dom-repeat" items="{{toArray(userList.*)}}">
                 <paper-icon-item>
                   <div class="avatar" slot="item-icon"
-                    style="background-image: url([[getUserInfo(userList.*, item.key, 'profilePic')]]);"></div>
-                    <paper-item-body two-line>
-                      <div>[[getUserInfo(userList.*, item.key, 'name')]]</div>
-                    </paper-item-body>
+                  style="background-image: url([[getUserInfo(userList.*, item.key, 'profilePic')]]);"></div>
+                  <paper-item-body two-line on-tap="toggle">
+                    <div>[[getUserInfo(userList.*, item.key, 'name')]]</div>
+                  </paper-item-body>
                   <div>[[getUserInfo(userList.*, item.key, 'status')]]</div>
                 </paper-icon-item>
-                </template>
-              </paper-listbox>
-            </template>
+                <iron-collapse id$="collapse[[index]]">
+                  <div class="expandInfo">
+                    <table width="100%" class="infoTable">
+                      <tr>
+                        <td class="tbLabel">Level</td>
+                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'level')]]</td>
+                      </tr>
+                      <tr>
+                        <td class="tbLabel">Upline</td>
+                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'upline')]]</td>
+                      </tr>
+                      <tr>
+                        <td class="tbLabel">Email</td>
+                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'email')]]</td>
+                      </tr>
+                      <tr>
+                        <td class="tbLabel">Phone</td>
+                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'phone')]]</td>
+                      </tr>
+                      <tr>
+                        <td class="tbLabel">Address</td>
+                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'address')]]</td>
+                      </tr>
+                    </table>
+                  </div>
+                </iron-collapse>
+              </template>
+            </paper-listbox>
+          </template>
         </div>
       </iron-pages>
     </app-header-layout>
@@ -218,9 +248,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       getUserInfo(change, user, data) {
-        if (change.base[user] != undefined){
-          return change.base[user][data];
+        var retVal;
+        if (change.base[user] != undefined) {
+          retVal = change.base[user][data];
         }
+        if (data == 'upline') {
+          if (this.userList[change.base[user][data]] != undefined) {
+            retVal = this.userList[change.base[user][data]]['name'];
+          }
+        }
+        return retVal;
       }
 
       getBtnID(string, index) {
@@ -317,6 +354,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       isAdmin(privilege){
         return (privilege == "Admin");
+      }
+
+      toggle(event) {
+        var collapseElem = this.shadowRoot.querySelector('#collapse'+event.model.__data.index);
+        collapseElem.toggle();
       }
     }
 

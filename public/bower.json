@@ -45,6 +45,7 @@
     "paper-toast": "PolymerElements/paper-toast#^2.1.2",
     "paper-material": "PolymerElements/paper-material#^2.1.0",
     "paper-header-panel": "PolymerElements/paper-header-panel#^2.1.0",
-    "paper-fab": "PolymerElements/paper-fab#^2.1.0"
+    "paper-fab": "PolymerElements/paper-fab#^2.1.0",
+    "iron-collapse": "PolymerElements/iron-collapse#^2.2.1"
   }
 }

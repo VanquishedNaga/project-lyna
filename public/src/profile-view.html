@@ -52,20 +52,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       :host {
         display: block;
       }
-      .infoTable {
-        margin: auto;
-        font-family: 'Roboto Condensed', sans-serif;
-        text-transform: uppercase;
-      }
-      td.label {
-        text-align: right;
-      }
-      td.value {
-        text-align: left;
-      }
-      td {
-        padding: 0 15px;
-      }
       paper-fab.editButton {
         --paper-fab-background: var(--app-secondary-color);
         position: absolute;
@@ -102,28 +88,28 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <paper-fab mini class="editButton" icon="icons:create" on-tap="editInfo"></paper-fab>
             <table width="100%" class="infoTable">
               <tr>
-                <td class="label">Name</td>
-                <td class="value">[[userData.name]]</td>
+                <td class="tbLabel">Name</td>
+                <td class="tbValue">[[userData.name]]</td>
               </tr>
               <tr>
-                <td class="label">Level</td>
-                <td class="value">[[userData.level]]</td>
+                <td class="tbLabel">Level</td>
+                <td class="tbValue">[[userData.level]]</td>
               </tr>
               <tr>
-                <td class="label">Upline</td>
-                <td class="value">[[getUplineName(uplineData.*, userData.upline)]]</td>
+                <td class="tbLabel">Upline</td>
+                <td class="tbValue">[[getUplineName(uplineData.*, userData.upline)]]</td>
               </tr>
               <tr>
-                <td class="label">Email</td>
-                <td class="value">[[userData.email]]</td>
+                <td class="tbLabel">Email</td>
+                <td class="tbValue">[[userData.email]]</td>
               </tr>
               <tr>
-                <td class="label">Phone</td>
-                <td class="value">[[userData.phone]]</td>
+                <td class="tbLabel">Phone</td>
+                <td class="tbValue">[[userData.phone]]</td>
               </tr>
               <tr>
-                <td class="label">Address</td>
-                <td class="value">[[userData.address]]</td>
+                <td class="tbLabel">Address</td>
+                <td class="tbValue">[[userData.address]]</td>
               </tr>
             </table>
           </paper-material>
