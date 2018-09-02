@@ -475,7 +475,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       onAdminRestockDialogClosed(event) {
         if (event.target == this.$.adminRestockDialog) {
           if (this.$.adminRestockDialog.closingReason.confirmed) {
-            var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processAdminRestock');
+            var processSales = firebase.app('absolute-reborn').functions().httpsCallable('adminRestockFunction');
             processSales({
               prodKey: this.prodKey,
               qty: this.$.adminRestockQty.value,

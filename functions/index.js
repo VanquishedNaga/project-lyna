@@ -34,7 +34,7 @@ admin.initializeApp();
 //       return snapshot.ref.parent.child('uppercase').set(uppercase);
 //     });
 
-exports.processRestock = functions.https.onCall((data, context) => {
+exports.processRestockRequestFunction = functions.https.onCall((data, context) => {
   const key = data.key;
   const action = data.action;
 
@@ -65,7 +65,7 @@ exports.processRestock = functions.https.onCall((data, context) => {
   }
 });
 
-exports.processRestockAdmin = functions.https.onCall((data, context) => {
+exports.processRestockRequestAdminFunction = functions.https.onCall((data, context) => {
   const key = data.key;
   const action = data.action;
 
@@ -103,7 +103,7 @@ exports.processRestockAdmin = functions.https.onCall((data, context) => {
   });
 });
 
-exports.processAdminRestock = functions.https.onCall((data, context) => {
+exports.adminRestockFunction = functions.https.onCall((data, context) => {
   const prodKey = data.prodKey;
   const qty = data.qty;
 
@@ -118,7 +118,7 @@ exports.processAdminRestock = functions.https.onCall((data, context) => {
   });
 });
 
-exports.addSales = functions.https.onCall((data, context) => {
+exports.addSalesFunction = functions.https.onCall((data, context) => {
   const custname = data.custname;
   const custaddr = data.custaddr;
   const prod = data.prod;
@@ -144,7 +144,7 @@ exports.addSales = functions.https.onCall((data, context) => {
   });
 });
 
-exports.processSales = functions.https.onCall((data, context) => {
+exports.processSalesFunction = functions.https.onCall((data, context) => {
   const key = data.key;
   const action = data.action;
 

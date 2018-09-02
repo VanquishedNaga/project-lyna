@@ -234,7 +234,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
 
         if (this.userdata.privilege == "Admin") {
-          var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestockAdmin');
+          var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestockRequestAdminFunction');
           processRestock({key: this.requestKey, action: action}).then(function(result) {
           })
           .catch((err) => {
@@ -242,7 +242,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           });
         }
         else {
-          var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestock');
+          var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestockRequestFunction');
           processRestock({key: this.requestKey, action: action}).then(function(result) {
           })
           .catch((err) => {

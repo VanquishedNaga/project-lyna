@@ -269,7 +269,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       onApproveSalesDialogClosed(event) {
         if (this.$.approveSalesDialog.closingReason.confirmed) {
-          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSales');
+          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSalesFunction');
           processSales({
             key: this.selectedOrder,
             action: 'Processed',
@@ -294,7 +294,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       onRejectSalesDialogClosed(event) {
         if (this.$.rejectSalesDialog.closingReason.confirmed) {
-          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSales');
+          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSalesFunction');
           processSales({
             key: this.selectedOrder,
             action: 'Rejected',
@@ -319,7 +319,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       onCancelSalesDialogClosed(event) {
         if (this.$.cancelSalesDialog.closingReason.confirmed) {
-          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSales');
+          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSalesFunction');
           processSales({
             key: this.selectedOrder,
             action: 'Cancelled',
@@ -367,7 +367,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               this.$.insufficientAmountToast.open();
             }
             else {
-              var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSales');
+              var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSalesFunction');
               addSales({
                 custname: this.$.custName.value,
                 custaddr: this.$.custAddr.value,
