@@ -202,10 +202,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 <div class="prod-header">
                   <span class="header">[[item.name]]</span>
                   <div class="prod-act">
-                    <paper-icon-button icon="icons:input" on-tap="adminRestock"></paper-icon-button>
                     <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
-                    <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
-                    <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
+                    <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
+                      <paper-icon-button icon="icons:input" on-tap="adminRestock"></paper-icon-button>
+                      <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
+                      <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
+                    </template>
                   </div>
                 </div>
                 <div class="prod-content">
