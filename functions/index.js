@@ -35,93 +35,108 @@ admin.initializeApp();
 //     });
 
 exports.processRestock = functions.https.onCall((data, context) => {
-	const key = data.key;
-	const action = data.action;
+  const key = data.key;
+  const action = data.action;
 
-	// Update request status
-	admin.database().ref('/productRequests/' + key).update({status:action});
+  // Update request status
+  admin.database().ref('/productRequests/' + key).update({status:action});
 
-	if (action == 'Approved') {
-		// Retrieve restock request data
-		admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
-			var quantity = snapshot.val().quantity;
-			var requestor = snapshot.val().requestor;
-			var upline = snapshot.val().upline;
-			var product = snapshot.val().productID;
+  if (action == 'Approved') {
+    // Retrieve restock request data
+    admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
+      var quantity = snapshot.val().quantity;
+      var requestor = snapshot.val().requestor;
+      var upline = snapshot.val().upline;
+      var product = snapshot.val().productID;
 
-			//Get and update requestor inventory quantity
-			var updateRequestorInventory = admin.database().ref('/users/' + requestor + '/inventory/' + product);
-			updateRequestorInventory.transaction(function(currentProduct) {
-				var total = currentProduct + parseFloat(quantity);
-				return currentProduct + parseFloat(quantity);
-			});
+      //Get and update requestor inventory quantity
+      var updateRequestorInventory = admin.database().ref('/users/' + requestor + '/inventory/' + product);
+      updateRequestorInventory.transaction(function(currentProduct) {
+        var total = currentProduct + parseFloat(quantity);
+        return currentProduct + parseFloat(quantity);
+      });
 
-			//Get and update upline inventory quantity
-			var updateUplineInventory = admin.database().ref('/users/' + upline + '/inventory/' + product);
-			updateUplineInventory.transaction(function(currentProduct) {
-				return currentProduct - quantity;
-			});
-		});
-	}
+      //Get and update upline inventory quantity
+      var updateUplineInventory = admin.database().ref('/users/' + upline + '/inventory/' + product);
+      updateUplineInventory.transaction(function(currentProduct) {
+        return currentProduct - quantity;
+      });
+    });
+  }
+});
+
+exports.processAdminRestock = functions.https.onCall((data, context) => {
+  const prodKey = data.prodKey;
+  const qty = data.qty;
+
+  var ref = admin.database().ref('/products/' + prodKey + '/qty/total');
+  ref.transaction(function(currentTotal) {
+    return currentTotal + parseFloat(qty);
+  });
+
+  ref = admin.database().ref('/products/' + prodKey + '/qty/free');
+  ref.transaction(function(currentFree) {
+    return currentFree + parseFloat(qty);
+  });
 });
 
 exports.addSales = functions.https.onCall((data, context) => {
-	const custname = data.custname;
-	const custaddr = data.custaddr;
-	const prod = data.prod;
-	const qty = data.qty;
-	const time = data.time;
-	const seller = data.seller;
-	const stat = data.stat;
+  const custname = data.custname;
+  const custaddr = data.custaddr;
+  const prod = data.prod;
+  const qty = data.qty;
+  const time = data.time;
+  const seller = data.seller;
+  const stat = data.stat;
 
-	return admin.database().ref('/sales').push({
-		custname: custname,
-		custaddr: custaddr,
-		prod: prod,
-		qty: qty,
-		time: time,
-		seller: seller,
-		stat: stat,
-	}).then((snap) => {
-		var ref = admin.database().ref('/users/' + seller + '/inventory/' + prod);
-		ref.transaction(function(currentAmount) {
-			return (currentAmount - qty);
-		});
-		return snap.key;
-	});
+  return admin.database().ref('/sales').push({
+    custname: custname,
+    custaddr: custaddr,
+    prod: prod,
+    qty: qty,
+    time: time,
+    seller: seller,
+    stat: stat,
+  }).then((snap) => {
+    var ref = admin.database().ref('/users/' + seller + '/inventory/' + prod);
+    ref.transaction(function(currentAmount) {
+      return (currentAmount - qty);
+    });
+    return snap.key;
+  });
 });
 
 exports.processSales = functions.https.onCall((data, context) => {
-	const key = data.key;
-	const action = data.action;
+  const key = data.key;
+  const action = data.action;
 
-	if (action == 'Processed') {
-		// Get sales order details.
-		admin.database().ref('/sales/' + key).once('value', (snapshot) => {
-			var status = snapshot.val().status;
+  if (action == 'Processed') {
+    // Get sales order details.
+    admin.database().ref('/sales/' + key).once('value', (snapshot) => {
+      var status = snapshot.val().status;
 
-			// Only proceed if status is not processed already.
-			if (status != action && status != 'Rejected') {
-				// Update order status.
-				admin.database().ref('/sales/' + key).update({stat: action});
-			}
-		});
-	}
-	else if ((action == 'Rejected') || (action == 'Cancelled')) {
-		// Update order status.
-		admin.database().ref('/sales/' + key).update({stat: action});
+      // Only proceed if status is not processed already.
+      if (status != action && status != 'Rejected') {
+        // Update order status.
+        admin.database().ref('/sales/' + key).update({stat: action});
+      }
+    });
+  }
+  else if ((action == 'Rejected') || (action == 'Cancelled')) {
+    // Update order status.
+    admin.database().ref('/sales/' + key).update({stat: action});
 
-		// Return amount to seller inventory.
-		admin.database().ref('/sales/' + key).once('value', (snapshot) => {
-			var seller = snapshot.val().seller;
-			var prod = snapshot.val().prod;
-			var qty = snapshot.val().qty;
+    // Return amount to seller inventory.
+    admin.database().ref('/sales/' + key).once('value', (snapshot) => {
+      var seller = snapshot.val().seller;
+      var prod = snapshot.val().prod;
+      var qty = snapshot.val().qty;
 
-			admin.database().ref('/users/' + seller + '/inventory/' + prod).transaction(function(currentAmount) {
-				return (currentAmount + parseFloat(qty));
-			});
-		});
-	}
+      admin.database().ref('/users/' + seller + '/inventory/' + prod).transaction(function(currentAmount) {
+        return (currentAmount + parseFloat(qty));
+      });
+    });
+  }
 });
 
 // // Create and Deploy Your First Cloud Functions

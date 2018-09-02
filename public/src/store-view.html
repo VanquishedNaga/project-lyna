@@ -20,6 +20,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
@@ -297,8 +298,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </template>
         </paper-listbox>
       </paper-dropdown-menu>
-      <p>Current Stock Left Quantity: [[getInventoryQuantity(prodKey)]]</p>
-      <p>Current Stock Left Quantity: [[getInventoryQuantity(prodKey)]]</p>
+      <p>Total in store: [[getTotalQuantity(prodKey)]]</p>
+      <p>Unallocated: [[getFreeQuantity(prodKey)]]</p>
       <paper-input
         id="adminRestockQty"
         always-float-label
@@ -313,6 +314,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <paper-button dialog-confirm autofocus>Submit</paper-button>
       </div>
     </paper-dialog>
+
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
 
   </template>
 
@@ -468,7 +472,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       adminRestock(e){
         // Setup.
         this.prodKey = e.model.item.$key;
-        this.prodName.value = e.model.item.name || null;
 
         // Open dialog.
         Polymer.dom(document.body).appendChild(this.$.adminRestockDialog);
@@ -478,7 +481,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       onAdminRestockDialogClosed(event) {
         if (event.target == this.$.adminRestockDialog) {
           if (this.$.adminRestockDialog.closingReason.confirmed) {
+            var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processAdminRestock');
+            processSales({
+              prodKey: this.prodKey,
+              qty: this.$.adminRestockQty.value,
+            }).then(function(result) {
+              this.promptToast(this.$.successToast);
+            }.bind(this)).catch((err) => {
+              this.promptToast(this.$.failToast);
+            });
           }
+          this.prodKey = null;
+          this.$.adminRestockQty.value = null;
           Polymer.dom(document.body).removeChild(this.$.adminRestockDialog);
         }
       }
@@ -532,10 +546,21 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return 0;
       }
 
-      getProdStoreQuantity(prodKey) {
-        for (var key in this.stockData) {
+      getTotalQuantity(prodKey) {
+        for (var key in this.productsData) {
           if (key == prodKey) {
-            return this.stockData[key];
+            try{ var val = this.productsData[key]['qty']['total']; } catch(err){}
+            return (val == undefined? 0:val);
+          }
+        }
+        return 0;
+      }
+
+      getFreeQuantity(prodKey) {
+        for (var key in this.productsData) {
+          if (key == prodKey) {
+            try{ var val = this.productsData[key]['qty']['free']; } catch(err){}
+            return (val == undefined? 0:val);
           }
         }
         return 0;
@@ -543,6 +568,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       isAdmin(privilege){
         return (privilege == "Admin");
+      }
+
+      promptToast(element) {
+        Polymer.dom(document.body).appendChild(element);
+        element.center();
+        element.refit();
+        element.open();
       }
     }
 
