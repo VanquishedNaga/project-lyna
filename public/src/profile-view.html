@@ -66,7 +66,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       td {
         padding: 0 15px;
       }
-      paper-fab.edit {
+      paper-fab.editButton {
         --paper-fab-background: var(--app-secondary-color);
         position: absolute;
         right: 0;
@@ -83,21 +83,23 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-header>
 
       <div class="content">
-        <div>Status: [[userData.status]]</div>
-        <paper-dropdown-menu label="Select upline" id="uplinemenu">
-          <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
-            <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
-              <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
-            </template>
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <paper-button id="submitButton" class="custom" on-tap="submitRequest">Submit</paper-button>
+        <paper-material elevation="3">
+          <div>Status: [[userData.status]]</div>
+          <paper-dropdown-menu label="Select upline" id="uplinemenu">
+            <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
+              <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
+                <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
+              </template>
+            </paper-listbox>
+          </paper-dropdown-menu>
+          <paper-button id="submitButton" class="custom" on-tap="submitRequest">Submit</paper-button>
+        </paper-material>
       </div>
 
-      <template is="dom-if" if="[[!isFirstTimeLogin(userData.status)]]">
-        <div style="position: relative; padding: 16px;">
-          <paper-material elevation="3" style="position: absolute;">
-            <paper-fab mini class="edit" icon="icons:create" on-tap="editInfo"></paper-fab>
+      <div class="content">
+        <template is="dom-if" if="[[!isFirstTimeLogin(userData.status)]]">
+          <paper-material elevation="3" style="position: relative;">
+            <paper-fab mini class="editButton" icon="icons:create" on-tap="editInfo"></paper-fab>
             <table width="100%" class="infoTable">
               <tr>
                 <td class="label">Name</td>
@@ -125,8 +127,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               </tr>
             </table>
           </paper-material>
-        </div>
-      </template>
+        </template>
+      </div>
     </app-header-layout>
 
     <paper-dialog id="editInfo" on-iron-overlay-closed="onEditInfoClose" modal>
