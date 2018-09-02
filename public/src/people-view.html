@@ -3,6 +3,7 @@
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
@@ -76,6 +77,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       .expandInfo {
         background-color: var(--app-primary-color);
         color: white;
+        border: solid thick white;
       }
     </style>
 
@@ -153,8 +155,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                   style="background-image: url([[getUserInfo(userList.*, item.key, 'profilePic')]]);"></div>
                   <paper-item-body two-line>
                     <div>[[getUserInfo(userList.*, item.key, 'name')]]</div>
+                    <div secondary style="color: grey;">[[getUserInfo(userList.*, item.key, 'status')]]</div>
                   </paper-item-body>
-                  <div>[[getUserInfo(userList.*, item.key, 'status')]]</div>
+                  <iron-icon id$="icon[[index]]"" icon="expand-more"></iron-icon>
                 </paper-icon-item>
                 <iron-collapse id$="collapse[[index]]">
                   <div class="expandInfo">
@@ -359,6 +362,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       toggle(event) {
         var collapseElem = this.shadowRoot.querySelector('#collapse'+event.model.__data.index);
         collapseElem.toggle();
+        var iconElem = this.shadowRoot.querySelector('#icon'+event.model.__data.index);
+        if (collapseElem.opened) {
+          Polymer.dom(iconElem).setAttribute('icon', 'expand-less');
+        }
+        else {
+          Polymer.dom(iconElem).setAttribute('icon', 'expand-more');
+        }
       }
     }
 
