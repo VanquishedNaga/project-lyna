@@ -208,7 +208,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </div>
         <div name="store">
           <template is="dom-if" if="[[isApproved(userdata.status)]]">
-            <store-view user="[[user]]">
+            <store-view user="[[user]]" userdata="[[userdata]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </store-view>
           </template>

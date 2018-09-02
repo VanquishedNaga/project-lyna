@@ -65,6 +65,44 @@ exports.processRestock = functions.https.onCall((data, context) => {
   }
 });
 
+exports.processRestockAdmin = functions.https.onCall((data, context) => {
+  const key = data.key;
+  const action = data.action;
+
+  admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
+    var status = snapshot.val().status;
+
+    // Only proceed if the action has not been done.
+    if ((status != action) &&(status != 'Approved')) {
+      // Update request status.
+      admin.database().ref('/productRequests/' + key).update({status:action});
+
+      if (action == 'Approved') {
+        // Retrieve restock request data
+        admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
+          var quantity = snapshot.val().quantity;
+          var requestor = snapshot.val().requestor;
+          var upline = snapshot.val().upline;
+          var product = snapshot.val().productID;
+
+          //Get and update requestor inventory quantity
+          var updateRequestorInventory = admin.database().ref('/users/' + requestor + '/inventory/' + product);
+          updateRequestorInventory.transaction(function(currentProduct) {
+            var total = currentProduct + parseFloat(quantity);
+            return currentProduct + parseFloat(quantity);
+          });
+
+          //Get and update upline inventory quantity
+          var updateUplineInventory = admin.database().ref('/products/' + product + '/qty/free');
+          updateUplineInventory.transaction(function(currentProduct) {
+            return currentProduct - quantity;
+          });
+        });
+      }
+    }
+  });
+});
+
 exports.processAdminRestock = functions.https.onCall((data, context) => {
   const prodKey = data.prodKey;
   const qty = data.qty;

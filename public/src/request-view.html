@@ -125,6 +125,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           inventoryData: Object,
           requestList: Array,
           user: Object,
+          userdata: Object,
           requestKey:String,
           productKey: String,
           requestStockQuantity: Number,
@@ -170,17 +171,24 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.event = e;
 
         if (this.event.target.id.indexOf("apr") >= 0) {
-            //Check if user has enough stock for stock request
+          if (this.userdata.privilege == "Admin") {
+            this.isApprove = true;
+            Polymer.dom(document.body).appendChild(this.$.actionDialog);
+            this.$.actionDialog.open();
+          }
+          else {
+            // Check if user has enough stock for stock request
             if (this.requestStockQuantity <= this.availableStock) {
               this.isApprove = true;
               Polymer.dom(document.body).appendChild(this.$.actionDialog);
               this.$.actionDialog.open();
             }
             else {
-              //Prompt up screen to notify users don't have enough stock
+              // Prompt up screen to notify users don't have enough stock
               Polymer.dom(document.body).appendChild(this.$.toast);
               this.$.toast.open();
             }
+          }
         }
         else {
           this.isApprove = false;
@@ -225,12 +233,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           action = 'Rejected';
         }
 
-        var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestock');
-        processRestock({key: this.requestKey, action: action}).then(function(result) {
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+        if (this.userdata.privilege == "Admin") {
+          var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestockAdmin');
+          processRestock({key: this.requestKey, action: action}).then(function(result) {
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+        }
+        else {
+          var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestock');
+          processRestock({key: this.requestKey, action: action}).then(function(result) {
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+        }
 
         this.$.actionDialog.close();
         Polymer.dom(document.body).removeChild(this.$.actionDialog);
