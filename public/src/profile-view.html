@@ -67,56 +67,31 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         padding: 0 15px;
       }
       paper-fab.edit {
-        --paper-fab-background: var(--app-primary-color-l);
+        --paper-fab-background: var(--app-secondary-color);
         position: absolute;
         right: 0;
         margin: 0 16px;
-      }
-      [main-title] {
-        position: absolute;
-        /*top: -110px;*/
-        top: calc(0px - 2 * var(--app-toolbar-height));
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-image: url('../images/banner.png');
-        background-repeat: no-repeat;
-        background-position: center ;
-        background-size: cover;
-        -webkit-transform-origin: center top !important;
-        transform-origin: center top !important;
-        z-index: -1;  /*not to cover drawer toggle button*/
-
-        /* The difference in font size is used to calculate the scale of the title in the transition. */
-        font-size: 15px;
       }
     </style>
 
     <app-header-layout>
       <app-header slot="header" condenses shadow fixed>
-        <!-- <app-toolbar class="header">
+        <app-toolbar class="header">
           <slot name="drawer-toggle"></slot>
           <div>Profile</div>
-        </app-toolbar> -->
-        <app-toolbar></app-toolbar>
-        <app-toolbar></app-toolbar>
-        <app-toolbar>
-          <div main-title></div>
         </app-toolbar>
       </app-header>
 
       <div class="content">
-        <paper-material elevation="3">
-          <div>Status: [[userData.status]]</div>
-          <paper-dropdown-menu label="Select upline" id="uplinemenu">
-            <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
-              <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
-                <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
-              </template>
-            </paper-listbox>
-          </paper-dropdown-menu>
-          <paper-button id="submitButton" class="custom" on-tap="submitRequest">Submit</paper-button>
-        </paper-material>
+        <div>Status: [[userData.status]]</div>
+        <paper-dropdown-menu label="Select upline" id="uplinemenu">
+          <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
+            <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
+              <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <paper-button id="submitButton" class="custom" on-tap="submitRequest">Submit</paper-button>
       </div>
 
       <template is="dom-if" if="[[!isFirstTimeLogin(userData.status)]]">
