@@ -155,11 +155,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </span>
             <div class="noti-act">
               <paper-icon-button hidden$="[[isAdmin(usersData.privilege)]]" icon="icons:create" on-tap="editNotice"></paper-icon-button>
-              <paper-icon-button hidden$="[[isAdmin(usersData.privilege)]]" disabled$="[[isEmpty(noticeData)]]" icon="icons:delete" on-tap="delNotice"></paper-icon-button>
+              <paper-icon-button hidden$="[[isAdmin(usersData.privilege)]]" disabled$="[[isEmpty(noticeData.*)]]" icon="icons:delete" on-tap="delNotice"></paper-icon-button>
             </div>
           </div>
           <div class="card-content noti-info">
-            <template is="dom-if" if="[[!isEmpty(noticeData)]]">
+            <template is="dom-if" if="[[!isEmpty(noticeData.*)]]" restamp>
               <div class="noti-desc">[[noticeData.message]]</div>
               <br><br>
               <span style="display: inline;">
@@ -167,7 +167,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 <span>[[_formatEpochDate(noticeData.time)]] [[_formatEpochTime(noticeData.time)]]</span>
               </span>
             </template>
-            <template is="dom-if" if="[[isEmpty(noticeData)]]">
+            <template is="dom-if" if="[[isEmpty(noticeData.*)]]" restamp>
               No announcement.
             </template>
           </div>
@@ -261,12 +261,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return (privilege != "Admin");
       }
 
-      isEmpty(obj) {
-        for(var prop in obj) {
-          if(obj.hasOwnProperty(prop))
-            return false;
-        }
-        return true;
+      isEmpty(change) {
+        return (change.base['message'] == undefined);
       }
 
       onEditDialogClose() {
