@@ -109,10 +109,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                   <div>[[getUserInfo(userList.*, item.user, 'name')]]</div>
                   <div secondary>Description here.</div>
                 </paper-item-body>
-                <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Accept" on-tap="openDialog">
+                <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Accept" on-tap="openApproveDialog">
                 </paper-icon-button>
                 <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Accept</paper-tooltip>
-                <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
+                <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openApproveDialog">
                 </paper-icon-button>
                 <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
               </paper-icon-item>
@@ -161,7 +161,29 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 </paper-icon-item>
                 <iron-collapse id$="collapse[[index]]">
                   <div class="expandInfo">
+                    <div>
+                      <paper-button on-tap="openSuspendUserDialog" class="custom" hidden="[[!isUserApproved(userList.*, item.key)]]">
+                        <iron-icon icon="pan-tool"></iron-icon>
+                        <span>Suspend</span>
+                      </paper-button>
+                      <paper-button on-tap="openUnsuspendUserDialog" class="custom" hidden="[[!isUserSuspended(userList.*, item.key)]]">
+                        <iron-icon icon="pan-tool"></iron-icon>
+                        <span>Unsuspend</span>
+                      </paper-button>
+                      <paper-button on-tap="openPromoteAdminDialog" class="custom" hidden="[[isUserAdmin(userList.*, item.key)]]">
+                        <iron-icon icon="arrow-upward"></iron-icon>
+                        <span>Promote as admin</span>
+                      </paper-button>
+                      <paper-button on-tap="openDemoteAdminDialog" class="custom" hidden="[[!isUserAdmin(userList.*, item.key)]]">
+                        <iron-icon icon="arrow-downward"></iron-icon>
+                        <span>Demote admin</span>
+                      </paper-button>
+                    </div>
                     <table width="100%" class="infoTable">
+                      <tr>
+                        <td class="tbLabel">Access</td>
+                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'privilege')]]</td>
+                      </tr>
                       <tr>
                         <td class="tbLabel">Level</td>
                         <td class="tbValue">[[getUserInfo(userList.*, item.key, 'level')]]</td>
@@ -196,6 +218,42 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <paper-dialog id="approveDialog" on-iron-overlay-closed="onDialogClosed" modal>
       <h2>[[getActionType(event, 1)]] Downline Request</h2>
       <p>Are you sure you want to [[getActionType(event, 0)]] the downline request from [[getUserInfo(userList.*, event.model.item.user, 'name')]]?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button dialog-confirm autofocus>Yes</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="suspendUserDialog" on-iron-overlay-closed="onSuspendUserDialogClosed" modal>
+      <h2>Suspend User</h2>
+      <p>Are you sure you want to suspend this user account?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button dialog-confirm autofocus>Yes</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="unsuspendUserDialog" on-iron-overlay-closed="onUnsuspendUserDialogClosed" modal>
+      <h2>Suspend User</h2>
+      <p>Are you sure you want to unsuspend this user account?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button dialog-confirm autofocus>Yes</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="promoteAdminDialog" on-iron-overlay-closed="onPromoteAdminDialogClosed" modal>
+      <h2>Promote as Admin</h2>
+      <p>Are you sure you want to promote this user as admin?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button dialog-confirm autofocus>Yes</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="demoteAdminDialog" on-iron-overlay-closed="onDemoteAdminDialogClosed" modal>
+      <h2>Demote Admin</h2>
+      <p>Are you sure you want to demote this admin?</p>
       <div class="buttons">
         <paper-button dialog-dismiss>No</paper-button>
         <paper-button dialog-confirm autofocus>Yes</paper-button>
@@ -263,6 +321,24 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return retVal;
       }
 
+      isUserApproved(change, user) {
+        if (change.base[user] != undefined) {
+          return (change.base[user]['status'] == 'Approved');
+        }
+      }
+
+      isUserSuspended(change, user) {
+        if (change.base[user] != undefined) {
+          return (change.base[user]['status'] == 'Suspended');
+        }
+      }
+
+      isUserAdmin(change, user) {
+        if (change.base[user] != undefined) {
+          return (change.base[user]['privilege'] == 'Admin');
+        }
+      }
+
       getBtnID(string, index) {
         return string + index;
       }
@@ -290,7 +366,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      openDialog(e) {
+      openApproveDialog(e) {
         this.event = e;
         if (this.event.target.id.indexOf("apr") >= 0) {
           this.event.isAccept = true;
@@ -304,7 +380,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       onDialogClosed() {
-
         if (!this.$.approveDialog.closingReason.canceled) {
           if (this.$.approveDialog.closingReason.confirmed) {
             if (this.event.isAccept) {
@@ -317,6 +392,78 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
         this.event = null;
         Polymer.dom(document.body).removeChild(this.$.approveDialog);
+      }
+
+      openSuspendUserDialog(event) {
+        this.event = event;
+        Polymer.dom(document.body).appendChild(this.$.suspendUserDialog);
+        this.$.suspendUserDialog.open();
+      }
+
+      onSuspendUserDialogClosed() {
+        if (this.$.suspendUserDialog.closingReason.confirmed) {
+          var uid = this.event.model.__data.item.key;
+          this.$.doc.path = '/users/'+ uid;
+          this.$.doc.ref.update({
+            status: 'Suspended',
+          });
+        }
+        this.event = null;
+        Polymer.dom(document.body).removeChild(this.$.suspendUserDialog);
+      }
+
+      openUnsuspendUserDialog(event) {
+        this.event = event;
+        Polymer.dom(document.body).appendChild(this.$.unsuspendUserDialog);
+        this.$.unsuspendUserDialog.open();
+      }
+
+      onUnsuspendUserDialogClosed() {
+        if (this.$.unsuspendUserDialog.closingReason.confirmed) {
+          var uid = this.event.model.__data.item.key;
+          this.$.doc.path = '/users/'+ uid;
+          this.$.doc.ref.update({
+            status: 'Approved',
+          });
+        }
+        this.event = null;
+        Polymer.dom(document.body).removeChild(this.$.unsuspendUserDialog);
+      }
+
+      openPromoteAdminDialog(event) {
+        this.event = event;
+        Polymer.dom(document.body).appendChild(this.$.promoteAdminDialog);
+        this.$.promoteAdminDialog.open();
+      }
+
+      onPromoteAdminDialogClosed() {
+        if (this.$.promoteAdminDialog.closingReason.confirmed) {
+          var uid = this.event.model.__data.item.key;
+          this.$.doc.path = '/users/'+ uid;
+          this.$.doc.ref.update({
+            privilege: 'Admin',
+          });
+        }
+        this.event = null;
+        Polymer.dom(document.body).removeChild(this.$.promoteAdminDialog);
+      }
+
+      openDemoteAdminDialog(event) {
+        this.event = event;
+        Polymer.dom(document.body).appendChild(this.$.demoteAdminDialog);
+        this.$.demoteAdminDialog.open();
+      }
+
+      onDemoteAdminDialogClosed() {
+        if (this.$.demoteAdminDialog.closingReason.confirmed) {
+          var uid = this.event.model.__data.item.key;
+          this.$.doc.path = '/users/'+ uid;
+          this.$.doc.ref.update({
+            privilege: 'User',
+          });
+        }
+        this.event = null;
+        Polymer.dom(document.body).removeChild(this.$.demoteAdminDialog);
       }
 
       processDownlineRequest(isAccept) {
