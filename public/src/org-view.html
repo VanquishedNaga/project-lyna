@@ -1,0 +1,66 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="import" href="shared-styles.html">
+
+<link rel="import" href="simple-expand-collapse.html">
+
+<dom-module id="org-view">
+  <template>
+    <firebase-query
+      id="boss"
+      app-name="absolute-reborn"
+      path="/users"
+      order-by-child="level"
+      equal-to="0"
+      data="{{boss}}">
+    </firebase-query>
+
+    <style include="shared-styles">
+    </style>
+
+    <paper-listbox class="custom">
+      <simple-expand-collapse userid="[[getUserInfo(boss.*, '$key')]]"></simple-expand-collapse>
+    </paper-listbox>
+  </template>
+
+  <script>
+    class OrgView extends Polymer.Element {
+      static get is() { return 'org-view'; }
+      static get properties() {
+        return {
+          boss: Object,
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("OrgView ready.");
+      }
+
+      getUserInfo(change, data) {
+        if (change.base[0] != undefined){
+          return change.base[0][data];
+        }
+      }
+    }
+
+    window.customElements.define(OrgView.is, OrgView);
+  </script>
+</dom-module>

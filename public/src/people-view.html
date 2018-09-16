@@ -19,6 +19,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="shared-styles.html">
 
+<link rel="import" href="org-view.html">
+
 <dom-module id="people-view">
   <template>
 
@@ -65,14 +67,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
       paper-icon-item paper-icon-button {
         color: green;
-      }
-      .avatar {
-        display: inline-block;
-        box-sizing: border-box;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-size: contain;
       }
       .expandInfo {
         background-color: var(--app-primary-color);
@@ -155,7 +149,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                   style="background-image: url([[getUserInfo(userList.*, item.key, 'profilePic')]]);"></div>
                   <paper-item-body two-line>
                     <div>[[getUserInfo(userList.*, item.key, 'name')]]</div>
-                    <div secondary style="color: grey;">[[getUserInfo(userList.*, item.key, 'status')]]</div>
+                    <div secondary style="color: grey; font-size: 0.9em">[[getUserInfo(userList.*, item.key, 'status')]]</div>
                   </paper-item-body>
                   <iron-icon id$="icon[[index]]"" icon="expand-more"></iron-icon>
                 </paper-icon-item>
@@ -211,6 +205,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </paper-listbox>
           </template>
         </div>
+        <div page-name="OrgChart" class="content">
+          <org-view></org-view>
+        </div>
       </iron-pages>
     </app-header-layout>
 
@@ -228,17 +225,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <h2>Suspend User</h2>
       <p>Are you sure you want to suspend this user account?</p>
       <div class="buttons">
-        <paper-button dialog-dismiss>No</paper-button>
-        <paper-button dialog-confirm autofocus>Yes</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Suspend</paper-button>
       </div>
     </paper-dialog>
 
     <paper-dialog id="unsuspendUserDialog" on-iron-overlay-closed="onUnsuspendUserDialogClosed" modal>
-      <h2>Suspend User</h2>
+      <h2>Unsuspend User</h2>
       <p>Are you sure you want to unsuspend this user account?</p>
       <div class="buttons">
-        <paper-button dialog-dismiss>No</paper-button>
-        <paper-button dialog-confirm autofocus>Yes</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Unsuspend</paper-button>
       </div>
     </paper-dialog>
 
@@ -246,8 +243,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <h2>Promote as Admin</h2>
       <p>Are you sure you want to promote this user as admin?</p>
       <div class="buttons">
-        <paper-button dialog-dismiss>No</paper-button>
-        <paper-button dialog-confirm autofocus>Yes</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Promote</paper-button>
       </div>
     </paper-dialog>
 
@@ -255,8 +252,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <h2>Demote Admin</h2>
       <p>Are you sure you want to demote this admin?</p>
       <div class="buttons">
-        <paper-button dialog-dismiss>No</paper-button>
-        <paper-button dialog-confirm autofocus>Yes</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Demote</paper-button>
       </div>
     </paper-dialog>
 
@@ -294,7 +291,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       onPrivilegeChanged(privilege) {
         if (privilege == "Admin") {
-          this.tabItems = ['Requests', 'Line', 'Users'];
+          this.tabItems = ['Requests', 'Line', 'Users', 'OrgChart'];
         }
         else {
           this.tabItems = ['Requests', 'Line'];

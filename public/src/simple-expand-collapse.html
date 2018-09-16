@@ -1,0 +1,85 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="simple-expand-collapse">
+  <template>
+    <firebase-document
+      id="user"
+      app-name="absolute-reborn"
+      path="/users/[[userid]]"
+      data="{{userData}}">
+    </firebase-document>
+
+    <firebase-query
+      id="downline-list"
+      app-name="absolute-reborn"
+      path="/users/[[userid]]/downlines"
+      data="{{downlineList}}">
+    </firebase-query>
+
+    <style include="shared-styles">
+      iron-collapse {
+        margin-left: 30px;
+      }
+    </style>
+
+    <!-- Visible contents -->
+    <paper-icon-item on-tap="toggle" aria-expanded$="[[opened]]" aria-controls="collapse" class="custom">
+      <div class="avatar" slot="item-icon"
+      style="background-image: url([[getUserInfo(userData.*, 'profilePic')]]);"></div>
+      <paper-item-body two-line>
+        <div>[[getUserInfo(userData.*, 'name')]]</div>
+      </paper-item-body>
+    </paper-icon-item>
+
+    <iron-collapse id="collapse" opened="{{opened}}" tabindex="0">
+      <template is="dom-repeat" items="{{downlineList}}">
+        <simple-expand-collapse userid="[[item.$key]]"></simple-expand-collapse>
+      </template>
+    </iron-collapse>
+
+  </template>
+
+  <script>
+    class SimpleExpandCollapse extends Polymer.Element {
+      static get is() { return 'simple-expand-collapse'; }
+      static get properties() {
+        return {
+          userid: Object,
+          opened: {
+            type: Boolean,
+            reflectToAttribute: true,
+          },
+          downlineList: Array,
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("SimpleExpandCollapse ready.");
+      }
+
+      toggle() {
+        this.$.collapse.toggle();
+      }
+
+      getUserInfo(change, data) {
+        var retVal;
+        if (change.base != undefined) {
+          retVal = change.base[data];
+        }
+        return retVal;
+      }
+    }
+
+    window.customElements.define(SimpleExpandCollapse.is, SimpleExpandCollapse);
+  </script>
+</dom-module>
