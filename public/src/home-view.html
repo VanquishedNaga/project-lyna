@@ -24,12 +24,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-document>
 
-    <firebase-document
-      id="message"
-      path = "/common/homeMsg"
-      data = "{{noticeData}}"
+    <firebase-query
+      id="messageList"
+      path = "/messages"
+      data = "{{messageList}}"
       app-name="absolute-reborn">
-    </firebase-document>
+    </firebase-query>
 
     <firebase-document
       id="users"
@@ -71,6 +71,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       .noti-desc {
         overflow: auto;
+        white-space: pre-line;
       }
 
       .prod-content {
@@ -146,44 +147,55 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div main-title></div>
         </app-toolbar>
       </app-header>
-      <paper-card class="noti-card horizontal">
-        <div style="width: 100%;">
-          <div class="noti-header">
-            <span class="header">
-              <iron-icon icon="icons:speaker-notes"></iron-icon>
-              Notice Board
-            </span>
-            <div class="noti-act">
-              <paper-icon-button hidden$="[[isAdmin(usersData.privilege)]]" icon="icons:create" on-tap="editNotice"></paper-icon-button>
-              <paper-icon-button hidden$="[[isAdmin(usersData.privilege)]]" disabled$="[[isEmpty(noticeData.*)]]" icon="icons:delete" on-tap="delNotice"></paper-icon-button>
+
+      <template is="dom-if" if="[[isAdmin(usersData.privilege)]]">
+        <app-toolbar>
+          <paper-button on-tap="addNotice" class="custom">
+            <iron-icon icon="add-circle-outline"></iron-icon>
+            <span>Add notice</span>
+          </paper-button>
+        </app-toolbar>
+      </template>
+
+      <template is="dom-repeat" items="{{messageList}}">
+        <paper-card class="noti-card horizontal">
+          <div style="width: 100%;">
+            <div class="noti-header">
+              <span class="header">
+                <iron-icon icon="icons:speaker-notes"></iron-icon>
+                Notice Board
+              </span>
+              <div class="noti-act">
+                <paper-icon-button hidden$="[[!isAdmin(usersData.privilege)]]" icon="icons:create" on-tap="editNotice"></paper-icon-button>
+                <paper-icon-button hidden$="[[!isAdmin(usersData.privilege)]]" disabled$="[[isEmpty(item.*)]]" icon="icons:delete" on-tap="delNotice"></paper-icon-button>
+              </div>
+            </div>
+            <div class="card-content noti-info">
+              <template is="dom-if" if="[[!isEmpty(item.*)]]" restamp>
+                <div class="noti-desc">[[item.message]]</div>
+                <br>
+                <span style="display: inline;">
+                  <span style="font-weight: bold;">Posted on </span>
+                  <span>[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</span>
+                </span>
+              </template>
+              <template is="dom-if" if="[[isEmpty(item.*)]]" restamp>
+                No announcement.
+              </template>
             </div>
           </div>
-          <div class="card-content noti-info">
-            <template is="dom-if" if="[[!isEmpty(noticeData.*)]]" restamp>
-              <div class="noti-desc">[[noticeData.message]]</div>
-              <br><br>
-              <span style="display: inline;">
-                <span style="font-weight: bold;">Posted on </span>
-                <span>[[_formatEpochDate(noticeData.time)]] [[_formatEpochTime(noticeData.time)]]</span>
-              </span>
-            </template>
-            <template is="dom-if" if="[[isEmpty(noticeData.*)]]" restamp>
-              No announcement.
-            </template>
-          </div>
-        </div>
-      </paper-card>
+        </paper-card>
+      </template>
     </app-header-layout>
 
     <paper-dialog id="updateNoticeDialog" on-iron-overlay-closed="onEditDialogClose" modal>
-      <h2>Update Notice Board Message</h2>
+      <h2>Notice Board Message</h2>
       <paper-dialog-scrollable>
         <paper-textarea
           required
           always-float-label
           id="messageDesc"
-          label="Notice Board Message"
-          value=[[noticeData.message]]>
+          label="Notice Board Message">
         </paper-textarea>
       </paper-dialog-scrollable>
       <div class="buttons">
@@ -207,10 +219,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get is() { return 'home-view'; }
       static get properties() {
         return {
-          noticeData: Object,
           usersData: Object,
           user: Object,
           event: Object,
+          msgKey: Object,
         };
       }
 
@@ -219,7 +231,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         console.log("HomeView ready.");
       }
 
-      editNotice() {
+      addNotice() {
+        Polymer.dom(document.body).appendChild(this.$.updateNoticeDialog);
+        this.$.updateNoticeDialog.open();
+      }
+
+      editNotice(e) {
+        this.msgKey = e.model.item.$key;
+        this.$.messageDesc.value = e.model.item.message;
         Polymer.dom(document.body).appendChild(this.$.updateNoticeDialog);
         this.$.updateNoticeDialog.open();
       }
@@ -228,22 +247,34 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         var valid = this.$.messageDesc.validate();
 
         if(valid) {
-          this.$.doc.path = '/common/homeMsg';
-          this.$.doc.ref.update({
-            message: this.$.messageDesc.value,
-            time: {".sv":"timestamp"}
-          });
-          this.$.updateNoticeDialog.close();
+          if (this.msgKey) {
+            this.$.doc.path = '/messages/' + this.msgKey;
+            this.$.doc.ref.update({
+              message: this.$.messageDesc.value
+            });
+            this.$.updateNoticeDialog.close();
+          }
+          else {
+            // new message
+            this.$.doc.path = '/messages';
+            this.$.doc.ref.push({
+              message: this.$.messageDesc.value,
+              time: {".sv":"timestamp"}
+            });
+            this.$.updateNoticeDialog.close();
+          }
         }
       }
 
-      delNotice() {
+      delNotice(e) {
+        this.msgKey = e.model.item.$key;
         Polymer.dom(document.body).appendChild(this.$.deleteNotiDialog);
         this.$.deleteNotiDialog.open();
       }
 
       deleteMessage() {
-        this.$.doc.path = '/common/homeMsg';
+        this.$.doc.path = '/messages/' + this.msgKey;
+        this.msgKey = null;
         this.$.doc.ref.remove();
         this.$.deleteNotiDialog.close();
         Polymer.dom(document.body).removeChild(this.$.deleteNotiDialog);
@@ -258,7 +289,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       isAdmin(privilege){
-        return (privilege != "Admin");
+        return (privilege == "Admin");
       }
 
       isEmpty(change) {
@@ -266,8 +297,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       onEditDialogClose() {
-        this.$.messageDesc.value = this.noticeData.message;
+        this.$.messageDesc.value = null;
         this.$.messageDesc.invalid = false;
+        this.msgKey = null;
         Polymer.dom(document.body).removeChild(this.$.updateNoticeDialog);
       }
     }
