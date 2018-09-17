@@ -93,11 +93,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               <iron-icon icon="delete"></iron-icon>
               <span hidden="[[narrow]]">Cancel</span>
             </paper-button>
-            <paper-button class="custom" on-tap="openApproveSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+            <paper-button class="custom" on-tap="openApproveSalesDialog" disabled$="[[!isSelected(selectedOrder)]]" hidden="[[!isAdminOrStoreManager(userdata.privilege)]]">
               <iron-icon icon="check"></iron-icon>
               <span hidden="[[narrow]]">Accept</span>
             </paper-button>
-            <paper-button class="custom" on-tap="openRejectSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+            <paper-button class="custom" on-tap="openRejectSalesDialog" disabled$="[[!isSelected(selectedOrder)]]" hidden="[[!isAdminOrStoreManager(userdata.privilege)]]">
               <iron-icon icon="clear"></iron-icon>
               <span hidden="[[narrow]]">Reject</span>
             </paper-button>
@@ -247,7 +247,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       userPrivChanged(priv) {
-        if (priv == 'Admin') {
+        if ((priv == 'Admin') || (priv == 'Store Manager')) {
           this.$.sales.orderByChild = null;
           this.$.sales.equalTo = null;
         }
@@ -447,6 +447,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         element.center();
         element.refit();
         element.open();
+      }
+
+      isAdminOrStoreManager(privilege) {
+        return ((privilege == "Admin") || (privilege == "Store Manager"));
       }
     }
 
