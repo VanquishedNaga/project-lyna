@@ -87,7 +87,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <link rel="import" href="bower_components/polymerfire/firebase-app.html">
 
     <!-- Add any global styles for body, document, etc. -->
-    <style include="shared-styles">
+    <style>
+      :root {
+        --app-primary-color: #81040A;
+        --app-primary-color-l: #b73f31;
+        --app-primary-color-d: #500000;
+        --app-secondary-color: #813c04;
+        --app-secondary-color-l: #b66831;
+        --app-secondary-color-d: #511100;
+      }
+
       body {
         margin: 0;
         font-family: 'Roboto', 'Noto', sans-serif;
@@ -113,6 +122,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
       paper-toast.bad {
         background-color: maroon;
+      }
+
+      paper-dialog .eventInfoHeader {
+        background-color: var(--app-primary-color);
+        color: white;
+        padding: 16px;
       }
     </style>
   </head>

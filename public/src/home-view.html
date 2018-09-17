@@ -7,6 +7,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
@@ -24,6 +27,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-document>
 
+    <firebase-document
+      id="userList"
+      path = "/users"
+      data = "{{userList}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
     <firebase-query
       id="messageList"
       path = "/messages"
@@ -31,12 +41,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-query>
 
-    <firebase-document
-      id="users"
-      path = "/users/[[user.uid]]"
-      data = "{{usersData}}"
+    <firebase-query
+      id="messageResponse"
+      path = "/messages/{{msgKey}}/response"
+      data = "{{messageResponse}}"
       app-name="absolute-reborn">
-    </firebase-document>
+    </firebase-query>
 
     <style include="shared-styles">
       app-header {
@@ -135,6 +145,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         /* The difference in font size is used to calculate the scale of the title in the transition. */
         font-size: 15px;
       }
+
+      .msg-event-actions {
+        background-color: var(--app-primary-color);
+        color: white;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      paper-icon-button.attend {
+        color: grey;
+      }
     </style>
     <app-header-layout>
       <app-header slot="header" condenses shadow fixed effects="resize-title waterfall" >
@@ -148,7 +169,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </app-toolbar>
       </app-header>
 
-      <template is="dom-if" if="[[isAdmin(usersData.privilege)]]">
+      <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
         <app-toolbar>
           <paper-button on-tap="addNotice" class="custom">
             <iron-icon icon="add-circle-outline"></iron-icon>
@@ -166,8 +187,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 Notice Board
               </span>
               <div class="noti-act">
-                <paper-icon-button hidden$="[[!isAdmin(usersData.privilege)]]" icon="icons:create" on-tap="editNotice"></paper-icon-button>
-                <paper-icon-button hidden$="[[!isAdmin(usersData.privilege)]]" disabled$="[[isEmpty(item.*)]]" icon="icons:delete" on-tap="delNotice"></paper-icon-button>
+                <paper-icon-button hidden$="[[!isAdmin(userdata.privilege)]]" icon="icons:create" on-tap="editNotice"></paper-icon-button>
+                <paper-icon-button hidden$="[[!isAdmin(userdata.privilege)]]" disabled$="[[isEmpty(item.*)]]" icon="icons:delete" on-tap="delNotice"></paper-icon-button>
+                <paper-icon-button hidden$="[[!item.event]]" icon="icons:info-outline" on-tap="openEventInfo"></paper-icon-button>
               </div>
             </div>
             <div class="card-content noti-info">
@@ -183,6 +205,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 No announcement.
               </template>
             </div>
+            <template is="dom-if" if="[[item.event]]" restamp class="msg-event-actions">
+              <div class="msg-event-actions">
+                <span class="header">Attend?</span>
+                <div style="margin-left: auto;">
+                  <paper-icon-button icon="icons:check" on-tap="attend" class$="[[isAttending(item.*, 'true')]]"></paper-icon-button>
+                  <paper-icon-button icon="icons:clear" on-tap="absent" class$="[[isAttending(item.*, 'false')]]"></paper-icon-button>
+                </div>
+              </div>
+            </template>
           </div>
         </paper-card>
       </template>
@@ -190,6 +221,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <paper-dialog id="updateNoticeDialog" on-iron-overlay-closed="onEditDialogClose" modal>
       <h2>Notice Board Message</h2>
+      <paper-toggle-button id="eventToggle" >Event</paper-toggle-button>
       <paper-dialog-scrollable>
         <paper-textarea
           required
@@ -212,6 +244,30 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </paper-button>
       </div>
     </paper-dialog>
+
+    <paper-dialog id="eventInfoDialog" on-iron-overlay-closed="onDialogClose" modal>
+      <paper-dialog-scrollable>
+        <div class="eventInfoHeader">Attending: [[attendCount]]</div>
+        <paper-listbox class="custom">
+          <template is="dom-repeat" items="{{messageResponse}}" filter="{{isAttendingFilter}}" rendered-item-count="{{attendCount}}">
+            <paper-item>
+              [[getName(item.$key)]]
+            </paper-item>
+          </template>
+        </paper-listbox>
+        <div class="eventInfoHeader">Not attending: [[absentCount]]</div>
+        <paper-listbox class="custom">
+          <template is="dom-repeat" items="{{messageResponse}}" filter="{{isAbsentFilter}}" rendered-item-count="{{absentCount}}">
+            <paper-item>
+              [[getName(item.$key)]]
+            </paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>OK</paper-button>
+      </div>
+    </paper-dialog>
   </template>
 
   <script>
@@ -219,10 +275,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get is() { return 'home-view'; }
       static get properties() {
         return {
-          usersData: Object,
+          userdata: Object,
           user: Object,
           event: Object,
           msgKey: Object,
+          userList: Object,
         };
       }
 
@@ -239,6 +296,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       editNotice(e) {
         this.msgKey = e.model.item.$key;
         this.$.messageDesc.value = e.model.item.message;
+        this.$.eventToggle.checked = e.model.item.event;
+        this.$.eventToggle.disabled = true;
         Polymer.dom(document.body).appendChild(this.$.updateNoticeDialog);
         this.$.updateNoticeDialog.open();
       }
@@ -259,7 +318,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.doc.path = '/messages';
             this.$.doc.ref.push({
               message: this.$.messageDesc.value,
-              time: {".sv":"timestamp"}
+              time: {".sv":"timestamp"},
+              event: this.$.eventToggle.checked
             });
             this.$.updateNoticeDialog.close();
           }
@@ -296,11 +356,66 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return (change.base['message'] == undefined);
       }
 
-      onEditDialogClose() {
+      onDialogClose() {
         this.$.messageDesc.value = null;
         this.$.messageDesc.invalid = false;
+        this.$.eventToggle.checked = false;
+        this.$.eventToggle.disabled = false;
         this.msgKey = null;
+      }
+
+      onEditDialogClose() {
+        this.onDialogClose();
         Polymer.dom(document.body).removeChild(this.$.updateNoticeDialog);
+      }
+
+      attend(e) {
+        this.$.doc.path = '/messages/' + e.model.item.$key + '/response';
+        this.$.doc.ref.update({
+          [this.user.uid]: true
+        });
+      }
+
+      absent(e) {
+        this.$.doc.path = '/messages/' + e.model.item.$key + '/response';
+        this.$.doc.ref.update({
+          [this.user.uid]: false
+        });
+      }
+
+      isAttending(change, attendButton) {
+        var retVal = false;
+        if (change.base['response'] != undefined){
+          if (change.base['response'][this.user.uid]) {
+            if (attendButton == 'false') {
+              retVal = 'attend';
+            }
+          }
+          else {
+            if (attendButton == 'true') {
+              retVal = 'attend';
+            }
+          }
+        }
+        return retVal;
+      }
+
+      openEventInfo(e) {
+        this.msgKey = e.model.item.$key;
+        Polymer.dom(document.body).appendChild(this.$.eventInfoDialog);
+        this.$.eventInfoDialog.open();
+      }
+
+      getName(key) {
+        return this.userList[key].name;
+      }
+
+      isAttendingFilter(person) {
+        return (person.$val == true);
+      }
+
+      isAbsentFilter(person) {
+        return (person.$val == false);
       }
     }
 
