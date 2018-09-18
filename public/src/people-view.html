@@ -11,6 +11,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
@@ -172,6 +173,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                         <iron-icon icon="arrow-downward"></iron-icon>
                         <span>Demote admin</span>
                       </paper-button>
+                      <paper-button on-tap="openEditDialog" class="custom">
+                        <iron-icon icon="create"></iron-icon>
+                        <span>Edit</span>
+                      </paper-button>
                     </div>
                     <table width="100%" class="infoTable">
                       <tr>
@@ -254,6 +259,60 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button dialog-confirm autofocus>Demote</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="editDialog" on-iron-overlay-closed="onEditInfoClose" modal>
+      <paper-dialog-scrollable>
+        <div style="
+          display: block;
+          padding: 16px;
+          width: 80%;
+          margin: auto;">
+          <h1 style="text-align: center;">Update Information</h1>
+          <paper-input
+            required
+            error-message="Field required!"
+            id="userName"
+            label="Name"
+            value="[[userData.name]]"
+            always-float-label>
+          </paper-input>
+          <paper-input
+            id="userLevel"
+            label="Level"
+            value="[[userData.level]]"
+            always-float-label>
+          </paper-input>
+          <paper-input
+            id="userEmail"
+            label="Email"
+            value="[[userData.email]]"
+            always-float-label>
+          </paper-input>
+          <paper-input
+            allowed-pattern="[0-9]"
+            error-message="Invalid Field"
+            id="userPhone"
+            label="Phone"
+            char-counter
+            minlength="10"
+            maxlength="11"
+            value="[[userData.phone]]"
+            always-float-label>
+          </paper-input>
+          <paper-input
+            error-message="Field required!"
+            id="userAddress"
+            label="Address"
+            value="[[userData.address]]"
+            always-float-label>
+          </paper-input>
+        </div>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-tap="submitInfo">Submit</paper-button>
       </div>
     </paper-dialog>
 
@@ -513,6 +572,55 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         else {
           Polymer.dom(iconElem).setAttribute('icon', 'expand-more');
         }
+      }
+
+      openEditDialog(event) {
+        this.event = event;
+
+        this.$.userName.value = this.userList[this.event.model.__data.item.key]['name'] || null;
+        this.$.userLevel.value = this.userList[this.event.model.__data.item.key]['level'] || null;
+        this.$.userEmail.value = this.userList[this.event.model.__data.item.key]['email'] || null;
+        this.$.userPhone.value = this.userList[this.event.model.__data.item.key]['phone'] || null;
+        this.$.userAddress.value = this.userList[this.event.model.__data.item.key]['address'] || null;
+
+        Polymer.dom(document.body).appendChild(this.$.editDialog);
+        this.$.editDialog.open();
+      }
+
+      submitInfo(e) {
+        // Check all inputs are valid, add new fields here.
+        var valid = this.$.userName.validate();
+        valid = this.$.userPhone.validate() && valid;
+        valid = this.$.userAddress.validate() && valid;
+
+        if (valid) {
+          this.$.doc.path = '/users/' + this.event.model.__data.item.key;
+          this.$.doc.ref.update({
+            name: this.$.userName.value,
+            level: this.$.userLevel.value,
+            email: this.$.userEmail.value,
+            phone: this.$.userPhone.value,
+            address: this.$.userAddress.value
+          });
+
+          this.$.editDialog.close();
+        }
+      }
+
+      onEditInfoClose() {
+        this.event = null;
+
+        this.$.userName.value = null;
+        this.$.userLevel.value = null;
+        this.$.userEmail.value = null;
+        this.$.userPhone.value = null;
+        this.$.userAddress.value = null;
+
+        this.$.userName.invalid = false;
+        this.$.userPhone.invalid = false;
+        this.$.userAddress.invalid = false;
+
+        Polymer.dom(document.body).removeChild(this.$.editDialog);
       }
     }
 
