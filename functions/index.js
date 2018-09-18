@@ -196,19 +196,22 @@ exports.sendNotifications = functions.database.ref('/messages/{messageId}').onCr
     }
   };
 
+  let tokens = []; // All Device tokens to send a notification to.
   // Get the list of device tokens.
-  admin.database().ref('tokens').once('value', (snapshot) => {
-    if (snapshot.exists()) {
-      // Listing all device tokens to send a notification to.
-      const tokens = Object.keys(snapshot.val());
+  return admin.database().ref('tokens').once('value').then((allTokens) => {
+    if (allTokens.exists()) {
+      // Listing all tokens.
+      tokens = Object.keys(allTokens.val());
 
       // Send notifications to all tokens.
-      admin.messaging().sendToDevice(tokens, payload).then((response) => {
-        cleanupTokens(response, tokens).then(() => {
-          console.log('Notifications have been sent and tokens cleaned up.');
-        });
-      });
+      return admin.messaging().sendToDevice(tokens, payload);
     }
+    return {results: []};
+  }).then((response) => {
+    return cleanupTokens(response, tokens);
+  }).then(() => {
+    console.log('Notifications have been sent and tokens cleaned up.');
+    return null;
   });
 });
 
