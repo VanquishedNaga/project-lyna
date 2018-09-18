@@ -32,6 +32,19 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-document>
 
+    <firebase-messaging
+      id="messaging"
+      app-name="absolute-reborn"
+      token="{{token}}"
+      on-message="handleMessage">
+    </firebase-messaging>
+
+    <firebase-document
+      app-name="absolute-reborn"
+      path="/tokens/[[token]]"
+      data="[[user.uid]]">
+    </firebase-document>
+
     <app-location
         route="{{route}}"
         url-space-regex="^[[rootPath]]">
@@ -152,6 +165,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               // Direct to home page.
               this.set('route.path', '/app/');
             }
+            this.$.messaging.requestPermission().then(function() {
+              // permission was granted
+            }, function(err) {
+              // permission was denied
+            });
           }
           else{
             console.log("User signed out.");

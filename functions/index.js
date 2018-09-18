@@ -183,3 +183,49 @@ exports.processSalesFunction = functions.https.onCall((data, context) => {
 // exports.helloWorld = functions.https.onRequest((request, response) => {
 //  response.send("Hello from Firebase!");
 // });
+
+// Sends a notifications to all users when a new message is posted.
+exports.sendNotifications = functions.database.ref('/messages/{messageId}').onCreate((snapshot) => {
+  // Notification details.
+  const text = snapshot.val().message;
+  const payload = {
+    notification: {
+      title: `Announcement`,
+      body: text ? (text.length <= 100 ? text : text.toString().substring(0, 97) + '...') : '',
+      click_action: `https://${process.env.GCLOUD_PROJECT}.firebaseapp.com`,
+    }
+  };
+
+  // Get the list of device tokens.
+  admin.database().ref('tokens').once('value', (snapshot) => {
+    if (snapshot.exists()) {
+      // Listing all device tokens to send a notification to.
+      const tokens = Object.keys(snapshot.val());
+
+      // Send notifications to all tokens.
+      admin.messaging().sendToDevice(tokens, payload).then((response) => {
+        cleanupTokens(response, tokens).then(() => {
+          console.log('Notifications have been sent and tokens cleaned up.');
+        });
+      });
+    }
+  });
+});
+
+// Cleans up the tokens that are no longer valid.
+function cleanupTokens(response, tokens) {
+ // For each notification we check if there was an error.
+ const tokensToRemove = {};
+ response.results.forEach((result, index) => {
+   const error = result.error;
+   if (error) {
+     console.error('Failure sending notification to', tokens[index], error);
+     // Cleanup the tokens who are not registered anymore.
+     if (error.code === 'messaging/invalid-registration-token' ||
+         error.code === 'messaging/registration-token-not-registered') {
+       tokensToRemove[`/fcmTokens/${tokens[index]}`] = null;
+     }
+   }
+ });
+ return admin.database().ref().update(tokensToRemove);
+}
