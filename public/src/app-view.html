@@ -28,6 +28,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="lazy-import" href="store-view.html">
 <link rel="lazy-import" href="people-view.html">
 <link rel="lazy-import" href="profile-view.html">
+<link rel="lazy-import" href="admin-view.html">
 <link rel="lazy-import" href="not-found-view.html">
 
 <dom-module id="app-view">
@@ -40,6 +41,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       user="{{user}}"
       status-known="{{statusKnown}}">
     </firebase-auth>
+
+    <firebase-document
+      id="level"
+      path = "/level"
+      data = "{{levelData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
 
     <style include="shared-styles">
       :host {
@@ -144,7 +152,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class = "profile-pic">
             <img id="user-pic" src="[[userdata.profilePic]]" alt="profilePic"/>
             <h3>[[userdata.name]]</h3>
-            <p>[[userdata.level]]</p>
+            <p>[[getLevelName(levelData.*, userdata.level)]]</p>
           </div>
           <hr>
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
@@ -162,6 +170,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </a>
             <a name="profile" href="[[rootPath]]app/profile">
               <iron-icon icon="icons:account-circle"></iron-icon> Profile
+            </a>
+            <a name="admin" href="[[rootPath]]app/admin" hidden$="[[!isAdmin(userdata.privilege)]]">
+              <iron-icon icon="icons:supervisor-account"></iron-icon> Admin
             </a>
           </iron-selector>
           <hr>
@@ -216,6 +227,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <profile-view name="profile" user="[[user]]">
           <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
         </profile-view>
+        <div name="admin">
+          <template is="dom-if" if="[[isApproved(userdata.status)]]">
+            <admin-view user="[[user]]" userdata="[[userdata]]">
+              <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
+            </admin-view>
+          </template>
+        </div>
         <login-view name="login"></login-view>
         <not-found-view name="not-found"></not-found-view>
       </iron-pages>
@@ -280,6 +298,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           case "sales":
           case "people":
           case "profile":
+          case "admin":
             break;
           default: {
             page = "not-found";
@@ -310,6 +329,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       isBlocked(status, page) {
         return (status != "Approved" && status != undefined && page != 'profile');
+      }
+
+      isAdmin(privilege){
+        return (privilege == "Admin");
+      }
+
+      getLevelName(change, level) {
+        if (change.base !=undefined && change.base[level] != undefined){
+          return change.base[level];
+        }
       }
     }
 

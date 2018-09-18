@@ -244,9 +244,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         id="new-prod-name"
         label="Product Name">
       </paper-input>
-      <paper-dialog-scrollable >
+      <paper-dialog-scrollable>
         <paper-textarea always-float-label id="new-prod-desc" label="Product Description" value={{value}}></paper-textarea>
-      </paper-dialog-scrollable >
+      </paper-dialog-scrollable>
       <paper-input type="file" id="prod-pic" accept="image/jpeg"></paper-input>
       <div class="buttons">
         <!-- <paper-button on-tap="uploadProdPic" >Upload photo</paper-button> -->
@@ -258,17 +258,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <paper-dialog id="restockprod" on-iron-overlay-closed="closeThis" modal>
       <h2>Restock Request</h2>
       <paper-dialog-scrollable>
-        <!-- <p>Product: [[productsData2.name]]</p> -->
-        <p>Upline: [[uplineUserdata.name]]</p>
-        <p>Current Stock Left Quantity: [[getInventoryQuantity(prodKey)]]</p>
-        <span style="display: inline;">
-          <paper-dropdown-menu label="Select product" id="productMenu">
+        <p>You are requesting restock from [[uplineUserdata.name]].</p>
+        <paper-dropdown-menu label="Select product" id="productMenu">
           <paper-listbox id="productList" slot="dropdown-content" attr-for-selected="key" selected="{{prodKey}}">
             <template is="dom-repeat" items="{{productsList}}">
               <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
             </template>
           </paper-listbox>
         </paper-dropdown-menu>
+        <p>Current Stock Left Quantity: [[getInventoryQuantity(prodKey)]]</p>
+        <p>Prices: RM[[getPrices(productsData.*, prodKey, userdata.level)]] </p>
         <paper-input always-float-label
           required
           type="number"
@@ -277,7 +276,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           id="prod-quantity"
           label="Product Quantity">
         </paper-input>
-        </span>
         </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
@@ -516,8 +514,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       submitProdRequest(){
         var valid = this.prodQuan.validate();
 
-        if(valid){
-          if(this.prodKey){
+        if (valid){
+          if (this.prodKey){
             this.$.doc.path = '/productRequests';
             this.$.doc.ref.push({
               productID: this.prodKey,
@@ -572,8 +570,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         element.refit();
         element.open();
       }
-    }
 
+      getPrices(change, prodKey, level) {
+        if (prodKey != undefined
+            && change.base[prodKey] != undefined
+            && change.base[prodKey]['prices'] != undefined){
+          return change.base[prodKey]['prices'][level];
+        }
+      }
+    }
     window.customElements.define(StoreView.is, StoreView);
   </script>
 </dom-module>

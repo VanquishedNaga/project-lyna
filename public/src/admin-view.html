@@ -1,0 +1,444 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="admin-view">
+  <template>
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-query
+      id="productNameList"
+      app-name="absolute-reborn"
+      path="/products"
+      data="{{productsNameList}}">
+    </firebase-query>
+
+    <firebase-document
+      id="product"
+      path = "/products"
+      data = "{{productsData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="level"
+      path = "/level"
+      data = "{{levelData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      th {
+        text-align: left;
+      }
+
+      .paper-card {
+        width: 80%;
+        min-width: 282px;
+        margin: 16px;
+        font-family: 'Roboto Condensed', sans-serif;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .paper-header {
+        background-color: var(--app-primary-color);
+        color: white;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      span.header {
+        padding: 8px;
+        font-size: 1.1em;
+      }
+
+      .paper-info {
+        min-width: 250px;
+        word-break: break-word;
+        hyphens: manual;
+        vertical-align: top;
+        margin: 16px;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 250px;
+      }
+
+      .paper-act {
+        float: right;
+        margin-left: auto;
+      }
+
+      .horizontal {
+        @apply(--layout-horizontal);
+      }
+    </style>
+
+    <app-header-layout>
+      <app-header slot="header" condenses shadow fixed>
+        <app-toolbar class="header">
+          <slot name="drawer-toggle"></slot>
+          <div>Admin</div>
+        </app-toolbar>
+        <app-toolbar class="tabs-bar" hidden$="{{!wideLayout}}" sticky>
+          <paper-tabs id="tabs" selected="{{selected}}" attr-for-selected="name">
+            <template is="dom-repeat" items="{{tabItems}}">
+              <paper-tab name$="{{item}}">{{item}}</paper-tab>
+            </template>
+          </paper-tabs>
+        </app-toolbar>
+      </app-header>
+        <iron-pages selected="{{selected}}" attr-for-selected="page-name">
+          <div page-name="Level">
+            <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
+              <paper-card class="paper-card horizontal">
+                <div style="width: 100%;">
+                  <div class="paper-header">
+                    <span class="header">
+                      Level
+                    </span>
+                    <div class="paper-act">
+                      <paper-icon-button icon="icons:add" on-tap="addLevel"></paper-icon-button>
+                      <paper-icon-button icon="icons:create" on-tap="editLevel"></paper-icon-button>
+                      <paper-icon-button icon="icons:delete" on-tap="delLevel"></paper-icon-button>
+                    </div>
+                  </div>
+                  <div class="card-content paper-info">
+                    <template is="dom-repeat" items="{{toArray(levelData.*)}}">
+                      <paper-listbox>[[item.value]]</paper-listbox>
+                    </template>
+                  </div>
+                </div>
+              </paper-card>
+            </template>
+
+            <paper-dialog id="addLevelDialog" on-iron-overlay-closed="onAddDialogClose" modal>
+              <h2>Create New Level</h2>
+                <paper-input
+                  required
+                  error-message="Field required!"
+                  always-float-label
+                  id="newLevel"
+                  label="Level Name">
+                </paper-input>
+              <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button autofocus on-tap="createNewLevel">Submit</paper-button>
+              </div>
+            </paper-dialog>
+
+            <paper-dialog id="editLevelDialog" on-iron-overlay-closed="onEditDialogClose" modal>
+              <h2>Edit Level</h2>
+              <paper-dialog-scrollable>
+                <template is="dom-repeat" items="{{toArray(levelData.*)}}">
+                  <paper-input
+                    required
+                    error-message="Field required!"
+                    always-float-label
+                    value="[[item.value]]"
+                    id="level[[item.key]]">
+                  </paper-input>
+                </template>
+              </paper-dialog-scrollable>
+              <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button autofocus on-tap="editExistingLevel">Submit</paper-button>
+              </div>
+            </paper-dialog>
+
+            <paper-dialog id="delLevelDialog" on-iron-overlay-closed="onDelDialogClose" modal>
+              <h2>Delete Level</h2>
+              <div>Are you sure you want to delete the last level?</div>
+              <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm autofocus on-tap="delLastLevel">Submit</paper-button>
+              </div>
+            </paper-dialog>
+
+          </div>
+          <div page-name="Product Price">
+            <paper-card style="min-width: 1000px;" class="paper-card horizontal">
+              <div style="width: 100%;">
+                <div class="paper-header">
+                  <span class="header">
+                    Product Price
+                  </span>
+                  <div class="paper-act">
+                    <paper-icon-button icon="icons:create" on-tap="editPrice"></paper-icon-button>
+                  </div>
+                </div>
+                <div class="card-content paper-info">
+                  <table width="100%" >
+                    <tr>
+                      <th>Product Name</th>
+                      <template is="dom-repeat" items="{{toArray(levelData.*)}}">
+                        <th>
+                          [[item.value]]
+                        </th>
+                      </template>
+                    </tr>
+                    <template is="dom-repeat" items="{{productsNameList}}">
+                      <tr>
+                        <td>
+                          [[item.name]]
+                        </td>
+                        <template is="dom-repeat" items="{{toArray(item.prices)}}">
+                          <td>
+                          [[item.value]]
+                          </td>
+                        </template>
+                      </tr>
+                    </template>
+                  </table>
+                </div>
+              </div>
+            </paper-card>
+            <paper-dialog id="editPriceDialog" on-iron-overlay-closed="onEditPriceDialogClose" modal>
+              <h2>Edit Price</h2>
+              <paper-dropdown-menu label="Select product" id="productMenu">
+                <paper-listbox id="productList" slot="dropdown-content" attr-for-selected="key" selected="{{prodKey}}">
+                  <template is="dom-repeat" items="{{productsNameList}}">
+                    <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
+                  </template>
+                </paper-listbox>
+              </paper-dropdown-menu>
+              <paper-dialog-scrollable>
+                <template is="dom-repeat" items="{{toArray(levelData.*)}}">
+                  <paper-input
+                    required
+                    label="[[item.value]]"
+                    auto-validate
+                    error-message="Invalid Field!"
+                    pattern="^([0-9])*.[0-9]{2}$"
+                    always-float-label
+                    value="[[getCurrentPrice(productsData.*, prodKey, item.key)]]"
+                    id="priceInput[[item.key]]">
+                    <div slot="prefix">RM</div>
+                  </paper-input>
+                </template>
+              </paper-dialog-scrollable>
+              <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button autofocus on-tap="editCurrentPrice">Submit</paper-button>
+              </div>
+            </paper-dialog>
+          </div>
+        </iron-pages>
+    </app-header-layout>
+  </template>
+
+  <script>
+    class AdminView extends Polymer.Element {
+      static get is() { return 'admin-view'; }
+
+      static get properties() {
+        return {
+          user: Object,
+          userData: Object,
+          priceItem: Object,
+          productsData: Object,
+          levelData: Object,
+          priceList: Array,
+          prodKey: String,
+          selected: {type: String, value: 'Level'},
+          tabItems: {
+            type: Array,
+            value: function() {
+              return ['Level', 'Product Price'];
+            }
+          },
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("AdminView ready.");
+      }
+
+      isAdmin(privilege){
+        return (privilege == "Admin");
+      }
+
+      toArray(input) {
+        if (input) {
+          var obj = input.base;
+          if (obj) {
+            return Object.keys(obj).map(function(key) {
+              return {
+                key: key,
+                value: obj[key]
+              };
+            });
+          }
+          else {
+            obj = input;
+            return Object.keys(obj).map(function(key) {
+              return {
+                key: key,
+                value: obj[key]
+              };
+            });
+          }
+        }
+      }
+
+      getProductName(change, productKey) {
+        if (change.base[productKey] != undefined){
+          this.productId = productKey;
+          return change.base[productKey]['name'];
+        }
+      }
+
+      getLevel(change, level) {
+        if (change.base[level] != undefined){
+          return change.base[level];
+        }
+      }
+
+      addLevel() {
+        Polymer.dom(document.body).appendChild(this.$.addLevelDialog);
+        this.$.addLevelDialog.open();
+      }
+
+      editLevel() {
+        Polymer.dom(document.body).appendChild(this.$.editLevelDialog);
+        this.$.editLevelDialog.open();
+      }
+
+      delLevel() {
+        Polymer.dom(document.body).appendChild(this.$.delLevelDialog);
+        this.$.delLevelDialog.open();
+      }
+
+      createNewLevel() {
+        var valid = this.$.newLevel.validate();
+
+        if (valid) {
+          var index = this.levelData.length;
+          this.$.doc.path = '/level';
+          this.$.doc.ref.update({
+            [[index]]: this.$.newLevel.value
+          });
+
+          this.$.addLevelDialog.close();
+        }
+      }
+
+      editExistingLevel() {
+        for (var i = 0; i < this.levelData.length; i++) {
+          var levelName = Polymer.dom(document.body).querySelector('#level'+i);
+          if (levelName.validate() == false) {
+            return;
+          }
+        }
+
+        for (var i = 0; i < this.levelData.length; i++) {
+          var levelName = Polymer.dom(document.body).querySelector('#level'+i);
+
+          this.$.doc.path = '/level';
+          this.$.doc.ref.update({
+            [[i]]: levelName.value
+          });
+        }
+        this.$.editLevelDialog.close();
+      }
+
+      delLastLevel() {
+        var index = this.levelData.length - 1;
+        this.$.doc.path = '/level/' + index;
+        this.$.doc.ref.remove();
+      }
+
+      onAddDialogClose() {
+        Polymer.dom(document.body).removeChild(this.$.addLevelDialog);
+        this.$.newLevel.value = null;
+        this.$.newLevel.invalid = false;
+      }
+
+      onEditDialogClose() {
+        for (var i = 0; i < this.levelData.length; i++) {
+          var levelName = Polymer.dom(document.body).querySelector('#level'+i);
+          levelName.value = this.levelData[i];
+          levelName.invalid = false;
+        }
+        Polymer.dom(document.body).removeChild(this.$.editLevelDialog);
+      }
+
+      onDelDialogClose() {
+        Polymer.dom(document.body).removeChild(this.$.delLevelDialog);
+      }
+
+      editPrice() {
+        Polymer.dom(document.body).appendChild(this.$.editPriceDialog);
+        for (var i = 0; i < this.levelData.length; i++) {
+          var priceInput = Polymer.dom(document.body).querySelector('#priceInput'+i);
+          priceInput.value = null;
+          priceInput.invalid = false;
+        }
+        this.$.editPriceDialog.open();
+      }
+
+      onEditPriceDialogClose(event) {
+        if (event.target == this.$.editPriceDialog) {
+          var productSelected = Polymer.dom(document.body).querySelector('#productList');
+          productSelected.selected = null;
+          this.productKey = null;
+          Polymer.dom(document.body).removeChild(this.$.editPriceDialog);
+        }
+      }
+
+      getCurrentPrice(change, prodKey, index) {
+        if (change.base[prodKey] != undefined && change.base[prodKey]['prices'] != undefined){
+          return change.base[prodKey]['prices'][index];
+        }
+      }
+
+      editCurrentPrice() {
+        for (var i = 0; i < this.levelData.length; i++) {
+          var priceInput = Polymer.dom(document.body).querySelector('#priceInput'+i);
+          if (priceInput.validate() == false) {
+            return;
+          }
+        }
+
+        for (var i = 0; i < this.levelData.length; i++) {
+          var priceInput = Polymer.dom(document.body).querySelector('#priceInput'+i);
+
+          this.$.doc.path = '/products/' + this.prodKey + '/prices';
+          this.$.doc.ref.update({
+            [[i]]: priceInput.value
+          });
+        }
+        this.$.editPriceDialog.close();
+      }
+    }
+    window.customElements.define(AdminView.is, AdminView);
+  </script>
+</dom-module>
