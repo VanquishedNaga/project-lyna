@@ -55,6 +55,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       path="/users"
       data="{{userListDoc}}">
     </firebase-document>
+    <firebase-document
+      id="level"
+      path = "/level"
+      data = "{{levelData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
     <style include="shared-styles">
       :host {
         display: block;
@@ -100,7 +106,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               </tr>
               <tr>
                 <td class="tbLabel">Level</td>
-                <td class="tbValue">[[userData.level]]</td>
+                <td class="tbValue">[[getLevelName(levelData.*,userData.level)]]</td>
               </tr>
               <tr>
                 <td class="tbLabel">Upline</td>
@@ -304,6 +310,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.userAddress.invalid = false;
 
         Polymer.dom(document.body).removeChild(this.$.editInfo);
+      }
+
+      getLevelName(change, level) {
+        if (change.base !=undefined && change.base[level] != undefined){
+          return change.base[level];
+        }
       }
     }
 
