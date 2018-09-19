@@ -119,6 +119,7 @@ exports.adminRestockFunction = functions.https.onCall((data, context) => {
 });
 
 exports.addSalesFunction = functions.https.onCall((data, context) => {
+  const amount = data.amount;
   const custname = data.custname;
   const custaddr = data.custaddr;
   const prod = data.prod;
@@ -128,6 +129,7 @@ exports.addSalesFunction = functions.https.onCall((data, context) => {
   const stat = data.stat;
 
   return admin.database().ref('/sales').push({
+    amount: amount,
     custname: custname,
     custaddr: custaddr,
     prod: prod,
@@ -140,6 +142,13 @@ exports.addSalesFunction = functions.https.onCall((data, context) => {
     ref.transaction(function(currentAmount) {
       return (currentAmount - qty);
     });
+
+    // Update user total revenue.
+    var ref = admin.database().ref('/users/' + seller + '/revenue');
+    ref.transaction(function(currentAmount) {
+      return (parseFloat(currentAmount || 0) + parseFloat(amount)).toFixed(2);
+    });
+
     return snap.key;
   });
 });
@@ -166,12 +175,18 @@ exports.processSalesFunction = functions.https.onCall((data, context) => {
 
     // Return amount to seller inventory.
     admin.database().ref('/sales/' + key).once('value', (snapshot) => {
+      var amount = snapshot.val().amount || 0;
       var seller = snapshot.val().seller;
       var prod = snapshot.val().prod;
-      var qty = snapshot.val().qty;
+      var qty = snapshot.val().qty || 0;
 
       admin.database().ref('/users/' + seller + '/inventory/' + prod).transaction(function(currentAmount) {
         return (currentAmount + parseFloat(qty));
+      });
+
+      // Update user total revenue.
+      admin.database().ref('/users/' + seller + '/revenue').transaction(function(currentAmount) {
+        return (parseFloat(currentAmount || 0) - parseFloat(amount)).toFixed(2);
       });
     });
   }

@@ -162,6 +162,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         style="display: inline-block;">
       </paper-input>
 
+      <paper-input always-float-label required auto-validate
+        pattern="^\d*\.?\d{0,2}$"
+        error-message="Field required!"
+        id="prodPrice"
+        label="Total Amount"
+        style="display: inline-block;">
+        <div slot="prefix">RM</div>
+      </paper-input>
+
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button autofocus on-tap="submitOrder">Confirm</paper-button>
@@ -344,6 +353,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         valid = this.$.custAddr.validate() && valid;
         valid = this.$.prodMenu.validate() && valid;
         valid = this.$.prodQuan.validate() && valid;
+        valid = this.$.prodPrice.validate() && valid;
 
         if (valid) {
           // Update existing order.
@@ -369,6 +379,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             else {
               var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSalesFunction');
               addSales({
+                amount: this.$.prodPrice.value,
                 custname: this.$.custName.value,
                 custaddr: this.$.custAddr.value,
                 prod: this.$.prodList.selected,
@@ -399,10 +410,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.prodQuan.value = null;
           this.$.prodQuan.invalid = false;
           this.$.prodList.selected = null;
+          this.$.prodPrice.value = null;
+          this.$.prodPrice.invalid = false;
 
           // Reset disabled fields.
           this.$.prodMenu.disabled = false;
           this.$.prodQuan.disabled = false;
+          this.$.prodPrice.disabled = false;
 
           Polymer.dom(document.body).removeChild(this.$.placeOrder);
         }
@@ -427,11 +441,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           // Disable some fields.
           this.$.prodMenu.disabled = true;
           this.$.prodQuan.disabled = true;
+          this.$.prodPrice.disabled = true;
 
           // Populate fields.
           this.$.custName.value = this.salesDoc[this.selectedOrder].custname;
           this.$.custAddr.value = this.salesDoc[this.selectedOrder].custaddr;
           this.$.prodQuan.value = this.salesDoc[this.selectedOrder].qty;
+          this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
           this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
 
           Polymer.dom(document.body).appendChild(this.$.placeOrder);
