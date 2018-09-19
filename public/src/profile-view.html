@@ -49,6 +49,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       path="/users"
       data="{{userList}}">
     </firebase-query>
+    <firebase-document
+      id="userList"
+      app-name="absolute-reborn"
+      path="/users"
+      data="{{userListDoc}}">
+    </firebase-document>
     <style include="shared-styles">
       :host {
         display: block;
@@ -279,6 +285,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.user.ref.update({
               status: "Pending approval",
               upline: this.$.uplinelist.selected,
+              level: parseFloat(this.userListDoc[this.$.uplinelist.selected]['level']) + 1,
             });
 
             Polymer.dom(document.body).appendChild(this.$.submitRequestToast);
