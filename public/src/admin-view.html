@@ -711,7 +711,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.doc.path = '/users/' + this.event.model.__data.item.key;
           this.$.doc.ref.update({
             name: this.$.userName.value,
-            level: this.$.userLevel.value,
+            level: parseInt(this.$.userLevel.value),
             email: this.$.userEmail.value,
             phone: this.$.userPhone.value,
             address: this.$.userAddress.value
