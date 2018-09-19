@@ -69,11 +69,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       paper-icon-item paper-icon-button {
         color: green;
       }
-      .expandInfo {
-        background-color: var(--app-primary-color);
-        color: white;
-        border: solid thick white;
-      }
     </style>
 
     <!-- Visible contents -->
@@ -140,76 +135,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </template>
           </paper-listbox>
         </div>
-
-        <div page-name="Users" class="content">
-          <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
-            <paper-listbox>
-              <template is="dom-repeat" items="{{toArray(userList.*)}}">
-                <paper-icon-item on-tap="toggle">
-                  <div class="avatar" slot="item-icon"
-                  style="background-image: url([[getUserInfo(userList.*, item.key, 'profilePic')]]);"></div>
-                  <paper-item-body two-line>
-                    <div>[[getUserInfo(userList.*, item.key, 'name')]]</div>
-                    <div secondary style="color: grey; font-size: 0.9em">[[getUserInfo(userList.*, item.key, 'status')]]</div>
-                  </paper-item-body>
-                  <iron-icon id$="icon[[index]]"" icon="expand-more"></iron-icon>
-                </paper-icon-item>
-                <iron-collapse id$="collapse[[index]]">
-                  <div class="expandInfo">
-                    <div>
-                      <paper-button on-tap="openSuspendUserDialog" class="custom" hidden="[[!isUserApproved(userList.*, item.key)]]">
-                        <iron-icon icon="pan-tool"></iron-icon>
-                        <span>Suspend</span>
-                      </paper-button>
-                      <paper-button on-tap="openUnsuspendUserDialog" class="custom" hidden="[[!isUserSuspended(userList.*, item.key)]]">
-                        <iron-icon icon="pan-tool"></iron-icon>
-                        <span>Unsuspend</span>
-                      </paper-button>
-                      <paper-button on-tap="openPromoteAdminDialog" class="custom" hidden="[[isUserAdmin(userList.*, item.key)]]">
-                        <iron-icon icon="arrow-upward"></iron-icon>
-                        <span>Promote as admin</span>
-                      </paper-button>
-                      <paper-button on-tap="openDemoteAdminDialog" class="custom" hidden="[[!isUserAdmin(userList.*, item.key)]]">
-                        <iron-icon icon="arrow-downward"></iron-icon>
-                        <span>Demote admin</span>
-                      </paper-button>
-                      <paper-button on-tap="openEditDialog" class="custom">
-                        <iron-icon icon="create"></iron-icon>
-                        <span>Edit</span>
-                      </paper-button>
-                    </div>
-                    <table width="100%" class="infoTable">
-                      <tr>
-                        <td class="tbLabel">Access</td>
-                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'privilege')]]</td>
-                      </tr>
-                      <tr>
-                        <td class="tbLabel">Level</td>
-                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'level')]]</td>
-                      </tr>
-                      <tr>
-                        <td class="tbLabel">Upline</td>
-                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'upline')]]</td>
-                      </tr>
-                      <tr>
-                        <td class="tbLabel">Email</td>
-                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'email')]]</td>
-                      </tr>
-                      <tr>
-                        <td class="tbLabel">Phone</td>
-                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'phone')]]</td>
-                      </tr>
-                      <tr>
-                        <td class="tbLabel">Address</td>
-                        <td class="tbValue">[[getUserInfo(userList.*, item.key, 'address')]]</td>
-                      </tr>
-                    </table>
-                  </div>
-                </iron-collapse>
-              </template>
-            </paper-listbox>
-          </template>
-        </div>
         <div page-name="OrgChart" class="content">
           <org-view></org-view>
         </div>
@@ -225,97 +150,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <paper-button dialog-confirm autofocus>Yes</paper-button>
       </div>
     </paper-dialog>
-
-    <paper-dialog id="suspendUserDialog" on-iron-overlay-closed="onSuspendUserDialogClosed" modal>
-      <h2>Suspend User</h2>
-      <p>Are you sure you want to suspend this user account?</p>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm autofocus>Suspend</paper-button>
-      </div>
-    </paper-dialog>
-
-    <paper-dialog id="unsuspendUserDialog" on-iron-overlay-closed="onUnsuspendUserDialogClosed" modal>
-      <h2>Unsuspend User</h2>
-      <p>Are you sure you want to unsuspend this user account?</p>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm autofocus>Unsuspend</paper-button>
-      </div>
-    </paper-dialog>
-
-    <paper-dialog id="promoteAdminDialog" on-iron-overlay-closed="onPromoteAdminDialogClosed" modal>
-      <h2>Promote as Admin</h2>
-      <p>Are you sure you want to promote this user as admin?</p>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm autofocus>Promote</paper-button>
-      </div>
-    </paper-dialog>
-
-    <paper-dialog id="demoteAdminDialog" on-iron-overlay-closed="onDemoteAdminDialogClosed" modal>
-      <h2>Demote Admin</h2>
-      <p>Are you sure you want to demote this admin?</p>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm autofocus>Demote</paper-button>
-      </div>
-    </paper-dialog>
-
-    <paper-dialog id="editDialog" on-iron-overlay-closed="onEditInfoClose" modal>
-      <paper-dialog-scrollable>
-        <div style="
-          display: block;
-          padding: 16px;
-          width: 80%;
-          margin: auto;">
-          <h1 style="text-align: center;">Update Information</h1>
-          <paper-input
-            required
-            error-message="Field required!"
-            id="userName"
-            label="Name"
-            value="[[userData.name]]"
-            always-float-label>
-          </paper-input>
-          <paper-input
-            id="userLevel"
-            label="Level"
-            value="[[userData.level]]"
-            always-float-label>
-          </paper-input>
-          <paper-input
-            id="userEmail"
-            label="Email"
-            value="[[userData.email]]"
-            always-float-label>
-          </paper-input>
-          <paper-input
-            allowed-pattern="[0-9]"
-            error-message="Invalid Field"
-            id="userPhone"
-            label="Phone"
-            char-counter
-            minlength="10"
-            maxlength="11"
-            value="[[userData.phone]]"
-            always-float-label>
-          </paper-input>
-          <paper-input
-            error-message="Field required!"
-            id="userAddress"
-            label="Address"
-            value="[[userData.address]]"
-            always-float-label>
-          </paper-input>
-        </div>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button on-tap="submitInfo">Submit</paper-button>
-      </div>
-    </paper-dialog>
-
   </template>
 
   <script>
@@ -350,7 +184,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       onPrivilegeChanged(privilege) {
         if (privilege == "Admin") {
-          this.tabItems = ['Requests', 'Line', 'Users', 'OrgChart'];
+          this.tabItems = ['Requests', 'Line', 'OrgChart'];
         }
         else {
           this.tabItems = ['Requests', 'Line'];
@@ -375,24 +209,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           }
         }
         return retVal;
-      }
-
-      isUserApproved(change, user) {
-        if (change.base[user] != undefined) {
-          return (change.base[user]['status'] == 'Approved');
-        }
-      }
-
-      isUserSuspended(change, user) {
-        if (change.base[user] != undefined) {
-          return (change.base[user]['status'] == 'Suspended');
-        }
-      }
-
-      isUserAdmin(change, user) {
-        if (change.base[user] != undefined) {
-          return (change.base[user]['privilege'] == 'Admin');
-        }
       }
 
       getBtnID(string, index) {
@@ -450,78 +266,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         Polymer.dom(document.body).removeChild(this.$.approveDialog);
       }
 
-      openSuspendUserDialog(event) {
-        this.event = event;
-        Polymer.dom(document.body).appendChild(this.$.suspendUserDialog);
-        this.$.suspendUserDialog.open();
-      }
-
-      onSuspendUserDialogClosed() {
-        if (this.$.suspendUserDialog.closingReason.confirmed) {
-          var uid = this.event.model.__data.item.key;
-          this.$.doc.path = '/users/'+ uid;
-          this.$.doc.ref.update({
-            status: 'Suspended',
-          });
-        }
-        this.event = null;
-        Polymer.dom(document.body).removeChild(this.$.suspendUserDialog);
-      }
-
-      openUnsuspendUserDialog(event) {
-        this.event = event;
-        Polymer.dom(document.body).appendChild(this.$.unsuspendUserDialog);
-        this.$.unsuspendUserDialog.open();
-      }
-
-      onUnsuspendUserDialogClosed() {
-        if (this.$.unsuspendUserDialog.closingReason.confirmed) {
-          var uid = this.event.model.__data.item.key;
-          this.$.doc.path = '/users/'+ uid;
-          this.$.doc.ref.update({
-            status: 'Approved',
-          });
-        }
-        this.event = null;
-        Polymer.dom(document.body).removeChild(this.$.unsuspendUserDialog);
-      }
-
-      openPromoteAdminDialog(event) {
-        this.event = event;
-        Polymer.dom(document.body).appendChild(this.$.promoteAdminDialog);
-        this.$.promoteAdminDialog.open();
-      }
-
-      onPromoteAdminDialogClosed() {
-        if (this.$.promoteAdminDialog.closingReason.confirmed) {
-          var uid = this.event.model.__data.item.key;
-          this.$.doc.path = '/users/'+ uid;
-          this.$.doc.ref.update({
-            privilege: 'Admin',
-          });
-        }
-        this.event = null;
-        Polymer.dom(document.body).removeChild(this.$.promoteAdminDialog);
-      }
-
-      openDemoteAdminDialog(event) {
-        this.event = event;
-        Polymer.dom(document.body).appendChild(this.$.demoteAdminDialog);
-        this.$.demoteAdminDialog.open();
-      }
-
-      onDemoteAdminDialogClosed() {
-        if (this.$.demoteAdminDialog.closingReason.confirmed) {
-          var uid = this.event.model.__data.item.key;
-          this.$.doc.path = '/users/'+ uid;
-          this.$.doc.ref.update({
-            privilege: 'User',
-          });
-        }
-        this.event = null;
-        Polymer.dom(document.body).removeChild(this.$.demoteAdminDialog);
-      }
-
       processDownlineRequest(isAccept) {
         var status;
         if (isAccept) {
@@ -560,67 +304,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       isAdmin(privilege){
         return (privilege == "Admin");
-      }
-
-      toggle(event) {
-        var collapseElem = this.shadowRoot.querySelector('#collapse'+event.model.__data.index);
-        collapseElem.toggle();
-        var iconElem = this.shadowRoot.querySelector('#icon'+event.model.__data.index);
-        if (collapseElem.opened) {
-          Polymer.dom(iconElem).setAttribute('icon', 'expand-less');
-        }
-        else {
-          Polymer.dom(iconElem).setAttribute('icon', 'expand-more');
-        }
-      }
-
-      openEditDialog(event) {
-        this.event = event;
-
-        this.$.userName.value = this.userList[this.event.model.__data.item.key]['name'] || null;
-        this.$.userLevel.value = this.userList[this.event.model.__data.item.key]['level'] || null;
-        this.$.userEmail.value = this.userList[this.event.model.__data.item.key]['email'] || null;
-        this.$.userPhone.value = this.userList[this.event.model.__data.item.key]['phone'] || null;
-        this.$.userAddress.value = this.userList[this.event.model.__data.item.key]['address'] || null;
-
-        Polymer.dom(document.body).appendChild(this.$.editDialog);
-        this.$.editDialog.open();
-      }
-
-      submitInfo(e) {
-        // Check all inputs are valid, add new fields here.
-        var valid = this.$.userName.validate();
-        valid = this.$.userPhone.validate() && valid;
-        valid = this.$.userAddress.validate() && valid;
-
-        if (valid) {
-          this.$.doc.path = '/users/' + this.event.model.__data.item.key;
-          this.$.doc.ref.update({
-            name: this.$.userName.value,
-            level: this.$.userLevel.value,
-            email: this.$.userEmail.value,
-            phone: this.$.userPhone.value,
-            address: this.$.userAddress.value
-          });
-
-          this.$.editDialog.close();
-        }
-      }
-
-      onEditInfoClose() {
-        this.event = null;
-
-        this.$.userName.value = null;
-        this.$.userLevel.value = null;
-        this.$.userEmail.value = null;
-        this.$.userPhone.value = null;
-        this.$.userAddress.value = null;
-
-        this.$.userName.invalid = false;
-        this.$.userPhone.invalid = false;
-        this.$.userAddress.invalid = false;
-
-        Polymer.dom(document.body).removeChild(this.$.editDialog);
       }
     }
 
