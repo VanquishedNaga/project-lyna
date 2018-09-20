@@ -171,9 +171,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <a name="profile" href="[[rootPath]]app/profile">
               <iron-icon icon="icons:account-circle"></iron-icon> Profile
             </a>
-            <a name="admin" href="[[rootPath]]app/admin" hidden$="[[!isAdmin(userdata.privilege)]]">
-              <iron-icon icon="icons:supervisor-account"></iron-icon> Admin
-            </a>
+            <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
+              <a name="admin" href="[[rootPath]]app/admin">
+                <iron-icon icon="icons:supervisor-account"></iron-icon> Admin
+              </a>
+            </template>
           </iron-selector>
           <hr>
           <paper-button on-tap="signOut" class="drawerButton side">
@@ -228,7 +230,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
         </profile-view>
         <div name="admin">
-          <template is="dom-if" if="[[isApproved(userdata.status)]]">
+          <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
             <admin-view user="[[user]]" userdata="[[userdata]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </admin-view>

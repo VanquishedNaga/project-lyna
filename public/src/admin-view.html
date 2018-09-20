@@ -615,6 +615,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             retVal = this.userList[change.base[user][data]]['name'];
           }
         }
+        else if (data == 'level') {
+          if (this.userList[change.base[user][data]] != undefined) {
+            retVal = this.levelData[data];
+          }
+        }
         return retVal;
       }
 
