@@ -378,12 +378,19 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                     value="[[userData.name]]"
                     always-float-label>
                   </paper-input>
+                  <paper-dropdown-menu label="Select level" id="userLevelMenu">
+                    <paper-listbox id="userLevel" slot="dropdown-content" attr-for-selected="key">
+                      <template is="dom-repeat" items="{{toArray(levelData.*)}}">
+                        <paper-item key="[[item.key]]">[[item.value]]</paper-item>
+                      </template>
+                    </paper-listbox>
+                  </paper-dropdown-menu><!--
                   <paper-input
                     id="userLevel"
                     label="Level"
                     value="[[userData.level]]"
                     always-float-label>
-                  </paper-input>
+                  </paper-input> -->
                   <paper-input
                     id="userEmail"
                     label="Email"
@@ -699,7 +706,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.event = event;
 
         this.$.userName.value = this.userList[this.event.model.__data.item.key]['name'] || null;
-        this.$.userLevel.value = this.userList[this.event.model.__data.item.key]['level'] || null;
+        this.$.userLevel.selected = this.userList[this.event.model.__data.item.key]['level'] || null;
         this.$.userEmail.value = this.userList[this.event.model.__data.item.key]['email'] || null;
         this.$.userPhone.value = this.userList[this.event.model.__data.item.key]['phone'] || null;
         this.$.userAddress.value = this.userList[this.event.model.__data.item.key]['address'] || null;
@@ -718,7 +725,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.doc.path = '/users/' + this.event.model.__data.item.key;
           this.$.doc.ref.update({
             name: this.$.userName.value,
-            level: parseInt(this.$.userLevel.value),
+            level: parseInt(this.$.userLevel.selected),
             email: this.$.userEmail.value,
             phone: this.$.userPhone.value,
             address: this.$.userAddress.value
@@ -729,19 +736,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       onEditInfoClose() {
-        this.event = null;
+        if (event.target == this.$.editPriceDialog) {
+          this.event = null;
 
-        this.$.userName.value = null;
-        this.$.userLevel.value = null;
-        this.$.userEmail.value = null;
-        this.$.userPhone.value = null;
-        this.$.userAddress.value = null;
+          this.$.userName.value = null;
+          this.$.userLevel.selected = null;
+          this.$.userEmail.value = null;
+          this.$.userPhone.value = null;
+          this.$.userAddress.value = null;
 
-        this.$.userName.invalid = false;
-        this.$.userPhone.invalid = false;
-        this.$.userAddress.invalid = false;
+          this.$.userName.invalid = false;
+          this.$.userPhone.invalid = false;
+          this.$.userAddress.invalid = false;
 
-        Polymer.dom(document.body).removeChild(this.$.editDialog);
+          Polymer.dom(document.body).removeChild(this.$.editDialog);
+        }
+        // console.log(this.$.userLevelList.selected);
       }
 
       isUserApproved(change, user) {
@@ -771,6 +781,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
         else {
           Polymer.dom(iconElem).setAttribute('icon', 'expand-more');
+        }
+      }
+
+      getLevelName(change, level) {
+        if (change.base !=undefined && change.base[level] != undefined){
+          return change.base[level];
         }
       }
     }
