@@ -301,7 +301,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                         </tr>
                         <tr>
                           <td class="tbLabel">Level</td>
-                          <td class="tbValue">[[getUserInfo(userList.*, item.key, 'level')]]</td>
+                          <td class="tbValue">[[getLevelName(userList.*, item.key)]]</td>
                         </tr>
                         <tr>
                           <td class="tbLabel">Upline</td>
@@ -312,7 +312,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                           <td class="tbValue">[[getUserInfo(userList.*, item.key, 'email')]]</td>
                         </tr>
                         <tr>
-                          <td class="tbLabel">WeChat ID</td>
+                          <td class="tbLabel">IC Number</td>
+                          <td class="tbValue">[[getUserInfo(userList.*, item.key, 'icNum')]]</td>
+                        </tr>
+                        <tr>
+                          <td class="tbLabel">WeChat</td>
                           <td class="tbValue">[[getUserInfo(userList.*, item.key, 'wechat')]]</td>
                         </tr>
                         <tr>
@@ -626,11 +630,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             retVal = this.userList[change.base[user][data]]['name'];
           }
         }
-        else if (data == 'level') {
-          if (this.userList[change.base[user][data]] != undefined) {
-            retVal = this.levelData[data];
-          }
-        }
         return retVal;
       }
 
@@ -788,9 +787,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      getLevelName(change, level) {
-        if (change.base !=undefined && change.base[level] != undefined){
-          return change.base[level];
+      getLevelName(change, user) {
+        if (change.base[user]['level'] != undefined){
+          var level = change.base[user]['level'];
+          return this.levelData[level];
         }
       }
     }
