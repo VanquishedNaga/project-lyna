@@ -117,6 +117,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 <td class="tbValue">[[userData.email]]</td>
               </tr>
               <tr>
+                <td class="tbLabel">WeChat ID</td>
+                <td class="tbValue">[[userData.wechat]]</td>
+              </tr>
+              <tr>
                 <td class="tbLabel">Phone</td>
                 <td class="tbValue">[[userData.phone]]</td>
               </tr>
@@ -156,6 +160,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             disabled
             label="Email"
             value="[[userData.email]]"
+            always-float-label>
+          </paper-input>
+          <paper-input
+            required
+            error-message="Invalid Field"
+            id="userWechat"
+            label="WeChat ID"
+            value="[[userData.wechat]]"
             always-float-label>
           </paper-input>
           <paper-input
@@ -244,14 +256,30 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             Polymer.dom(document.body).appendChild(this.$.editInfo);
             this.$.editInfo.open();
           }
+          else {
+            // Push request to requested upline.
+            this.$.request.path = '/users/' + this.$.uplinelist.selected + '/requests';
+            this.$.request.ref.push({
+              user: this.user.uid
+            });
+
+            //Delete users from previous upline
+            this.$.doc.path = '/users/' + this.userData.upline + '/downlines/' + this.user.uid;
+            this.$.doc.ref.remove();
+
+            // Set own status to pending approval.
+            this.$.user.ref.update({
+              status: "Pending approval",
+              upline: this.$.uplinelist.selected
+            });
+          }
         }
         else {
-            this.$.uplinemenu.invalid = true;
+          this.$.uplinemenu.invalid = true;
         }
       }
 
       isFirstTimeLogin(status) {
-        console.log(status);
         return (status == "Inactive");
       }
 
@@ -271,13 +299,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         var valid = this.$.userName.validate();
         valid = this.$.userPhone.validate() && valid;
         valid = this.$.userAddress.validate() && valid;
+        valid = this.$.userWechat.validate() && valid;
 
         if (valid) {
           this.$.doc.path = '/users/' + this.user.uid;
           this.$.doc.ref.update({
               name: this.$.userName.value,
               phone: this.$.userPhone.value,
-              address: this.$.userAddress.value
+              address: this.$.userAddress.value,
+              wechat: this.$.userWechat.value
             });
 
           if (this.userData.status == "Inactive") {
@@ -290,8 +320,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             // Set own status to pending approval.
             this.$.user.ref.update({
               status: "Pending approval",
-              upline: this.$.uplinelist.selected,
-              level: parseFloat(this.userListDoc[this.$.uplinelist.selected]['level']) + 1,
+              upline: this.$.uplinelist.selected
             });
 
             Polymer.dom(document.body).appendChild(this.$.submitRequestToast);
@@ -308,6 +337,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.userPhone.invalid = false;
         this.$.userAddress.value = this.userData.address;
         this.$.userAddress.invalid = false;
+        this.$.userWechat.value = this.userData.wechat;
+        this.$.userWechat.invalid = false;
 
         Polymer.dom(document.body).removeChild(this.$.editInfo);
       }

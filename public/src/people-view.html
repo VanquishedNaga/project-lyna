@@ -261,6 +261,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.doc.ref.update({
             [this.event.model.item.user]: true,
           });
+
+          //Update downline's level
+          this.$.doc.path = '/users/' + this.event.model.item.user;
+          this.$.doc.ref.update({
+            level: parseFloat(this.userdata.level) + 1
+          });
         }
         else {
           status = "Rejected";
