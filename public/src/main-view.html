@@ -42,7 +42,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <firebase-document
       app-name="absolute-reborn"
       path="/tokens/[[token]]"
-      data="[[user.uid]]">
+      data="[[uid]]">
     </firebase-document>
 
     <app-location
@@ -96,7 +96,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             value: false,
             observer: 'onStatusKnown',
           },
-          userdata: Object
+          userdata: Object,
+          uid: {
+            type: String,
+            computed: 'computeUserId(user.uid)'
+          }
         };
       }
 
@@ -194,6 +198,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       _showPage404() {
         this.page = 'not-found';
+      }
+
+      computeUserId(uid) {
+        if (uid) {
+          return uid;
+        }
+        else {
+          // Return the old value
+          return this.uid;
+        }
       }
     }
 
