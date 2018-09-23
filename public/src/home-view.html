@@ -49,6 +49,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </firebase-query>
 
     <style include="shared-styles">
+      :root {
+        --radius: 5px;
+      }
       app-header {
         color: #fff;
         background-color: #000;
@@ -65,6 +68,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         font-family: 'Roboto Condensed', sans-serif;
         margin-left: auto;
         margin-right: auto;
+        border-radius: var(--radius);
       }
 
       .noti-header {
@@ -72,6 +76,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         color: white;
         display: flex;
         flex-wrap: wrap;
+        border-radius: var(--radius) var(--radius) 0 0;
       }
 
       span.header {
@@ -107,6 +112,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         margin-left: auto;
       }
 
+      .msg-event-actions {
+        background-color: var(--app-primary-color);
+        color: white;
+        display: flex;
+        flex-wrap: wrap;
+        border-radius: 0 0 var(--radius) var(--radius);
+      }
+
       .horizontal {
         @apply(--layout-horizontal);
       }
@@ -129,7 +142,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       [main-title] {
         position: absolute;
-        /*top: -110px;*/
         top: calc(0px - 2 * var(--app-toolbar-height));
         bottom: 0;
         left: 0;
@@ -144,13 +156,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
         /* The difference in font size is used to calculate the scale of the title in the transition. */
         font-size: 15px;
-      }
-
-      .msg-event-actions {
-        background-color: var(--app-primary-color);
-        color: white;
-        display: flex;
-        flex-wrap: wrap;
       }
 
       paper-icon-button.attend {
