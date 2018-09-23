@@ -106,6 +106,21 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-header>
       <div class="content">
         <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}">
+          <paper-item>
+            <paper-item-body two-line style="width: 30%;">
+              <div>Product name</div>
+              <div secondary>Quantity</div>
+            </paper-item-body>
+            <paper-item-body two-line style="width: 30%;">
+              <div>Customer Name</div>
+              <div secondary>Address</div>
+            </paper-item-body>
+            <div style="width: 20%;">Status</div>
+            <paper-item-body two-line style="width: 20%;">
+              <div>Date</div>
+              <div secondary>Time</div>
+            </paper-item-body>
+          </paper-item>
           <template is="dom-repeat" items="{{sales}}">
             <paper-item key="[[item.$key]]">
               <paper-item-body two-line style="width: 30%;">
@@ -130,18 +145,36 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <!-- To place a sales order -->
     <paper-dialog id="placeOrder" on-iron-overlay-closed="onPlaceOrderClosed" modal>
       <h2>Sales Order</h2>
-
       <paper-input
         id="custName"
         label="Customer Name"
         error-message="Field required!"
         always-float-label required auto-validate>
       </paper-input>
-
+      <paper-input
+        id="custPhone"
+        label="Customer Phone"
+        allowed-pattern="[0-9]"
+        char-counter
+        minlength="10"
+        maxlength="11"
+        error-message="Field required!"
+        always-float-label required auto-validate>
+      </paper-input>
       <paper-input
         id="custAddr"
         label="Delivery Address"
         error-message="Field required!"
+        always-float-label required auto-validate>
+      </paper-input>
+      <paper-input
+        id="custPos"
+        label="Postcode"
+        error-message="Field required!"
+        allowed-pattern="[0-9]"
+        char-counter
+        minlength="5"
+        maxlength="5"
         always-float-label required auto-validate>
       </paper-input>
 
@@ -350,7 +383,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       submitOrder() {
         // Check all inputs are valid, add new fields here.
         var valid = this.$.custName.validate();
+        valid = this.$.custPhone.validate() && valid;
         valid = this.$.custAddr.validate() && valid;
+        valid = this.$.custPos.validate() && valid;
         valid = this.$.prodMenu.validate() && valid;
         valid = this.$.prodQuan.validate() && valid;
         valid = this.$.prodPrice.validate() && valid;
@@ -362,6 +397,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.doc.ref.update({
               custname: this.$.custName.value,
               custaddr: this.$.custAddr.value,
+              custphone: this.$.custPhone.value,
+              custpos: this.$.custPos.value
             }).then(function(result) {
               this.promptToast(this.$.successToast);
             }.bind(this)).catch((err) => {
@@ -382,6 +419,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 amount: this.$.prodPrice.value,
                 custname: this.$.custName.value,
                 custaddr: this.$.custAddr.value,
+                custphone: this.$.custPhone.value,
+                custpos: this.$.custPos.value,
                 prod: this.$.prodList.selected,
                 qty: this.$.prodQuan.value,
                 time: {".sv":"timestamp"},
@@ -403,8 +442,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           // Reset all fields.
           this.$.custName.value = null;
           this.$.custName.invalid = false;
+          this.$.custPhone.value = null;
+          this.$.custPhone.invalid = false;
           this.$.custAddr.value = null;
           this.$.custAddr.invalid = false;
+          this.$.custPos.value = null;
+          this.$.custPos.invalid = false;
           this.$.prodMenu.value = null;
           this.$.prodMenu.invalid = false;
           this.$.prodQuan.value = null;
@@ -445,7 +488,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
           // Populate fields.
           this.$.custName.value = this.salesDoc[this.selectedOrder].custname;
+          this.$.custPhone.value = this.salesDoc[this.selectedOrder].custphone;
           this.$.custAddr.value = this.salesDoc[this.selectedOrder].custaddr;
+          this.$.custPos.value = this.salesDoc[this.selectedOrder].custpos;
           this.$.prodQuan.value = this.salesDoc[this.selectedOrder].qty;
           this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
           this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;

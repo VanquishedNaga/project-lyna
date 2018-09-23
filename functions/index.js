@@ -121,7 +121,9 @@ exports.adminRestockFunction = functions.https.onCall((data, context) => {
 exports.addSalesFunction = functions.https.onCall((data, context) => {
   const amount = data.amount;
   const custname = data.custname;
+  const custphone = data.custphone;
   const custaddr = data.custaddr;
+  const custpos = data.custpos;
   const prod = data.prod;
   const qty = data.qty;
   const time = data.time;
@@ -131,7 +133,9 @@ exports.addSalesFunction = functions.https.onCall((data, context) => {
   return admin.database().ref('/sales').push({
     amount: amount,
     custname: custname,
+    custphone: custphone,
     custaddr: custaddr,
+    custpos: custpos,
     prod: prod,
     qty: qty,
     time: time,
