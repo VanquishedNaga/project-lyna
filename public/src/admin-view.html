@@ -383,7 +383,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                     error-message="Field required!"
                     id="userName"
                     label="Name"
-                    value="[[userData.name]]"
                     always-float-label>
                   </paper-input>
                   <paper-dropdown-menu label="Select level" id="userLevelMenu">
@@ -392,17 +391,28 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                         <paper-item key="[[item.key]]">[[item.value]]</paper-item>
                       </template>
                     </paper-listbox>
-                  </paper-dropdown-menu><!--
-                  <paper-input
-                    id="userLevel"
-                    label="Level"
-                    value="[[userData.level]]"
-                    always-float-label>
-                  </paper-input> -->
+                  </paper-dropdown-menu>
                   <paper-input
                     id="userEmail"
                     label="Email"
-                    value="[[userData.email]]"
+                    always-float-label>
+                  </paper-input>
+                  <paper-input
+                    required
+                    allowed-pattern="[0-9]"
+                    char-counter
+                    minlength="12"
+                    maxlength="12"
+                    error-message="Invalid Field"
+                    id="userIc"
+                    label="IC Number"
+                    always-float-label>
+                  </paper-input>
+                  <paper-input
+                    required
+                    error-message="Invalid Field"
+                    id="userWechat"
+                    label="WeChat ID"
                     always-float-label>
                   </paper-input>
                   <paper-input
@@ -413,14 +423,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                     char-counter
                     minlength="10"
                     maxlength="11"
-                    value="[[userData.phone]]"
                     always-float-label>
                   </paper-input>
                   <paper-input
                     error-message="Field required!"
                     id="userAddress"
                     label="Address"
-                    value="[[userData.address]]"
                     always-float-label>
                   </paper-input>
                 </div>
@@ -710,6 +718,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
         this.$.userName.value = this.userList[this.event.model.__data.item.key]['name'] || null;
         this.$.userLevel.selected = this.userList[this.event.model.__data.item.key]['level'] || null;
+        this.$.userWechat.value = this.userList[this.event.model.__data.item.key]['wechat'] || null;
+        this.$.userIc.value = this.userList[this.event.model.__data.item.key]['icNum'] || null;
         this.$.userEmail.value = this.userList[this.event.model.__data.item.key]['email'] || null;
         this.$.userPhone.value = this.userList[this.event.model.__data.item.key]['phone'] || null;
         this.$.userAddress.value = this.userList[this.event.model.__data.item.key]['address'] || null;
@@ -747,10 +757,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.userEmail.value = null;
           this.$.userPhone.value = null;
           this.$.userAddress.value = null;
+          this.$.userWechat.value = null;
+          this.$.userIc.value = null;
 
           this.$.userName.invalid = false;
           this.$.userPhone.invalid = false;
           this.$.userAddress.invalid = false;
+          this.$.userWechat.invalid = false;
+          this.$.userIc.invalid = false;
 
           Polymer.dom(document.body).removeChild(this.$.editDialog);
         }
