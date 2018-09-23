@@ -58,6 +58,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-document>
 
+    <firebase-document
+      app-name="absolute-reborn"
+      path="/level"
+      data="{{levelList}}">
+    </firebase-document>
+
     <style include="shared-styles">
       :host {
         display: block;
@@ -97,7 +103,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 style="background-image: url([[getUserInfo(userList.*, item.user, 'profilePic')]]);"></div>
                 <paper-item-body two-line>
                   <div>[[getUserInfo(userList.*, item.user, 'name')]]</div>
-                  <div secondary>Description here.</div>
+                  <div secondary class="secondLine"></div>
                 </paper-item-body>
                 <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Accept" on-tap="openApproveDialog">
                 </paper-icon-button>
@@ -115,11 +121,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <paper-listbox>
             <paper-icon-item>
               <div class="avatar" slot="item-icon"
-                style="background-image: url([[getUserInfo(userList.*, uplineData, 'profilePic')]]);"></div>
-                <paper-item-body two-line>
-                  <div>[[getUserInfo(userList.*, uplineData, 'name')]]</div>
-                </paper-item-body>
-              <div style="width: 20%;">[[getUserInfo(userList.*, item.$key, 'level')]]</div>
+              style="background-image: url([[getUserInfo(userList.*, uplineData, 'profilePic')]]);"></div>
+              <paper-item-body two-line>
+                <div>[[getUserInfo(userList.*, uplineData, 'name')]]</div>
+                <div secondary class="secondLine">[[getUserInfo(userList.*, uplineData, 'levelName')]]</div>
+              </paper-item-body>
             </paper-icon-item>
           </paper-listbox>
 
@@ -129,8 +135,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               <paper-icon-item>
                 <div class="avatar" slot="item-icon"
                 style="background-image: url([[getUserInfo(userList.*, item.$key, 'profilePic')]]);"></div>
-                <div style="width: 30%;">[[getUserInfo(userList.*, item.$key, 'name')]]</div>
-                <div style="width: 20%;">[[getUserInfo(userList.*, item.$key, 'level')]]</div>
+                <paper-item-body two-line>
+                  <div>[[getUserInfo(userList.*, item.$key, 'name')]]</div>
+                  <div secondary class="secondLine">[[getUserInfo(userList.*, item.$key, 'levelName')]]</div>
+                </paper-item-body>
               </paper-icon-item>
             </template>
           </paper-listbox>
@@ -187,10 +195,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         var retVal;
         if (change.base[user] != undefined) {
           retVal = change.base[user][data];
-        }
-        if (data == 'upline') {
-          if (this.userList[change.base[user][data]] != undefined) {
-            retVal = this.userList[change.base[user][data]]['name'];
+
+          if (data == 'upline') {
+            if (this.userList[change.base[user][data]] != undefined) {
+              retVal = this.userList[change.base[user][data]]['name'];
+            }
+          }
+          else if(data == 'levelName') {
+            retVal = this.levelList[change.base[user]['level']];
           }
         }
         return retVal;
