@@ -267,12 +267,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </paper-listbox>
         </paper-dropdown-menu>
         <p>Current Stock Left Quantity: [[getInventoryQuantity(prodKey)]]</p>
-        <p>Prices: RM[[getPrices(productsData.*, prodKey, userdata.level)]] </p>
+        <p>Unit Price: RM[[getPrices(productsData.*, prodKey, userdata.level)]] </p>
+        <p>Total: RM[[getPayable(productsData.*, prodKey, userdata.level, quantity)]] </p>
         <paper-input always-float-label
           required
+          error-message="Field required!"
           type="number"
           min="1"
-          error-message="Field required!"
+          value="{{quantity}}"
           id="prod-quantity"
           label="Product Quantity">
         </paper-input>
@@ -386,13 +388,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.dlRestockProduct.open();
       }
 
-      closeThis() {
-        //Polymer.dom(document.body).removeChild(this.dlAddProduct);
-        this.prodName.value = null;
-        this.prodDesc.value = null;
-        this.prodName.invalid = false;
-        this.prodPic.value = null;
-        this.prodQuan.value = null;
+      closeThis(event) {
+        if (event.target == this.dlRestockProduct) {
+          this.prodName.value = null;
+          this.prodDesc.value = null;
+          this.prodName.invalid = false;
+          this.prodPic.value = null;
+          this.prodQuan.value = null;
+
+          Polymer.dom(document.body).removeChild(this.dlRestockProduct);
+        }
       }
 
       saveNewProd() {
@@ -576,6 +581,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             && change.base[prodKey] != undefined
             && change.base[prodKey]['prices'] != undefined){
           return change.base[prodKey]['prices'][level];
+        }
+      }
+
+      getPayable(change, prodKey, level, quantity) {
+        if (prodKey != undefined
+            && change.base[prodKey] != undefined
+            && change.base[prodKey]['prices'] != undefined
+            && !isNaN(quantity)){
+          return (change.base[prodKey]['prices'][level] * quantity).toFixed(2);
         }
       }
     }
