@@ -18,6 +18,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="shared-styles.html">
 
+<script src="../bower_components/strftime/strftime-min.js"></script>
 <!-- <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"> -->
 
 <dom-module id="request-view">
@@ -63,7 +64,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         padding: 16px;
       }
 
-      .product{
+      .product {
         display: inline-block;
         box-sizing: border-box;
         width: 40px;
@@ -72,8 +73,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         background-size: contain;
       }
 
-      .requestList{
+      .requestList {
         padding: 16px;
+        min-width: 800px;
+      }
+
+      .title {
+        font-weight: bold;
+        margin-right: 16px;
+      }
+
+      .list-content {
+        margin-right: 16px;
       }
 
       h1 {
@@ -83,13 +94,20 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <h1>Downline Restock Request</h1>
     <paper-listbox class="requestList">
-      <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestApproved}}" observe="status item.status" rendered-item-count="{{count}}">
+      <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestPending}}" observe="status item.status" rendered-item-count="{{pendingReq}}">
+        <paper-item>
+          <div class="product" style="margin-right: 16px;"></div>
+          <div class="title" style="width: 40%;">Product</div>
+          <div class="title" style="width: 30%;">Requestor</div>
+          <div class="title" style="width: 22%;">Quantity</div>
+          <div class="title" style="width: 55px;">Action</div>
+        </paper-item>
         <paper-icon-item>
           <div class="product" slot="item-icon"
           style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-          <div style="width: 40%;">[[getProductName(productsList.*, item.productID)]]</div>
-          <div style="width: 30%;">Requestor: [[getRequestorName(usersList.*, item.requestor)]]</div>
-          <div style="width: 20%;">Quantity: [[item.quantity]]</div>
+          <div class="list-content" style="width: 40%;">[[getProductName(productsList.*, item.productID)]]</div>
+          <div class="list-content" style="width: 30%;">[[getRequestorName(usersList.*, item.requestor)]]</div>
+          <div class="list-content" style="width: 20%;">[[item.quantity]]</div>
           <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Approve" on-tap="openDialog">
           </paper-icon-button>
           <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Approve</paper-tooltip>
@@ -99,8 +117,37 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </paper-icon-item>
       </template>
 
-      <template is="dom-if" if="[[!count]]">
-        You don't have any Request.
+      <template is="dom-if" if="[[!pendingReq]]">
+        You don't have any pending request.
+      </template>
+    </paper-listbox>
+
+    <h1>Past Restock Request</h1>
+    <paper-listbox class="requestList">
+      <paper-item>
+        <div class="product" style="margin-right: 16px;"></div>
+        <div class="title" style="width: 30%;">Product</div>
+        <div class="title" style="width: 30%;">Requestor</div>
+        <div class="title" style="width: 10%;">Quantity</div>
+        <div class="title" style="width: 10%;">Status</div>
+        <div class="title" style="width: 10%;">Date</div>
+        <div class="title" style="width: 10%;">Time</div>
+      </paper-item>
+      <template is="dom-repeat" items="{{requestList}}" filter="{{!isRequestPending}}" observe="status item.status" rendered-item-count="{{historyReq}}">
+        <paper-icon-item>
+          <div class="product" slot="item-icon"
+          style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
+          <div class="list-content" style="width: 30%;">[[getProductName(productsList.*, item.productID)]]</div>
+          <div class="list-content" style="width: 30%;">[[getRequestorName(usersList.*, item.requestor)]]</div>
+          <div class="list-content" style="width: 10%;">[[item.quantity]]</div>
+          <div class="list-content" style="width: 10%;">[[item.status]]</div>
+          <div class="list-content" style="width: 10%">[[_formatEpochDate(item.time)]]</div>
+          <div class="list-content" style="width: 10%">[[_formatEpochTime(item.time)]]</div>
+        </paper-icon-item>
+      </template>
+
+      <template is="dom-if" if="[[!historyReq]]">
+        You don't have any request.
       </template>
     </paper-listbox>
 
@@ -136,7 +183,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           availableStock: Number,
           event: Object,
           app: Object,
-          count: Number,
+          historyReq: Number,
+          pendingReq: Number,
           action: Boolean
         };
       }
@@ -225,7 +273,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      isRequestApproved(item) {
+      isRequestPending(item) {
         return (item.status == "Pending");
       }
 
@@ -257,6 +305,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
         this.$.actionDialog.close();
         Polymer.dom(document.body).removeChild(this.$.actionDialog);
+      }
+
+      _formatEpochDate(eTS) {
+        return strftime('%D', new Date(eTS));
+      }
+
+      _formatEpochTime(eTS) {
+        return strftime('%I:%M %P', new Date(eTS));
       }
     }
 
