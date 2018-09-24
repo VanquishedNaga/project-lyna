@@ -21,15 +21,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
 <script src="../bower_components/strftime/strftime-min.js"></script>
 
-<!-- <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"> -->
-
 <dom-module id="inventory-view">
   <template>
-    <firebase-document
-      id="doc"
-      app-name="absolute-reborn">
-    </firebase-document>
-
     <firebase-query
       reversed
       id="inventory-list"
@@ -57,15 +50,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       data = "{{productsList}}"
       app-name="absolute-reborn">
     </firebase-document>
-
-    <firebase-query
-      id="request-lists"
-      path = "/productRequests"
-      data = "{{requestList}}"
-      order-by-child="requestor"
-      equal-to="[[user.uid]]"
-      app-name="absolute-reborn">
-    </firebase-query>
 
     <style include="shared-styles">
       :host {
@@ -124,35 +108,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <user-inventory-collapsible userid="[[item.$key]]"></user-inventory-collapsible>
       </template>
     </paper-listbox>
-
-    <h1>Your Request</h1>
-    <paper-listbox class="itemsList">
-      <paper-item>
-        <div class="product" style="margin-right: 16px;"></div>
-        <div class="title" style="width: 30%;">Product</div>
-        <div class="title" style="width: 15%;">Quantity</div>
-        <div class="title" style="width: 15%;">Status</div>
-        <div class="title" style="width: 15%;">Date</div>
-        <div class="title" style="width: 15%;">Time</div>
-      </paper-item>
-      <template is="dom-repeat" items="{{requestList}}" observe="status item.status" rendered-item-count="{{count}}">
-        <paper-icon-item>
-          <div class="product" slot="item-icon"
-          style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-          <div class="list-content" style="width: 30%; ">[[getProductName(productsList.*, item.productID)]]</div>
-          <div class="list-content" style="width: 15%;">[[item.quantity]]</div>
-          <div class="list-content" style="width: 15%;">[[item.status]]</div>
-          <div class="list-content" style="width: 15%;">[[_formatEpochDate(item.time)]]</div>
-          <div class="list-content" style="width: 15%;">[[_formatEpochTime(item.time)]]</div>
-        </paper-icon-item>
-      </template>
-
-      <template is="dom-if" if="[[!count]]">
-        You don't have any request.
-      </template>
-    </paper-listbox>
   </template>
-
 
   <script>
     class InventoryView extends Polymer.Element {
@@ -187,14 +143,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         if (change.base[productKey] != undefined){
           return change.base[productKey];
         }
-      }
-
-      _formatEpochDate(eTS) {
-        return strftime('%D', new Date(eTS));
-      }
-
-      _formatEpochTime(eTS) {
-        return strftime('%I:%M %P', new Date(eTS));
       }
     }
 

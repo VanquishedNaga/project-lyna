@@ -58,6 +58,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-query>
 
+    <firebase-query
+      path = "/productRequests"
+      data = "{{ownRequestList}}"
+      order-by-child="requestor"
+      equal-to="[[user.uid]]"
+      app-name="absolute-reborn">
+    </firebase-query>
+
     <style include="shared-styles">
       :host {
         display: block;
@@ -92,7 +100,34 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
     </style>
 
-    <h1>Downline Restock Request</h1>
+    <h1>Sent Request</h1>
+    <paper-listbox class="itemsList">
+      <paper-item>
+        <div class="product" style="margin-right: 16px;"></div>
+        <div class="title" style="width: 30%;">Product</div>
+        <div class="title" style="width: 15%;">Quantity</div>
+        <div class="title" style="width: 15%;">Status</div>
+        <div class="title" style="width: 15%;">Date</div>
+        <div class="title" style="width: 15%;">Time</div>
+      </paper-item>
+      <template is="dom-repeat" items="{{ownRequestList}}" observe="status item.status" rendered-item-count="{{count}}">
+        <paper-icon-item>
+          <div class="product" slot="item-icon"
+          style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
+          <div class="list-content" style="width: 30%; ">[[getProductName(productsList.*, item.productID)]]</div>
+          <div class="list-content" style="width: 15%;">[[item.quantity]]</div>
+          <div class="list-content" style="width: 15%;">[[item.status]]</div>
+          <div class="list-content" style="width: 15%;">[[_formatEpochDate(item.time)]]</div>
+          <div class="list-content" style="width: 15%;">[[_formatEpochTime(item.time)]]</div>
+        </paper-icon-item>
+      </template>
+
+      <template is="dom-if" if="[[!count]]">
+        You don't have any request.
+      </template>
+    </paper-listbox>
+
+    <h1>Received Request</h1>
     <paper-listbox class="requestList">
       <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestPending}}" observe="status item.status" rendered-item-count="{{pendingReq}}">
         <paper-item>
@@ -122,7 +157,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </template>
     </paper-listbox>
 
-    <h1>Past Restock Request</h1>
+    <h1>Past Received Request</h1>
     <paper-listbox class="requestList">
       <paper-item>
         <div class="product" style="margin-right: 16px;"></div>
@@ -133,7 +168,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <div class="title" style="width: 10%;">Date</div>
         <div class="title" style="width: 10%;">Time</div>
       </paper-item>
-      <template is="dom-repeat" items="{{requestList}}" filter="{{!isRequestPending}}" observe="status item.status" rendered-item-count="{{historyReq}}">
+      <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestNotPending}}" observe="status item.status" rendered-item-count="{{historyReq}}">
         <paper-icon-item>
           <div class="product" slot="item-icon"
           style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
@@ -275,6 +310,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       isRequestPending(item) {
         return (item.status == "Pending");
+      }
+
+      isRequestNotPending(item) {
+        return (item.status != "Pending");
       }
 
       processRestockRequest(e) {
