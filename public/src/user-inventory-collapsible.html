@@ -1,0 +1,104 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="user-inventory-collapsible">
+  <template>
+    <firebase-document
+      app-name="absolute-reborn"
+      path="/users/[[userid]]"
+      data="{{userData}}">
+    </firebase-document>
+
+    <firebase-query
+      app-name="absolute-reborn"
+      path="/users/[[userid]]/inventory"
+      data="{{inventoryList}}">
+    </firebase-query>
+
+    <firebase-document
+      app-name="absolute-reborn"
+      path="/products"
+      data="{{productList}}">
+    </firebase-document>
+
+    <style include="shared-styles">
+      iron-collapse {
+        margin-left: 50px;
+      }
+      paper-item {
+        border: black solid 1px;
+      }
+    </style>
+
+    <!-- Visible contents -->
+    <paper-icon-item on-tap="toggle" aria-expanded$="[[opened]]" aria-controls="collapse" class="custom">
+      <div class="avatar" slot="item-icon"
+      style="background-image: url([[getUserInfo(userData.*, 'profilePic')]]);"></div>
+      <paper-item-body two-line>
+        <div>[[getUserInfo(userData.*, 'name')]]</div>
+      </paper-item-body>
+    </paper-icon-item>
+
+    <iron-collapse id="collapse" opened="{{opened}}" tabindex="0">
+      <template is="dom-repeat" items="{{inventoryList}}">
+        <paper-item>
+          <div style="width: 60%;">[[getProdName(productList.*, item.$key)]]</div>
+          <div style="width: 40%;">[[item.$val]]</div>
+        </paper-item>
+      </template>
+    </iron-collapse>
+
+  </template>
+
+  <script>
+    class UserInventoryCollapsible extends Polymer.Element {
+      static get is() { return 'user-inventory-collapsible'; }
+      static get properties() {
+        return {
+          userid: Object,
+          opened: {
+            type: Boolean,
+            reflectToAttribute: true,
+          },
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("UserInventoryCollapsible ready.");
+      }
+
+      toggle() {
+        this.$.collapse.toggle();
+      }
+
+      getUserInfo(change, data) {
+        var retVal;
+        if (change.base != undefined) {
+          retVal = change.base[data];
+        }
+        return retVal;
+      }
+
+      getProdName(change, data) {
+        var retVal;
+        if (change.base != undefined) {
+          retVal = change.base[data]['name'];
+        }
+        return retVal;
+      }
+    }
+
+    window.customElements.define(UserInventoryCollapsible.is, UserInventoryCollapsible);
+  </script>
+</dom-module>

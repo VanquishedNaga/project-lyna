@@ -15,7 +15,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="user-inventory-collapsible.html">
 
 <script src="../bower_components/strftime/strftime-min.js"></script>
 
@@ -34,6 +36,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn"
       path="/users/[[user.uid]]/inventory"
       data="{{inventoryList}}">
+    </firebase-query>
+
+    <firebase-query
+      app-name="absolute-reborn"
+      path="/users/[[user.uid]]/downlines"
+      data="{{downlineList}}">
     </firebase-query>
 
     <firebase-document
@@ -93,7 +101,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
     </style>
 
-    <h1>Inventory</h1>
+    <h1>Your Inventory</h1>
     <paper-listbox class="itemsList">
       <paper-item>
         <div class="product" style="margin-right: 16px;"></div>
@@ -107,6 +115,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="list-content" style="width: 60%;">[[getProductName(productsList.*, item.$key)]]</div>
           <div class="list-content" style="width: 30%;">[[getInventoryQuantity(inventoryData.*, item.$key)]]</div>
         </paper-icon-item>
+      </template>
+    </paper-listbox>
+
+    <h1>Downline Inventory</h1>
+    <paper-listbox class="itemsList">
+      <template is="dom-repeat" items="{{downlineList}}">
+        <user-inventory-collapsible userid="[[item.$key]]"></user-inventory-collapsible>
       </template>
     </paper-listbox>
 
