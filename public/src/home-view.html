@@ -3,6 +3,7 @@
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
@@ -16,6 +17,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="shared-styles.html">
 
 <script src="../bower_components/strftime/strftime-min.js"></script>
@@ -47,6 +49,28 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       data = "{{messageResponse}}"
       app-name="absolute-reborn">
     </firebase-query>
+
+    <firebase-storage-ref
+      id="storage"
+      app-name="absolute-reborn"
+      path="/messages"
+      metadata="{{metadata}}"
+      storage-uri="{{gsUri}}"
+      download-url="{{downloadUrl}}"
+      force-unique>
+    </firebase-storage-ref>
+
+    <firebase-storage-upload-task
+      id="task"
+      app-name="absolute-reborn"
+      task="[[task]]"
+      bytes-transferred="{{bytesTransferred}}"
+      total-bytes="{{totalBytes}}"
+      state="{{state}}"
+      download-url="{{downloadUrl}}"
+      metadata="{{metadata}}"
+      path="{{path}}">
+    </firebase-storage-upload-task>
 
     <style include="shared-styles">
       :root {
@@ -89,7 +113,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         white-space: pre-line;
       }
 
-      .prod-content {
+      .board-content {
         clear: right;
         display: flex;
         flex-wrap: wrap;
@@ -122,6 +146,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       .horizontal {
         @apply(--layout-horizontal);
+      }
+
+      img{
+        width: 90%;
+        height: 250px;
+        background-repeat: no-repeat;
+        object-fit: contain;
+        background-color: white;
+        background-size: cover;
+        margin: auto;
+        margin-top: 16px;
       }
 
       [condensed-title] {
@@ -197,18 +232,23 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 <paper-icon-button hidden$="[[!item.event]]" icon="icons:info-outline" on-tap="openEventInfo"></paper-icon-button>
               </div>
             </div>
-            <div class="card-content noti-info">
-              <template is="dom-if" if="[[!isEmpty(item.*)]]" restamp>
-                <div class="noti-desc">[[item.message]]</div>
-                <br>
-                <span style="display: inline;">
-                  <span style="font-weight: bold;">Posted on </span>
-                  <span>[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</span>
-                </span>
-              </template>
-              <template is="dom-if" if="[[isEmpty(item.*)]]" restamp>
-                No announcement.
-              </template>
+            <div class="board-content">
+              <img src="[[item.images.downloadUrl]]" alt="boardPic"
+                onerror="this.style.display='none'"
+                onload="this.style.display='block'"/>
+              <div class="card-content noti-info">
+                <template is="dom-if" if="[[!isEmpty(item.*)]]" restamp>
+                  <div class="noti-desc">[[item.message]]</div>
+                  <br>
+                  <span style="display: inline;">
+                    <span style="font-weight: bold;">Posted on </span>
+                    <span>[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</span>
+                  </span>
+                </template>
+                <template is="dom-if" if="[[isEmpty(item.*)]]" restamp>
+                  No announcement.
+                </template>
+              </div>
             </div>
             <template is="dom-if" if="[[item.event]]" restamp class="msg-event-actions">
               <div class="msg-event-actions">
@@ -230,14 +270,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <paper-dialog-scrollable>
         <paper-textarea
           required
+          error-message="Field required!"
           always-float-label
           id="messageDesc"
           label="Notice Board Message">
         </paper-textarea>
       </paper-dialog-scrollable>
+      <paper-input type="file" id="noticePic" accept="image/jpeg"></paper-input>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button dialog-confirm autofocus on-tap="updateMessage">Submit</paper-button>
+        <paper-button autofocus on-tap="updateMessage">Submit</paper-button>
       </div>
     </paper-dialog>
 
@@ -284,13 +326,35 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           user: Object,
           event: Object,
           msgKey: Object,
+          boardImg: String,
           userList: Object,
+          state: {
+            type: Object,
+            observer: 'stateChanged'
+          }
         };
       }
 
       ready() {
         super.ready();
         console.log("HomeView ready.");
+      }
+
+      stateChanged() {
+        if (this.$.task.state == 'success'){
+          this.$.task.ref.getDownloadURL()
+            .then(function(url){
+              this.downloadUrl = url;
+              // Add image path to product entry.
+              this.$.doc.path = '/messages/' + this.msgKey + '/images';
+              this.$.doc.ref.set({
+                path: this.$.task.path,
+                downloadUrl: this.downloadUrl,
+              });
+              console.log(this.$.task.path);
+              this.msgKey = null;
+            }.bind(this));
+        }
       }
 
       addNotice() {
@@ -316,18 +380,28 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.doc.ref.update({
               message: this.$.messageDesc.value
             });
-            this.$.updateNoticeDialog.close();
           }
           else {
             // new message
             this.$.doc.path = '/messages';
-            this.$.doc.ref.push({
+            this.msgKey = this.$.doc.ref.push({
               message: this.$.messageDesc.value,
               time: {".sv":"timestamp"},
               event: this.$.eventToggle.checked
-            });
-            this.$.updateNoticeDialog.close();
+            }).key;
           }
+
+          // Upload notice board pic.
+          var file = this.$.noticePic.inputElement.inputElement.files[0];
+          if (file){
+            this.$.storage.path = '/messages';
+            this.$.task.task = this.$.storage.put(this.$.noticePic.inputElement.inputElement.files[0]);
+          }
+          else{
+            this.msgKey = null;
+          }
+
+          this.$.updateNoticeDialog.close();
         }
       }
 
@@ -337,10 +411,27 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.deleteNotiDialog.open();
       }
 
-      deleteMessage() {
+      debug() {
         this.$.doc.path = '/messages/' + this.msgKey;
-        this.msgKey = null;
-        this.$.doc.ref.remove();
+        if (this.$.doc.data['images'] != undefined) {
+          var path = this.$.doc.data['images']['path'];
+          console.log(path);
+        }
+
+      }
+
+      deleteMessage() {
+        var path = "";
+        this.$.doc.path = '/messages/' + this.msgKey;
+        this.$.doc.ref.once("value")
+         .then(function(snapshot) {
+            path = this.$.doc.data['images']['path'];
+            this.$.storage.path = '/' + path;
+            this.$.storage.ref.delete();
+            this.msgKey = null;
+            this.$.doc.ref.remove();
+          }.bind(this));
+
         this.$.deleteNotiDialog.close();
         Polymer.dom(document.body).removeChild(this.$.deleteNotiDialog);
       }
@@ -366,7 +457,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.messageDesc.invalid = false;
         this.$.eventToggle.checked = false;
         this.$.eventToggle.disabled = false;
-        this.msgKey = null;
+        this.$.noticePic.value = null;
       }
 
       onEditDialogClose() {

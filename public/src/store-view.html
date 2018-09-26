@@ -156,7 +156,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         object-fit: cover;
         background-color: white;
         background-size: cover;
-        margin: 16px 0 0 16px;
+        margin: 16px;
       }
 
       .horizontal {
@@ -211,7 +211,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                   </div>
                 </div>
                 <div class="prod-content">
-                  <img src="[[item.images.downloadUrl]]" alt="productPic"/>
+                  <img src="[[item.images.downloadUrl]]" alt="productPic"
+                    onerror="this.src='../images/AR.png'"
+                    onload="this.style.display='block'"/>
                   <div class="card-content prod-info">
                     <span style="font-weight: bold;">Description: </span>
                     <div class="prod-desc">[[item.description]]</div>
@@ -249,7 +251,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-dialog-scrollable>
       <paper-input type="file" id="prod-pic" accept="image/jpeg"></paper-input>
       <div class="buttons">
-        <!-- <paper-button on-tap="uploadProdPic" >Upload photo</paper-button> -->
         <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button on-tap="saveNewProd" autofocus>Save</paper-button>
       </div>

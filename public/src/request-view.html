@@ -101,15 +101,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </style>
 
     <h1>Sent Request</h1>
-    <paper-listbox class="itemsList">
-      <paper-item>
-        <div class="product" style="margin-right: 16px;"></div>
-        <div class="title" style="width: 30%;">Product</div>
-        <div class="title" style="width: 15%;">Quantity</div>
-        <div class="title" style="width: 15%;">Status</div>
-        <div class="title" style="width: 15%;">Date</div>
-        <div class="title" style="width: 15%;">Time</div>
-      </paper-item>
+    <paper-listbox class="requestList">
+      <template is="dom-if" if="[[count]]">
+        <paper-item>
+          <div class="product" style="margin-right: 16px;"></div>
+          <div class="title" style="width: 30%;">Product</div>
+          <div class="title" style="width: 15%;">Quantity</div>
+          <div class="title" style="width: 15%;">Status</div>
+          <div class="title" style="width: 15%;">Date</div>
+          <div class="title" style="width: 15%;">Time</div>
+        </paper-item>
+      </template>
+
       <template is="dom-repeat" items="{{ownRequestList}}" observe="status item.status" rendered-item-count="{{count}}">
         <paper-icon-item>
           <div class="product" slot="item-icon"
@@ -128,15 +131,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </paper-listbox>
 
     <h1>Received Request</h1>
-    <paper-listbox class="requestList">
+      <paper-listbox class="requestList">
+        <template is="dom-if" if="[[pendingReq]]">
+          <paper-item>
+            <div class="product" style="margin-right: 16px;"></div>
+            <div class="title" style="width: 40%;">Product</div>
+            <div class="title" style="width: 30%;">Requestor</div>
+            <div class="title" style="width: 22%;">Quantity</div>
+            <div class="title" style="width: 55px;">Action</div>
+          </paper-item>
+        </template>
+
       <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestPending}}" observe="status item.status" rendered-item-count="{{pendingReq}}">
-        <paper-item>
-          <div class="product" style="margin-right: 16px;"></div>
-          <div class="title" style="width: 40%;">Product</div>
-          <div class="title" style="width: 30%;">Requestor</div>
-          <div class="title" style="width: 22%;">Quantity</div>
-          <div class="title" style="width: 55px;">Action</div>
-        </paper-item>
         <paper-icon-item>
           <div class="product" slot="item-icon"
           style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
@@ -159,15 +165,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <h1>Past Received Request</h1>
     <paper-listbox class="requestList">
-      <paper-item>
-        <div class="product" style="margin-right: 16px;"></div>
-        <div class="title" style="width: 30%;">Product</div>
-        <div class="title" style="width: 30%;">Requestor</div>
-        <div class="title" style="width: 10%;">Quantity</div>
-        <div class="title" style="width: 10%;">Status</div>
-        <div class="title" style="width: 10%;">Date</div>
-        <div class="title" style="width: 10%;">Time</div>
-      </paper-item>
+      <template is="dom-if" if="[[historyReq]]">
+        <paper-item>
+          <div class="product" style="margin-right: 16px;"></div>
+          <div class="title" style="width: 30%;">Product</div>
+          <div class="title" style="width: 30%;">Requestor</div>
+          <div class="title" style="width: 10%;">Quantity</div>
+          <div class="title" style="width: 10%;">Status</div>
+          <div class="title" style="width: 10%;">Date</div>
+          <div class="title" style="width: 10%;">Time</div>
+        </paper-item>
+      </template>
+
       <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestNotPending}}" observe="status item.status" rendered-item-count="{{historyReq}}">
         <paper-icon-item>
           <div class="product" slot="item-icon"
