@@ -222,6 +222,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               </div>
           </paper-card>
         </template>
+
+        <paper-dialog id="delProdDialog" modal>
+          <p>Are you sure you want to delete this product?</p>
+          <div class="buttons">
+            <paper-button dialog-dismiss>No</paper-button>
+            <paper-button autofocus on-tap="deleteProduct">Yes
+            </paper-button>
+          </div>
+        </paper-dialog>
       </div>
       <inventory-view
         user="[[user]]"
@@ -442,17 +451,33 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       delProd(e) {
-        this.$.doc.path = '/products/'+ e.model.item.$key;
+        this.prodKey = e.model.item.$key;
+        Polymer.dom(document.body).appendChild(this.$.delProdDialog);
+        this.$.delProdDialog.open();
+      }
 
-        if (e.model.item.images != null){
-          // Delete product images.
-          this.$.storage.path = '/' + e.model.item.images.path;
-          this.$.storage.ref.delete();
-        }
+      deleteProduct() {
+        var path;
+        this.$.doc.path = '/products/'+ this.prodKey;
+        this.$.doc.ref.once("value")
+         .then(function(snapshot) {
+            if (this.$.doc.data['images'] != undefined) {
+              path = this.$.doc.data['images']['path'];
+              this.$.storage.path = '/' + path;
+              this.$.storage.ref.delete();
+            }
+            this.$.doc.ref.remove();
+            console.log(this.prodKey + ' deleted from database.');
+            this.promptToast(this.$.successToast);
+            this.prodKey = null;
+          }.bind(this))
+         .catch(function(error){
+            console.log(error);
+            this.promptToast(this.$.failToast);
+          });
 
-        // Remove product entry.
-        this.$.doc.ref.remove();
-        console.log(e.model.item.name + ' deleted from database.');
+        this.$.delProdDialog.close();
+        Polymer.dom(document.body).removeChild(this.$.delProdDialog);
       }
 
       editProd(e) {

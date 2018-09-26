@@ -411,26 +411,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.deleteNotiDialog.open();
       }
 
-      debug() {
-        this.$.doc.path = '/messages/' + this.msgKey;
-        if (this.$.doc.data['images'] != undefined) {
-          var path = this.$.doc.data['images']['path'];
-          console.log(path);
-        }
-
-      }
-
       deleteMessage() {
-        var path = "";
+        var path;
         this.$.doc.path = '/messages/' + this.msgKey;
         this.$.doc.ref.once("value")
          .then(function(snapshot) {
-            path = this.$.doc.data['images']['path'];
-            this.$.storage.path = '/' + path;
-            this.$.storage.ref.delete();
+            if (this.$.doc.data['images'] != undefined) {
+              path = this.$.doc.data['images']['path'];
+              this.$.storage.path = '/' + path;
+              this.$.storage.ref.delete();
+            }
             this.msgKey = null;
             this.$.doc.ref.remove();
-          }.bind(this));
+          }.bind(this))
+         .catch(function(error){
+            console.log(error);
+          });
 
         this.$.deleteNotiDialog.close();
         Polymer.dom(document.body).removeChild(this.$.deleteNotiDialog);
