@@ -104,14 +104,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </div>
         </app-toolbar>
       </app-header>
-      <div class="content">
+      <div>
         <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}">
-          <paper-item>
-            <paper-item-body two-line style="width: 30%;">
+          <paper-item style="font-weight: bold;">
+            <paper-item-body two-line style="width: 20%;">
               <div>Product name</div>
               <div secondary>Quantity</div>
             </paper-item-body>
-            <paper-item-body two-line style="width: 30%;">
+            <paper-item-body two-line style="width: 20%;">
               <div>Customer Name</div>
               <div secondary>Address</div>
             </paper-item-body>
@@ -120,14 +120,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               <div>Date</div>
               <div secondary>Time</div>
             </paper-item-body>
+            <div style="width: 20%;">Tracking No.</div>
           </paper-item>
           <template is="dom-repeat" items="{{sales}}">
             <paper-item key="[[item.$key]]">
-              <paper-item-body two-line style="width: 30%;">
+              <paper-item-body two-line style="width: 20%;">
                 <div>[[getProdName(productsList.*, item.prod)]]</div>
                 <div secondary>[[item.qty]]</div>
               </paper-item-body>
-              <paper-item-body two-line style="width: 30%;">
+              <paper-item-body two-line style="width: 20%;">
                 <div>[[item.custname]]</div>
                 <div secondary>[[item.custaddr]]</div>
               </paper-item-body>
@@ -136,6 +137,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 <div>[[_formatEpochDate(item.time)]]</div>
                 <div secondary>[[_formatEpochTime(item.time)]]</div>
               </paper-item-body>
+              <div style="width: 20%; min-width: 85px">[[item.trackNum]]</div>
             </paper-item>
           </template>
         </paper-listbox>
@@ -214,9 +216,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <paper-dialog id="approveSalesDialog" on-iron-overlay-closed="onApproveSalesDialogClosed" modal>
       <h2>Mark Order as Processed</h2>
       <p>Are you sure you want to mark this order as processed?</p>
+      <paper-input always-float-label required auto-validate
+        error-message="Field required!"
+        id="trackNum"
+        label="Parcel tracking number">
+      </paper-input>
       <div class="buttons">
         <paper-button dialog-dismiss>No</paper-button>
-        <paper-button dialog-confirm autofocus>Yes</paper-button>
+        <paper-button autofocus on-tap="approveSales">Yes</paper-button>
       </div>
     </paper-dialog>
 
@@ -300,7 +307,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       openApproveSalesDialog(e) {
-        if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
+        if ((this.salesDoc[this.selectedOrder].stat == 'Processing') ||
+          (this.salesDoc[this.selectedOrder].stat == 'Processed')) {
+          // Display tracking number if exists
+          this.$.doc.path = '/sales/' + this.selectedOrder + '/trackNum'
+          this.$.doc.ref.once('value')
+          .then(function(snapshot) {
+            this.$.trackNum.value = snapshot.val();
+            this.$.trackNum.invalid = false;
+          }.bind(this));
+
           Polymer.dom(document.body).appendChild(this.$.approveSalesDialog);
           this.$.approveSalesDialog.open();
         }
@@ -309,18 +325,26 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      onApproveSalesDialogClosed(event) {
-        if (this.$.approveSalesDialog.closingReason.confirmed) {
-          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSalesFunction');
-          processSales({
-            key: this.selectedOrder,
-            action: 'Processed',
+      approveSales() {
+        if (this.$.trackNum.validate()) {
+          // Update sales
+          this.$.doc.path = '/sales/' + this.selectedOrder;
+          this.$.doc.ref.update({
+            stat: 'Processed',
+            trackNum: this.$.trackNum.value,
           }).then(function(result) {
             this.promptToast(this.$.successToast);
           }.bind(this)).catch((err) => {
             this.promptToast(this.$.failToast);
           });
+
+          this.$.approveSalesDialog.close();
         }
+      }
+
+      onApproveSalesDialogClosed(event) {
+        this.$.trackNum.value = null;
+        this.$.trackNum.invalid = false;
         Polymer.dom(document.body).removeChild(this.$.approveSalesDialog);
       }
 
