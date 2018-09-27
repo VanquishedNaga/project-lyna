@@ -92,7 +92,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       getProdName(change, data) {
         var retVal;
-        if (change.base != undefined) {
+        if ((change.base != undefined) && (change.base[data] != undefined)) {
           retVal = change.base[data]['name'];
         }
         return retVal;

@@ -96,6 +96,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       path="{{path}}">
     </firebase-storage-upload-task>
 
+    <firebase-storage-upload-task
+      id="payProofTask"
+      app-name="absolute-reborn"
+      on-state-changed="onPayProofTaskStateChanged">
+    </firebase-storage-upload-task>
+
     <style include="shared-styles">
       :host {
         display: block;
@@ -246,9 +252,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <!-- Dialog to add new product -->
     <paper-dialog
-      id="addprod"
+      id="dlAddProd"
       modal
-      on-iron-overlay-closed="closeThis">
+      on-iron-overlay-closed="onDialogClosed">
       <h2>Add product</h2>
       <paper-input always-float-label required
         error-message="Field required!"
@@ -265,10 +271,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </div>
     </paper-dialog>
 
-    <paper-dialog id="restockprod" on-iron-overlay-closed="closeThis" modal>
+    <paper-dialog id="dlRestockProd" on-iron-overlay-closed="onDialogClosed" modal>
       <h2>Restock Request</h2>
       <paper-dialog-scrollable>
-        <p>You are requesting restock from [[uplineUserdata.name]].</p>
+        <p>You are requesting restock from <b>[[uplineUserdata.name]]</b>.</p>
+        <p>You have: [[getInventoryQuantity(prodKey)]]</p>
         <paper-dropdown-menu label="Select product" id="productMenu">
           <paper-listbox id="productList" slot="dropdown-content" attr-for-selected="key" selected="{{prodKey}}">
             <template is="dom-repeat" items="{{productsList}}">
@@ -276,9 +283,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </template>
           </paper-listbox>
         </paper-dropdown-menu>
-        <p>Current Stock Left Quantity: [[getInventoryQuantity(prodKey)]]</p>
-        <p>Unit Price: RM[[getPrices(productsData.*, prodKey, userdata.level)]] </p>
-        <p>Total: RM[[getPayable(productsData.*, prodKey, userdata.level, quantity)]] </p>
         <paper-input always-float-label
           required
           error-message="Field required!"
@@ -288,6 +292,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           id="prod-quantity"
           label="Product Quantity">
         </paper-input>
+        <p>Unit price: RM[[getPrices(productsData.*, prodKey, userdata.level)]] </p>
+        <p>Total payable: RM[[getPayable(productsData.*, prodKey, userdata.level, quantity)]] </p>
+        <paper-input type="file" id="payProof" accept="image/jpeg" label="Upload payment proof"></paper-input>
         </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
@@ -340,6 +347,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           stockData: Object,
           selected: {type: String, value: 'Product'},
           prodKey: String,
+          reqKey: String,
           tabItems: {
             type: Array,
             value: function() {
@@ -353,7 +361,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
           state: {
             type: Object,
-            observer: 'stateChanged'
+            observer: 'onUploadTaskStateChanged'
           },
 
           value: {
@@ -367,8 +375,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         super.ready();
         console.log("StoreView ready.");
 
-        this.dlAddProduct = this.shadowRoot.querySelector('#addprod');
-        this.dlRestockProduct = this.shadowRoot.querySelector('#restockprod')
         this.prodName = this.shadowRoot.querySelector('#new-prod-name');
         this.prodDesc = this.shadowRoot.querySelector('#new-prod-desc');
         this.prodPic = this.shadowRoot.querySelector('#prod-pic');
@@ -383,30 +389,30 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       valueChanged() {
-        this.dlAddProduct.notifyResize();
+        this.$.dlAddProd.notifyResize();
       }
 
       addProduct() {
-        Polymer.dom(document.body).appendChild(this.dlAddProduct);
+        Polymer.dom(document.body).appendChild(this.$.dlAddProd);
 
-        this.dlAddProduct.open();
+        this.$.dlAddProd.open();
       }
 
       restockProd(){
-        Polymer.dom(document.body).appendChild(this.dlRestockProduct);
+        Polymer.dom(document.body).appendChild(this.$.dlRestockProd);
 
-        this.dlRestockProduct.open();
+        this.$.dlRestockProd.open();
       }
 
-      closeThis(event) {
-        if (event.target == this.dlRestockProduct) {
+      onDialogClosed(event) {
+        if (event.target == this.$.dlRestockProd) {
           this.prodName.value = null;
           this.prodDesc.value = null;
           this.prodName.invalid = false;
           this.prodPic.value = null;
           this.prodQuan.value = null;
 
-          Polymer.dom(document.body).removeChild(this.dlRestockProduct);
+          Polymer.dom(document.body).removeChild(this.$.dlRestockProd);
         }
       }
 
@@ -421,7 +427,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               name: this.prodName.value,
               description: this.prodDesc.value
             });
-            console.log(this.prodName.value + ' edited.');
           }
           else{
             this.$.doc.path = '/products';
@@ -431,22 +436,20 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               name: this.prodName.value,
               description: this.prodDesc.value,
             }).key;
-            console.log(this.prodName.value + ' saved.');
-            console.log('Key: ' + this.prodKey);
           }
 
           // Upload product pic.
           var file = this.prodPic.inputElement.inputElement.files[0];
           if (file){
             this.$.storage.path = '/products';
-            this.$.task.task = this.$.storage.put(this.prodPic.inputElement.inputElement.files[0]);
+            this.$.task.x = this.$.storage.put(this.prodPic.inputElement.inputElement.files[0]);
           }
           else{
             this.prodKey = null;
           }
 
           // Close the dialog.
-          this.dlAddProduct.close();
+          this.$.dlAddProd.close();
         }
       }
 
@@ -467,12 +470,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               this.$.storage.ref.delete();
             }
             this.$.doc.ref.remove();
-            console.log(this.prodKey + ' deleted from database.');
             this.promptToast(this.$.successToast);
             this.prodKey = null;
           }.bind(this))
          .catch(function(error){
-            console.log(error);
             this.promptToast(this.$.failToast);
           });
 
@@ -522,21 +523,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      stateChanged() {
-        console.log(this.$.task.state);
+      onUploadTaskStateChanged() {
         if (this.$.task.state == 'success'){
           this.$.task.ref.getDownloadURL()
             .then(function(url){
               this.downloadUrl = url;
-              console.log(this.downloadUrl);
-               console.log("product key:" + this.prodKey);
               // Add image path to product entry.
               this.$.doc.path = '/products/' + this.prodKey + '/images';
               this.$.doc.ref.set({
                 path: this.$.task.path,
                 downloadUrl: this.downloadUrl,
               });
-              console.log(this.$.task.path);
               this.prodKey = null;
             }.bind(this));
         }
@@ -547,18 +544,38 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
         if (valid){
           if (this.prodKey){
+            // Upload product pic.
+            var file = this.$.payProof.inputElement.inputElement.files[0];
+            if (file){
+              this.$.storage.path = '/payProof';
+              this.$.payProofTask.task = this.$.storage.put(file);
+            }
+
             this.$.doc.path = '/productRequests';
-            this.$.doc.ref.push({
+            this.reqKey = this.$.doc.ref.push({
               productID: this.prodKey,
               quantity: this.prodQuan.value,
               requestor: this.user.uid,
               upline: this.uplineUid,
               status: "Pending",
               time: {".sv":"timestamp"}
-            });
+            }).key;
 
-            this.dlRestockProduct.close();
+            // this.$.dlRestockProd.close();
           }
+        }
+      }
+
+      onPayProofTaskStateChanged(event) {
+        if (event.detail.value == 'success' && this.reqKey){
+          this.$.payProofTask.ref.getDownloadURL().then(function(url){
+            this.$.doc.path = '/productRequests/' + this.reqKey + '/images';
+            this.$.doc.ref.set({
+              path: this.$.payProofTask.path,
+              downloadUrl: url,
+            });
+            this.reqKey = null;
+          }.bind(this));
         }
       }
 
