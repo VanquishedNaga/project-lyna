@@ -65,6 +65,19 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-query>
 
+    <firebase-storage-ref
+      id="storage"
+      app-name="absolute-reborn"
+      path="/payProof"
+      force-unique>
+    </firebase-storage-ref>
+
+    <firebase-storage-upload-task
+      id="payProofTask"
+      app-name="absolute-reborn"
+      on-state-changed="onPayProofTaskStateChanged">
+    </firebase-storage-upload-task>
+
     <style include="shared-styles">
       :host {
         display: block;
@@ -128,8 +141,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="list-content" style="width: 10%;">[[_formatEpochTime(item.time)]]</div>
           <div class="list-content" style="width: 10%;">
             <paper-icon-button
+            icon="icons:file-upload"
+            on-tap="openUploadPayProofDialog"
+            hidden$="[[hasPayProof(item.*)]]"></paper-icon-button>
+            <paper-icon-button
             icon="icons:info"
-            on-tap="openPayProof"
+            on-tap="openDisplayPayProofDialog"
             hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
           </div>
 
@@ -165,7 +182,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="list-content" style="width: 15%;">
             <paper-icon-button
             icon="icons:info"
-            on-tap="openPayProof"
+            on-tap="openDisplayPayProofDialog"
             hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
           </div>
           <div class="list-content" style="width: 15%; min-width: 90px;">
@@ -230,7 +247,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </paper-dialog>
 
     <paper-dialog
-    id="payProofDialog"
+    id="displayPayProofDialog"
     modal
     style="
     position: fixed;
@@ -257,7 +274,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       max-width: 100%;"/>
       <paper-icon-button
       icon="icons:close"
-      on-tap="closePayProof"
+      on-tap="closeDisplayPayProofDialog"
       style="
       padding: 8px;
       color: white;
@@ -265,7 +282,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       float: right;"></paper-icon-button>
     </paper-dialog>
 
-    <paper-toast id="toast" text="Insufficient units in your inventory!"> </paper-toast>
+    <paper-dialog id="uploadPayProofDialog" modal on-iron-overlay-closed="onDialogClosed">
+      <h2>Upload payment proof</h2>
+      <paper-input type="file" id="payProof" accept="image/jpeg" label="Upload payment proof"></paper-input>
+      <div class="buttons">
+        <paper-button id="cancelUploadButton" dialog-dismiss>Cancel</paper-button>
+        <paper-button id="uploadButton" on-tap="uploadPayProof">Upload payment proof</paper-button>
+    </paper-dialog>
+
+    <paper-toast id="insufficientUnitToast" class="bad" text="Insufficient units in your inventory!"> </paper-toast>
+    <paper-toast id="uploadFailedToast" class="bad" text="Upload failed, please try again later."> </paper-toast>
+    <paper-toast id="uploadSuccessfulToast" class="good" text="Upload successful."> </paper-toast>
   </template>
 
 
@@ -339,8 +366,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             }
             else {
               // Prompt up screen to notify users don't have enough stock
-              Polymer.dom(document.body).appendChild(this.$.toast);
-              this.$.toast.open();
+              Polymer.dom(document.body).appendChild(this.$.insufficientUnitToast);
+              this.$.insufficientUnitToast.open();
             }
           }
         }
@@ -408,16 +435,68 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return (change.base['payProof']);
       }
 
-      openPayProof(event) {
+      openDisplayPayProofDialog(event) {
         if (event.model.item.payProof.downloadUrl) {
           this.payProof = event.model.item.payProof.downloadUrl;
-          Polymer.dom(document.body).appendChild(this.$.payProofDialog);
-          this.$.payProofDialog.open();
+          Polymer.dom(document.body).appendChild(this.$.displayPayProofDialog);
+          this.$.displayPayProofDialog.open();
         }
       }
 
-      closePayProof() {
-        this.$.payProofDialog.close();
+      closeDisplayPayProofDialog() {
+        this.$.displayPayProofDialog.close();
+      }
+
+      openUploadPayProofDialog(event) {
+        this.reqKey = event.model.item.$key;
+        Polymer.dom(document.body).appendChild(this.$.uploadPayProofDialog);
+        this.$.uploadPayProofDialog.open();
+      }
+
+      uploadPayProof() {
+        var file = this.$.payProof.inputElement.inputElement.files[0];
+        if (file) {
+          this.$.payProof.invalid = false;
+
+          // Disable buttons
+          this.$.uploadButton.disabled = true;
+          this.$.cancelUploadButton.disabled = true;
+
+          // Upload photo
+          this.$.storage.put(file).then(function(snap) {
+            // Update request entry with photo url
+            this.$.doc.path = '/productRequests/' + this.reqKey + '/payProof';
+            this.$.doc.ref.set({
+              path: snap.metadata.fullPath,
+              downloadUrl: snap.downloadURL,
+            });
+
+            this.$.uploadPayProofDialog.close();
+
+            // Display error message
+            Polymer.dom(document.body).appendChild(this.$.uploadSuccessfulToast);
+            this.$.uploadSuccessfulToast.open();
+          }.bind(this))
+          // Failed to upload
+          .catch((err) => {
+            this.$.uploadPayProofDialog.close();
+
+            // Display error message
+            Polymer.dom(document.body).appendChild(this.$.uploadFailedToast);
+            this.$.uploadFailedToast.open();
+          });
+        }
+        else {
+          this.$.payProof.invalid = true;
+        }
+      }
+
+      onDialogClosed() {
+        this.reqKey = null;
+        this.$.payProof.value = null;
+        this.$.payProof.invalid = false;
+        this.$.uploadButton.disabled = false;
+        this.$.cancelUploadButton.disabled = false;
       }
     }
 
