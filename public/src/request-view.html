@@ -383,30 +383,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       processRestockRequest(e) {
-        var action;
-        if (this.isApprove) {
-          action = 'Approved';
-        }
-        else {
-          action = 'Rejected';
-        }
+        var action = this.isApprove ? 'Approved' : 'Rejected';
 
-        if (this.userdata.privilege == "Admin") {
-          var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestockRequestAdminFunction');
-          processRestock({key: this.requestKey, action: action}).then(function(result) {
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-        }
-        else {
-          var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestockRequestFunction');
-          processRestock({key: this.requestKey, action: action}).then(function(result) {
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-        }
+        var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestockRequestFunction');
+        processRestock({key: this.requestKey, action: action, privilege: this.userdata.privilege})
+        .then(function(result) {
+        })
+        .catch((err) => {
+        });
 
         this.$.actionDialog.close();
         Polymer.dom(document.body).removeChild(this.$.actionDialog);

@@ -37,47 +37,7 @@ admin.initializeApp();
 exports.processRestockRequestFunction = functions.https.onCall((data, context) => {
   const key = data.key;
   const action = data.action;
-
-  // Check if payment proof was uploaded
-  admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
-    if (snapshot.hasChild('payProof')) {
-      // Delete the photo
-      var photoPath = snapshot.val().payProof.path;
-      admin.storage().ref(photoPath).delete();
-      admin.database().ref('/productRequests/' + key + 'payProof').remove();
-    }
-  });
-
-  // Update request status
-  admin.database().ref('/productRequests/' + key).update({status:action});
-
-  if (action == 'Approved') {
-    // Retrieve restock request data
-    admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
-      var quantity = snapshot.val().quantity;
-      var requestor = snapshot.val().requestor;
-      var upline = snapshot.val().upline;
-      var product = snapshot.val().productID;
-
-      //Get and update requestor inventory quantity
-      var updateRequestorInventory = admin.database().ref('/users/' + requestor + '/inventory/' + product);
-      updateRequestorInventory.transaction(function(currentProduct) {
-        var total = currentProduct + parseFloat(quantity);
-        return currentProduct + parseFloat(quantity);
-      });
-
-      //Get and update upline inventory quantity
-      var updateUplineInventory = admin.database().ref('/users/' + upline + '/inventory/' + product);
-      updateUplineInventory.transaction(function(currentProduct) {
-        return currentProduct - quantity;
-      });
-    });
-  }
-});
-
-exports.processRestockRequestAdminFunction = functions.https.onCall((data, context) => {
-  const key = data.key;
-  const action = data.action;
+  const privilege = data.privilege;
 
   admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
     var status = snapshot.val().status;
@@ -103,18 +63,26 @@ exports.processRestockRequestAdminFunction = functions.https.onCall((data, conte
           var upline = snapshot.val().upline;
           var product = snapshot.val().productID;
 
-          //Get and update requestor inventory quantity
+          // Get and update requestor inventory quantity
           var updateRequestorInventory = admin.database().ref('/users/' + requestor + '/inventory/' + product);
           updateRequestorInventory.transaction(function(currentProduct) {
-            var total = currentProduct + parseFloat(quantity);
             return currentProduct + parseFloat(quantity);
           });
 
-          //Get and update upline inventory quantity
-          var updateUplineInventory = admin.database().ref('/products/' + product + '/qty/free');
-          updateUplineInventory.transaction(function(currentProduct) {
-            return currentProduct - quantity;
-          });
+          if (privilege == 'Admin') {
+            // Get and update store quantity
+            var updateUplineInventory = admin.database().ref('/products/' + product + '/qty/free');
+            updateUplineInventory.transaction(function(currentProduct) {
+              return currentProduct - parseFloat(quantity);
+            });
+          }
+          else {
+            // Get and update upline inventory quantity
+            var updateUplineInventory = admin.database().ref('/users/' + upline + '/inventory/' + product);
+            updateUplineInventory.transaction(function(currentProduct) {
+              return currentProduct - parseFloat(quantity);
+            });
+          }
         });
       }
     }
