@@ -421,12 +421,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       hasPayProof(change) {
-        return (change.base.hasOwnProperty('images'));
+        return (change.base['payProof']);
       }
 
       openPayProof(event) {
-        if (event.model.item.images.downloadUrl) {
-          this.payProof = event.model.item.images.downloadUrl;
+        if (event.model.item.payProof.downloadUrl) {
+          this.payProof = event.model.item.payProof.downloadUrl;
           Polymer.dom(document.body).appendChild(this.$.payProofDialog);
           this.$.payProofDialog.open();
         }

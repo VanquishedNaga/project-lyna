@@ -38,6 +38,16 @@ exports.processRestockRequestFunction = functions.https.onCall((data, context) =
   const key = data.key;
   const action = data.action;
 
+  // Check if payment proof was uploaded
+  admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
+    if (snapshot.hasChild('payProof')) {
+      // Delete the photo
+      var photoPath = snapshot.val().payProof.path;
+      admin.storage().ref(photoPath).delete();
+      admin.database().ref('/productRequests/' + key + 'payProof').remove();
+    }
+  });
+
   // Update request status
   admin.database().ref('/productRequests/' + key).update({status:action});
 
@@ -73,7 +83,15 @@ exports.processRestockRequestAdminFunction = functions.https.onCall((data, conte
     var status = snapshot.val().status;
 
     // Only proceed if the action has not been done.
-    if ((status != action) &&(status != 'Approved')) {
+    if ((status != action) && (status != 'Approved')) {
+      // Check if payment proof was uploaded
+      if (snapshot.hasChild('payProof')) {
+        // Delete the photo
+        var photoPath = snapshot.val().payProof.path;
+        admin.storage().bucket().file(photoPath).delete();
+        admin.database().ref('/productRequests/' + key + '/payProof').remove();
+      }
+
       // Update request status.
       admin.database().ref('/productRequests/' + key).update({status:action});
 

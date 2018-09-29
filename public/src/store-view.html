@@ -569,7 +569,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       onPayProofTaskStateChanged(event) {
         if (event.detail.value == 'success' && this.reqKey){
           this.$.payProofTask.ref.getDownloadURL().then(function(url){
-            this.$.doc.path = '/productRequests/' + this.reqKey + '/images';
+            this.$.doc.path = '/productRequests/' + this.reqKey + '/payProof';
             this.$.doc.ref.set({
               path: this.$.payProofTask.path,
               downloadUrl: url,
