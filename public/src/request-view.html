@@ -19,7 +19,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="shared-styles.html">
 
 <script src="../bower_components/strftime/strftime-min.js"></script>
-<!-- <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"> -->
 
 <dom-module id="request-view">
   <template>
@@ -95,6 +94,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         margin-right: 16px;
       }
 
+      paper-icon-button {
+        color: var(--app-secondary-color);
+      }
+
       h1 {
         font-family: 'Roboto Condensed', sans-serif;
       }
@@ -108,8 +111,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="title" style="width: 30%;">Product</div>
           <div class="title" style="width: 15%;">Quantity</div>
           <div class="title" style="width: 15%;">Status</div>
-          <div class="title" style="width: 15%;">Date</div>
-          <div class="title" style="width: 15%;">Time</div>
+          <div class="title" style="width: 10%;">Date</div>
+          <div class="title" style="width: 10%;">Time</div>
+          <div class="title" style="width: 10%;">Payment</div>
         </paper-item>
       </template>
 
@@ -120,8 +124,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="list-content" style="width: 30%; ">[[getProductName(productsList.*, item.productID)]]</div>
           <div class="list-content" style="width: 15%;">[[item.quantity]]</div>
           <div class="list-content" style="width: 15%;">[[item.status]]</div>
-          <div class="list-content" style="width: 15%;">[[_formatEpochDate(item.time)]]</div>
-          <div class="list-content" style="width: 15%;">[[_formatEpochTime(item.time)]]</div>
+          <div class="list-content" style="width: 10%;">[[_formatEpochDate(item.time)]]</div>
+          <div class="list-content" style="width: 10%;">[[_formatEpochTime(item.time)]]</div>
+          <div class="list-content" style="width: 10%;">
+            <paper-icon-button
+            icon="icons:info"
+            on-tap="openPayProof"
+            hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
+          </div>
+
         </paper-icon-item>
       </template>
 
@@ -133,13 +144,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <h1>Received Request</h1>
       <paper-listbox class="requestList">
         <template is="dom-if" if="[[pendingReq]]">
-          <paper-item>
-            <div class="product" style="margin-right: 16px;"></div>
+          <paper-icon-item>
+            <div class="product" slot="item-icon"
+            style="background-image: url('../images/AR.png');"></div>
             <div class="title" style="width: 40%;">Product</div>
-            <div class="title" style="width: 30%;">Requestor</div>
-            <div class="title" style="width: 22%;">Quantity</div>
-            <div class="title" style="width: 55px;">Action</div>
-          </paper-item>
+            <div class="title" style="width: 15%;">Requestor</div>
+            <div class="title" style="width: 15%;">Quantity</div>
+            <div class="title" style="width: 15%;">Payment</div>
+            <div class="title" style="width: 15%; min-width: 90px;">Action</div>
+          </paper-icon-item>
         </template>
 
       <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestPending}}" observe="status item.status" rendered-item-count="{{pendingReq}}">
@@ -147,14 +160,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="product" slot="item-icon"
           style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
           <div class="list-content" style="width: 40%;">[[getProductName(productsList.*, item.productID)]]</div>
-          <div class="list-content" style="width: 30%;">[[getRequestorName(usersList.*, item.requestor)]]</div>
-          <div class="list-content" style="width: 20%;">[[item.quantity]]</div>
-          <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Approve" on-tap="openDialog">
-          </paper-icon-button>
-          <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Approve</paper-tooltip>
-          <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
-          </paper-icon-button>
-          <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
+          <div class="list-content" style="width: 15%;">[[getRequestorName(usersList.*, item.requestor)]]</div>
+          <div class="list-content" style="width: 15%;">[[item.quantity]]</div>
+          <div class="list-content" style="width: 15%;">
+            <paper-icon-button
+            icon="icons:info"
+            on-tap="openPayProof"
+            hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
+          </div>
+          <div class="list-content" style="width: 15%; min-width: 90px;">
+            <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Approve" on-tap="openDialog">
+            </paper-icon-button>
+            <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Approve</paper-tooltip>
+            <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
+            </paper-icon-button>
+            <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
+          </div>
         </paper-icon-item>
       </template>
 
@@ -206,6 +227,42 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           on-tap="processRestockRequest">Yes
         </paper-button>
       </div>
+    </paper-dialog>
+
+    <paper-dialog
+    id="payProofDialog"
+    modal
+    style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: black;">
+      <img
+      src="[[payProof]]"
+      alt="payProof"
+      style="
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      padding: 0;
+      max-height: 100%;
+      max-width: 100%;"/>
+      <paper-icon-button
+      icon="icons:close"
+      on-tap="closePayProof"
+      style="
+      padding: 8px;
+      color: white;
+      background-color: black;
+      float: right;"></paper-icon-button>
     </paper-dialog>
 
     <paper-toast id="toast" text="Insufficient units in your inventory!"> </paper-toast>
@@ -361,6 +418,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       _formatEpochTime(eTS) {
         return strftime('%I:%M %P', new Date(eTS));
+      }
+
+      hasPayProof(change) {
+        return (change.base.hasOwnProperty('images'));
+      }
+
+      openPayProof(event) {
+        if (event.model.item.images.downloadUrl) {
+          this.payProof = event.model.item.images.downloadUrl;
+          Polymer.dom(document.body).appendChild(this.$.payProofDialog);
+          this.$.payProofDialog.open();
+        }
+      }
+
+      closePayProof() {
+        this.$.payProofDialog.close();
       }
     }
 
