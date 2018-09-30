@@ -6,7 +6,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
@@ -24,13 +23,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
-<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="inventory-view.html">
 <link rel="import" href="request-view.html">
-
-<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
 <dom-module id="store-view">
   <template>
@@ -78,29 +76,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       id="storage"
       app-name="absolute-reborn"
       path="/products"
-      metadata="{{metadata}}"
-      storage-uri="{{gsUri}}"
-      download-url="{{downloadUrl}}"
       force-unique>
     </firebase-storage-ref>
-
-    <firebase-storage-upload-task
-      id="task"
-      app-name="absolute-reborn"
-      task="[[task]]"
-      bytes-transferred="{{bytesTransferred}}"
-      total-bytes="{{totalBytes}}"
-      state="{{state}}"
-      download-url="{{downloadUrl}}"
-      metadata="{{metadata}}"
-      path="{{path}}">
-    </firebase-storage-upload-task>
-
-    <firebase-storage-upload-task
-      id="payProofTask"
-      app-name="absolute-reborn"
-      on-state-changed="onPayProofTaskStateChanged">
-    </firebase-storage-upload-task>
 
     <style include="shared-styles">
       :host {
@@ -159,8 +136,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         width: 250px;
         height: 250px;
         background-repeat: no-repeat;
-        object-fit: cover;
-        background-color: white;
+        object-fit: contain;
+        background-color: black;
         background-size: cover;
         margin: 16px;
       }
@@ -195,7 +172,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <div page-name="Product">
           <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
             <app-toolbar>
-              <paper-button on-tap="addProduct" class="custom">
+              <paper-button on-tap="openAddProdDialog" class="custom">
                 <iron-icon icon="add-circle-outline"></iron-icon>
                 <span>Add product</span>
               </paper-button>
@@ -208,11 +185,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 <div class="prod-header">
                   <span class="header">[[item.name]]</span>
                   <div class="prod-act">
-                    <paper-icon-button icon="icons:add-circle" on-tap="restock"></paper-icon-button>
+                    <paper-icon-button icon="icons:add-circle" on-tap="openRestockProdDialog"></paper-icon-button>
                     <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
-                      <paper-icon-button icon="icons:input" on-tap="adminRestock"></paper-icon-button>
-                      <paper-icon-button icon="icons:create" on-tap="editProd"></paper-icon-button>
-                      <paper-icon-button icon="icons:delete" on-tap="delProd"></paper-icon-button>
+                      <paper-icon-button icon="icons:input" on-tap="openAdminRestockDialog"></paper-icon-button>
+                      <paper-icon-button icon="icons:create" on-tap="openEditProdDialog"></paper-icon-button>
+                      <paper-icon-button icon="icons:delete" on-tap="openDelProdDialog"></paper-icon-button>
                     </template>
                   </div>
                 </div>
@@ -246,16 +223,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         label="Product Name">
       </paper-input>
       <paper-dialog-scrollable>
-        <paper-textarea always-float-label id="prodDesc" label="Product Description" value={{prodDescVal}}></paper-textarea>
+        <paper-textarea always-float-label id="prodDesc" label="Product Description" on-value-changed="prodDescValChanged"></paper-textarea>
       </paper-dialog-scrollable>
       <paper-input type="file" id="prodPic" accept="image/jpeg"></paper-input>
       <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button on-tap="saveNewProd" autofocus>Save</paper-button>
+        <paper-button id="addProdCancelButton" dialog-dismiss>Cancel</paper-button>
+        <paper-button id="addProdButton" on-tap="saveNewProd" autofocus>Save</paper-button>
       </div>
     </paper-dialog>
 
     <paper-dialog id="delProdDialog" modal>
+      <h2>Delete product</h2>
       <p>Are you sure you want to delete this product?</p>
       <div class="buttons">
         <paper-button dialog-dismiss>No</paper-button>
@@ -265,7 +243,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </paper-dialog>
 
     <paper-dialog id="restockProdDialog" on-iron-overlay-closed="onDialogClosed" modal>
-      <h2>Restock Request</h2>
+      <h2>Restock request</h2>
       <paper-dialog-scrollable>
         <p>You are requesting restock from <b>[[uplineUserdata.name]]</b>.</p>
         <p>You have: [[getInventoryQuantity(prodKey)]]</p>
@@ -289,13 +267,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <paper-input type="file" id="payProof" accept="image/jpeg" label="Upload payment proof"></paper-input>
         </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button on-tap="submitProdRequest">Submit Request</paper-button>
+        <paper-button id="restockProdDialogCancelButton" dialog-dismiss>Cancel</paper-button>
+        <paper-button id="restockProdDialogSubmitButton" on-tap="submitProdRequest">Submit Request</paper-button>
       </div>
     </paper-dialog>
 
     <paper-dialog id="adminRestockDialog" on-iron-overlay-closed="onAdminRestockDialogClosed" modal>
-      <h2>Admin Restock</h2>
+      <h2>Admin restock</h2>
       <paper-dropdown-menu label="Select product" id="productMenu">
         <paper-listbox id="productList" slot="dropdown-content" attr-for-selected="key" selected="{{prodKey}}">
           <template is="dom-repeat" items="{{productsList}}">
@@ -322,6 +300,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <!-- Paper toasts -->
     <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
     <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
+    <paper-toast id="uploadFailToast" class="bad" text="Image upload failed! Please try again."> </paper-toast>
 
   </template>
 
@@ -331,119 +310,177 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get properties() {
         return {
           user: Object,
-          productName: String,
           userdata: Object,
-          uplineUserdata: Object,
-          productsData: Object,
-          productsList: Array,
-          stockData: Object,
-          selected: {type: String, value: 'Product'},
-          prodKey: String,
-          reqKey: String,
+          selected: {
+            type: String,
+            value: 'Product'
+          },
           tabItems: {
             type: Array,
             value: function() {
               return ['Product', 'Inventory', 'Request'];
             }
           },
-
-          prodItems: {
-            type: Array
-          },
-
-          state: {
-            type: Object,
-            observer: 'onUploadTaskStateChanged'
-          },
-
-          prodDescVal: {
-            type: Object,
-            observer: 'prodDescValChanged'
-          },
+          prodItems: Array,
         };
       }
 
       ready() {
         super.ready();
         console.log("StoreView ready.");
-
-        // init to null to solve error
-        this.prodKey = null;
-        this.$.prodName.value = null;
-        this.$.prodDesc.value = null;
-        this.$.prodQuan.value = null;
       }
 
-      prodDescValChanged() {
+      prodDescValChanged(event) {
         this.$.addProdDialog.notifyResize();
       }
 
-      addProduct() {
+      openAddProdDialog() {
         Polymer.dom(document.body).appendChild(this.$.addProdDialog);
-
         this.$.addProdDialog.open();
       }
 
-      restockProd(){
-        Polymer.dom(document.body).appendChild(this.$.restockProdDialog);
+      openDelProdDialog(e) {
+        this.prodKey = e.model.item.$key;
+        Polymer.dom(document.body).appendChild(this.$.delProdDialog);
+        this.$.delProdDialog.open();
+      }
 
+      openEditProdDialog(e) {
+        this.prodKey = e.model.item.$key;
+        this.$.prodName.value = e.model.item.name || null;
+        this.$.prodDesc.value = e.model.item.description || null;
+        this.openAddProdDialog();
+      }
+
+      openRestockProdDialog(e) {
+        this.prodKey = e.model.item.$key;
+        this.$.prodName.value = e.model.item.name || null;
+        this.uplineUid = this.userdata.upline;
+
+        Polymer.dom(document.body).appendChild(this.$.restockProdDialog);
         this.$.restockProdDialog.open();
       }
 
+      openAdminRestockDialog(e) {
+        // Setup.
+        this.prodKey = e.model.item.$key;
+
+        // Open dialog.
+        Polymer.dom(document.body).appendChild(this.$.adminRestockDialog);
+        this.$.adminRestockDialog.open();
+      }
+
       onDialogClosed(event) {
-        if (event.target == this.$.restockProdDialog) {
+        if ((event.target == this.$.addProdDialog) || (event.target == this.$.restockProdDialog)) {
+          this.prodKey = null;
+
+          // addProdDialog specific
           this.$.prodName.value = null;
-          this.$.prodDesc.value = null;
           this.$.prodName.invalid = false;
+          this.$.prodDesc.value = null;
           this.$.prodPic.value = null;
+          this.$.addProdCancelButton.disabled = false;
+          this.$.addProdButton.disabled = false;
+
+          // restockProdDialog specific
           this.$.prodQuan.value = null;
           this.$.payProof.value = null;
+          this.$.restockProdDialogCancelButton.disabled = false;
+          this.$.restockProdDialogSubmitButton.disabled = false;
+        }
+      }
 
-          Polymer.dom(document.body).removeChild(this.$.restockProdDialog);
+      onAdminRestockDialogClosed(event) {
+        if (event.target == this.$.adminRestockDialog) {
+          if (this.$.adminRestockDialog.closingReason.confirmed) {
+            var processSales = firebase.app('absolute-reborn').functions().httpsCallable('adminRestockFunction');
+            processSales({
+              prodKey: this.prodKey,
+              qty: this.$.adminRestockQty.value,
+            }).then(function(result) {
+              Polymer.dom(document.body).appendChild(this.$.successToast);
+              this.$.successToast.open();
+            }.bind(this)).catch((err) => {
+              Polymer.dom(document.body).appendChild(this.$.failToast);
+              this.$.failToast.open();
+            });
+          }
+          this.prodKey = null;
+          this.$.adminRestockQty.value = null;
+          Polymer.dom(document.body).removeChild(this.$.adminRestockDialog);
         }
       }
 
       saveNewProd() {
-        var valid = this.$.prodName.validate();
+        var inputValid = this.$.prodName.validate();
 
-        if (valid)
+        if (inputValid)
         {
-          if (this.prodKey){
+          // Disable buttons to prevent exiting dialog before upload is done.
+          this.$.addProdCancelButton.disabled = true;
+          this.$.addProdButton.disabled = true;
+
+          // If updating existing product entry
+          if (this.prodKey) {
             this.$.doc.path = '/products/' + this.prodKey;
             this.$.doc.ref.update({
               name: this.$.prodName.value,
               description: this.$.prodDesc.value
+            }).then(function(prodSnap) {
+              this.uploadProductImage();
+            }.bind(this)).catch(function(err) {
+              this.$.addProdDialog.close();
             });
           }
           else{
             this.$.doc.path = '/products';
 
             // Save the key.
-            this.prodKey = this.$.doc.ref.push({
+            this.$.doc.ref.push({
               name: this.$.prodName.value,
               description: this.$.prodDesc.value,
-            }).key;
+            }).then(function(prodSnap) {
+              this.prodKey = prodSnap.key;
+              this.uploadProductImage();
+            }.bind(this)).catch(function(err) {
+              this.$.addProdDialog.close();
+            });
           }
-
-          // Upload product pic.
-          var file = this.$.prodPic.inputElement.inputElement.files[0];
-          if (file){
-            this.$.storage.path = '/products';
-            this.$.task.x = this.$.storage.put(this.$.prodPic.inputElement.inputElement.files[0]);
-          }
-          else{
-            this.prodKey = null;
-          }
-
-          // Close the dialog.
-          this.$.addProdDialog.close();
         }
       }
 
-      delProd(e) {
-        this.prodKey = e.model.item.$key;
-        Polymer.dom(document.body).appendChild(this.$.delProdDialog);
-        this.$.delProdDialog.open();
+      uploadProductImage() {
+        // Upload product pic.
+        var file = this.$.prodPic.inputElement.inputElement.files[0];
+        if (file) {
+          // Disable buttons to prevent exiting dialog before upload is done.
+          this.$.addProdCancelButton.disabled = true;
+          this.$.addProdButton.disabled = true;
+
+          this.$.storage.path = '/products';
+          this.$.storage.put(file).then(function(snap) {
+            // TODO: Delete old image if exist
+            // Update product entry with image url
+            this.$.doc.path = '/products/' + this.prodKey + '/images';
+            this.$.doc.ref.set({
+              path: snap.metadata.fullPath,
+              downloadUrl: snap.downloadURL,
+            });
+
+            this.$.addProdDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          // Failed to upload
+          .catch((err) => {
+            this.$.addProdDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          });
+        }
+        else{
+          this.$.addProdDialog.close();
+        }
       }
 
       deleteProduct() {
@@ -457,113 +494,72 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               this.$.storage.ref.delete();
             }
             this.$.doc.ref.remove();
-            this.promptToast(this.$.successToast);
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
             this.prodKey = null;
-          }.bind(this))
-         .catch(function(error){
-            this.promptToast(this.$.failToast);
+          }.bind(this)).catch(function(error) {
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
           });
 
         this.$.delProdDialog.close();
         Polymer.dom(document.body).removeChild(this.$.delProdDialog);
       }
 
-      editProd(e) {
-        this.prodKey = e.model.item.$key;
-        this.$.prodName.value = e.model.item.name || null;
-        this.$.prodDesc.value = e.model.item.description || null;
-        this.addProduct();
-      }
+      submitProdRequest() {
+        var inputValid = this.$.prodQuan.validate();
 
-      restock(e){
-        this.prodKey = e.model.item.$key;
-        this.$.prodName.value = e.model.item.name || null;
-        this.uplineUid = this.userdata.upline;
-        this.restockProd();
-      }
+        if (inputValid && this.prodKey) {
+          // Disable buttons
+          this.$.restockProdDialogCancelButton.disabled = true;
+          this.$.restockProdDialogSubmitButton.disabled = true;
 
-      adminRestock(e){
-        // Setup.
-        this.prodKey = e.model.item.$key;
-
-        // Open dialog.
-        Polymer.dom(document.body).appendChild(this.$.adminRestockDialog);
-        this.$.adminRestockDialog.open();
-      }
-
-      onAdminRestockDialogClosed(event) {
-        if (event.target == this.$.adminRestockDialog) {
-          if (this.$.adminRestockDialog.closingReason.confirmed) {
-            var processSales = firebase.app('absolute-reborn').functions().httpsCallable('adminRestockFunction');
-            processSales({
-              prodKey: this.prodKey,
-              qty: this.$.adminRestockQty.value,
-            }).then(function(result) {
-              this.promptToast(this.$.successToast);
-            }.bind(this)).catch((err) => {
-              this.promptToast(this.$.failToast);
-            });
-          }
-          this.prodKey = null;
-          this.$.adminRestockQty.value = null;
-          Polymer.dom(document.body).removeChild(this.$.adminRestockDialog);
-        }
-      }
-
-      onUploadTaskStateChanged() {
-        if (this.$.task.state == 'success'){
-          this.$.task.ref.getDownloadURL()
-            .then(function(url){
-              this.downloadUrl = url;
-              // Add image path to product entry.
-              this.$.doc.path = '/products/' + this.prodKey + '/images';
-              this.$.doc.ref.set({
-                path: this.$.task.path,
-                downloadUrl: this.downloadUrl,
-              });
-              this.prodKey = null;
-            }.bind(this));
-        }
-      }
-
-      submitProdRequest(){
-        var valid = this.$.prodQuan.validate();
-
-        if (valid){
-          if (this.prodKey){
-            // Upload product pic.
+          // Create new restock request
+          this.$.doc.path = '/productRequests';
+          this.$.doc.ref.push({
+            productID: this.prodKey,
+            quantity: this.$.prodQuan.value,
+            requestor: this.user.uid,
+            upline: this.uplineUid,
+            status: "Pending",
+            time: {".sv":"timestamp"}
+          }).then(function(reqSnap) {
+            // Upload payment proof.
             var file = this.$.payProof.inputElement.inputElement.files[0];
-            if (file){
+            if (file) {
               this.$.storage.path = '/payProof';
-              this.$.payProofTask.task = this.$.storage.put(file);
+              this.$.storage.put(file).then(function(imageSnap) {
+                // Update product entry with image url
+                this.$.doc.path = '/productRequests/' + reqSnap.key + '/payProof';
+                this.$.doc.ref.set({
+                  path: imageSnap.metadata.fullPath,
+                  downloadUrl: imageSnap.downloadURL,
+                });
+                this.$.restockProdDialog.close();
+                Polymer.dom(document.body).appendChild(this.$.successToast);
+                this.$.successToast.open();
+              }.bind(this)).catch((err) => {
+                // Failed to upload image
+                this.$.restockProdDialog.close();
+                Polymer.dom(document.body).appendChild(this.$.uploadFailToast);
+                this.$.uploadFailToast.open();
+              });
             }
-
-            this.$.doc.path = '/productRequests';
-            this.reqKey = this.$.doc.ref.push({
-              productID: this.prodKey,
-              quantity: this.$.prodQuan.value,
-              requestor: this.user.uid,
-              upline: this.uplineUid,
-              status: "Pending",
-              time: {".sv":"timestamp"}
-            }).key;
-
+            // No image to upload
+            else {
+              this.$.restockProdDialog.close();
+            }
+          }.bind(this)).catch((err) => {
+            // Failed to create new restock request
             this.$.restockProdDialog.close();
-          }
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          });
         }
       }
 
-      onPayProofTaskStateChanged(event) {
-        if (event.detail.value == 'success' && this.reqKey){
-          this.$.payProofTask.ref.getDownloadURL().then(function(url){
-            this.$.doc.path = '/productRequests/' + this.reqKey + '/payProof';
-            this.$.doc.ref.set({
-              path: this.$.payProofTask.path,
-              downloadUrl: url,
-            });
-            this.reqKey = null;
-          }.bind(this));
-        }
+      isAdmin(privilege) {
+        return (privilege == "Admin");
       }
 
       getInventoryQuantity(prodKey) {
@@ -578,7 +574,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       getTotalQuantity(prodKey) {
         for (var key in this.productsData) {
           if (key == prodKey) {
-            try{ var val = this.productsData[key]['qty']['total']; } catch(err){}
+            try{ var val = this.productsData[key]['qty']['total']; } catch(err) {}
             return (val == undefined? 0:val);
           }
         }
@@ -588,28 +584,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       getFreeQuantity(prodKey) {
         for (var key in this.productsData) {
           if (key == prodKey) {
-            try{ var val = this.productsData[key]['qty']['free']; } catch(err){}
+            try{ var val = this.productsData[key]['qty']['free']; } catch(err) {}
             return (val == undefined? 0:val);
           }
         }
         return 0;
       }
 
-      isAdmin(privilege){
-        return (privilege == "Admin");
-      }
-
-      promptToast(element) {
-        Polymer.dom(document.body).appendChild(element);
-        element.center();
-        element.refit();
-        element.open();
-      }
-
       getPrices(change, prodKey, level) {
         if (prodKey != undefined
             && change.base[prodKey] != undefined
-            && change.base[prodKey]['prices'] != undefined){
+            && change.base[prodKey]['prices'] != undefined) {
           return change.base[prodKey]['prices'][level];
         }
       }
@@ -618,7 +603,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         if (prodKey != undefined
             && change.base[prodKey] != undefined
             && change.base[prodKey]['prices'] != undefined
-            && !isNaN(quantity)){
+            && !isNaN(quantity)) {
           return (change.base[prodKey]['prices'][level] * quantity).toFixed(2);
         }
       }
