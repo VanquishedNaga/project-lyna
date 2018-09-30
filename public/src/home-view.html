@@ -43,6 +43,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-query>
 
+    <firebase-document
+      id="messageData"
+      path = "/messages"
+      data = "{{messageData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
     <firebase-query
       id="messageResponse"
       path = "/messages/{{msgKey}}/response"
@@ -148,6 +155,58 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         @apply(--layout-horizontal);
       }
 
+      .avatar {
+        margin: 0 12px 0 12px;
+      }
+
+      paper-textarea.commentCustom {
+        width: 90%;
+        margin: 0 0 16px 0;
+        word-break: break-word;
+
+        --paper-input-container-color: black;
+        --paper-input-container-focus-color: black;
+        --paper-input-container-invalid-color: black;
+        border: 1px solid #BDBDBD;
+        border-radius: 20px;
+        background-color: #F2F3F5;
+
+        /* Reset some defaults */
+        --paper-input-container: {
+          padding: 3px;
+        };
+        --paper-input-container-underline: { display: none; height: 0;};
+        --paper-input-container-underline-focus: { display: none; };
+
+        --paper-input-container-label: {
+          margin: 4px;
+          font-size: 10pt;
+          color: gray;
+        };
+
+        /* New custom styles */
+        --paper-input-container-input: {
+          margin: 3px;
+          box-sizing: border-box;
+          font-size: 10pt;
+        };
+      }
+
+      .commentBox {
+        width: 90%;
+        border: 1px solid #BDBDBD;
+        border-radius: 20px;
+        background-color: #EFF1F3;
+        max-width: 90%;
+        margin: 0 12px 0 0;
+      }
+
+      .commentContent {
+        font-size: 10pt;
+        margin: 10px;
+        font-family: sans-serif;
+      }
+
       img{
         width: 90%;
         height: 250px;
@@ -195,6 +254,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       paper-icon-button.attend {
         color: grey;
+      }
+
+      paper-icon-button.post {
+        color: var(--app-secondary-color);;
       }
     </style>
     <app-header-layout>
@@ -257,6 +320,33 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                   <paper-icon-button icon="icons:check" on-tap="attend" class$="[[isAttending(item.*, 'true')]]"></paper-icon-button>
                   <paper-icon-button icon="icons:clear" on-tap="absent" class$="[[isAttending(item.*, 'false')]]"></paper-icon-button>
                 </div>
+              </div>
+            </template>
+            <hr>
+            <div style="display: flex;">
+              <div class="avatar" slot="item-icon" style="background-image: url([[userdata.profilePic]]);"></div>
+              <paper-textarea
+                class="commentCustom"
+                id="commentField[[index]]"
+                label="Write a comment..."
+                no-label-float>
+              </paper-textarea>
+              <paper-icon-button icon="icons:send" class="post" on-tap="postComment"></paper-icon-button>
+            </div>
+            <template is="dom-repeat" items="{{toArray(messageData.*, item.$key)}}">
+              <div style="display: flex;">
+                <div class="avatar" slot="item-icon" style="background-image: url([[userdata.profilePic]]);"></div>
+                <div class="commentBox">
+                  <div class="commentContent horizontal">
+                    <div style="word-break: break-word;">
+                      <span style="font-weight: bold; color: #365899;">[[getName(item.userid)]] </span>
+                      [[item.comment]]
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin: 1px 0 12px 74px; font-size: 0.9em; color: gray;">
+                [[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]
               </div>
             </template>
           </div>
@@ -508,6 +598,39 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       isAbsentFilter(person) {
         return (person.$val == false);
+      }
+
+      postComment(e) {
+        var commentField = Polymer.dom(this.root).querySelector('#commentField' + e.model.index);
+        var valid = commentField.validate();
+
+        if (valid) {
+          this.msgKey = e.model.item.$key;
+          this.$.doc.path = '/messages/' + e.model.item.$key + '/comments';
+          this.$.doc.ref.push({
+            userid: this.user.uid,
+            comment: commentField.value,
+            time: {".sv":"timestamp"}
+          })
+          .then(function(snapshot) {
+            commentField.value = null;
+            commentField.invalid = false;
+          });
+        }
+      }
+
+      toArray(input, messageKey) {
+        if(input.base[messageKey] != undefined && input.base[messageKey]['comments'] != undefined) {
+          var obj = input.base[messageKey]['comments'];
+          return Object.keys(obj).map(function(key) {
+            return {
+              key: key,
+              userid: obj[key]['userid'],
+              time: obj[key]['time'],
+              comment: obj[key]['comment']
+            };
+          });
+        }
       }
     }
 

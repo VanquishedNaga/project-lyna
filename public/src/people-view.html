@@ -295,16 +295,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.doc.ref.remove();
       }
 
-      toArray(input) {
-        var obj = input.base;
-        return Object.keys(obj).map(function(key) {
-          return {
-            key: key,
-            value: obj[key]
-          };
-        });
-      }
-
       isAdmin(privilege){
         return (privilege == "Admin");
       }
