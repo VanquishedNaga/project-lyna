@@ -276,6 +276,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       icon="icons:close"
       on-tap="closeDisplayPayProofDialog"
       style="
+      margin: 0;
       padding: 8px;
       color: white;
       background-color: black;
@@ -473,7 +474,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
             this.$.uploadPayProofDialog.close();
 
-            // Display error message
+            // Display success message
             Polymer.dom(document.body).appendChild(this.$.uploadSuccessfulToast);
             this.$.uploadSuccessfulToast.open();
           }.bind(this))
