@@ -2,6 +2,7 @@
 @license
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
@@ -61,23 +62,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       id="storage"
       app-name="absolute-reborn"
       path="/messages"
-      metadata="{{metadata}}"
-      storage-uri="{{gsUri}}"
-      download-url="{{downloadUrl}}"
       force-unique>
     </firebase-storage-ref>
-
-    <firebase-storage-upload-task
-      id="task"
-      app-name="absolute-reborn"
-      task="[[task]]"
-      bytes-transferred="{{bytesTransferred}}"
-      total-bytes="{{totalBytes}}"
-      state="{{state}}"
-      download-url="{{downloadUrl}}"
-      metadata="{{metadata}}"
-      path="{{path}}">
-    </firebase-storage-upload-task>
 
     <style include="shared-styles">
       :root {
@@ -335,11 +321,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </div>
             <template is="dom-repeat" items="{{toArray(messageData.*, item.$key)}}">
               <div style="display: flex;">
-                <div class="avatar" slot="item-icon" style="background-image: url([[userdata.profilePic]]);"></div>
+                <div class="avatar" slot="item-icon" style="background-image: url([[getUserInfo(item.userid, 'profilePic')]]);"></div>
                 <div class="commentBox">
                   <div class="commentContent horizontal">
                     <div style="word-break: break-word;">
-                      <span style="font-weight: bold; color: #365899;">[[getName(item.userid)]] </span>
+                      <span style="font-weight: bold; color: #365899;">[[getUserInfo(item.userid, 'name')]] </span>
                       [[item.comment]]
                     </div>
                   </div>
@@ -368,8 +354,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-dialog-scrollable>
       <paper-input type="file" id="noticePic" accept="image/jpeg"></paper-input>
       <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button autofocus on-tap="updateMessage">Submit</paper-button>
+        <paper-button id="addNoticeCancelButton" dialog-dismiss>Cancel</paper-button>
+        <paper-button id="addNoticeButton" autofocus on-tap="updateMessage">Submit</paper-button>
       </div>
     </paper-dialog>
 
@@ -388,7 +374,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <paper-listbox class="custom">
           <template is="dom-repeat" items="{{messageResponse}}" filter="{{isAttendingFilter}}" rendered-item-count="{{attendCount}}">
             <paper-item>
-              [[getName(item.$key)]]
+              [[getUserInfo(item.$key, 'name')]]
             </paper-item>
           </template>
         </paper-listbox>
@@ -396,7 +382,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <paper-listbox class="custom">
           <template is="dom-repeat" items="{{messageResponse}}" filter="{{isAbsentFilter}}" rendered-item-count="{{absentCount}}">
             <paper-item>
-              [[getName(item.$key)]]
+              [getUserInfo(item.$key, 'name')]]
             </paper-item>
           </template>
         </paper-listbox>
@@ -405,6 +391,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <paper-button dialog-dismiss>OK</paper-button>
       </div>
     </paper-dialog>
+
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
   </template>
 
   <script>
@@ -418,33 +407,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           msgKey: Object,
           boardImg: String,
           userList: Object,
-          state: {
-            type: Object,
-            observer: 'stateChanged'
-          }
         };
       }
 
       ready() {
         super.ready();
         console.log("HomeView ready.");
-      }
-
-      stateChanged() {
-        if (this.$.task.state == 'success'){
-          this.$.task.ref.getDownloadURL()
-            .then(function(url){
-              this.downloadUrl = url;
-              // Add image path to product entry.
-              this.$.doc.path = '/messages/' + this.msgKey + '/images';
-              this.$.doc.ref.set({
-                path: this.$.task.path,
-                downloadUrl: this.downloadUrl,
-              });
-              console.log(this.$.task.path);
-              this.msgKey = null;
-            }.bind(this));
-        }
       }
 
       addNotice() {
@@ -466,31 +434,71 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
         if(valid) {
           if (this.msgKey) {
+            // Disable buttons to prevent exiting dialog before upload is done.
+            this.$.addNoticeButton.disabled = true;
+            this.$.addNoticeCancelButton.disabled = true;
+
+            // If updating existing message
             this.$.doc.path = '/messages/' + this.msgKey;
             this.$.doc.ref.update({
               message: this.$.messageDesc.value
-            });
+            }).then(function(snapshot) {
+              this.uploadNoticeBoardImage();
+            }.bind(this)).catch(function(error) {
+              console.log(error);
+              this.$.updateNoticeDialog.close();
+            }.bind(this));
           }
           else {
-            // new message
+            // New message
             this.$.doc.path = '/messages';
-            this.msgKey = this.$.doc.ref.push({
+            this.$.doc.ref.push({
               message: this.$.messageDesc.value,
               time: {".sv":"timestamp"},
               event: this.$.eventToggle.checked
-            }).key;
+            }).then(function(snapshot) {
+              this.msgKey = snapshot.key;
+              this.uploadNoticeBoardImage();
+            }.bind(this)).catch(function(error) {
+              console.log(error);
+              this.$.updateNoticeDialog.close();
+            }.bind(this));
           }
+        }
+      }
 
-          // Upload notice board pic.
-          var file = this.$.noticePic.inputElement.inputElement.files[0];
-          if (file){
-            this.$.storage.path = '/messages';
-            this.$.task.task = this.$.storage.put(this.$.noticePic.inputElement.inputElement.files[0]);
-          }
-          else{
-            this.msgKey = null;
-          }
+      uploadNoticeBoardImage() {
+        // Upload notice board pic.
+        var file = this.$.noticePic.inputElement.inputElement.files[0];
+        if (file){
 
+          // Disable buttons to prevent exiting dialog before upload is done.
+          this.$.addNoticeCancelButton.disabled = true;
+          this.$.addNoticeButton.disabled = true;
+
+          this.$.storage.path = '/messages';
+          this.$.storage.put(file).then(function(snap) {
+            // TODO: Delete old image if exist
+            // Update product entry with image url
+            this.$.doc.path = '/messages/' + this.msgKey + '/images';
+            this.$.doc.ref.set({
+              path: snap.metadata.fullPath,
+              downloadUrl: snap.downloadURL,
+            });
+
+            this.$.updateNoticeDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          // Failed to upload
+          .catch(function(error) {
+            console.log(error);
+            this.$.updateNoticeDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
+        }
+        else{
           this.$.updateNoticeDialog.close();
         }
       }
@@ -516,7 +524,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           }.bind(this))
          .catch(function(error){
             console.log(error);
-          });
+          }.bind(this));
 
         this.$.deleteNotiDialog.close();
         Polymer.dom(document.body).removeChild(this.$.deleteNotiDialog);
@@ -544,6 +552,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.eventToggle.checked = false;
         this.$.eventToggle.disabled = false;
         this.$.noticePic.value = null;
+        this.$.addNoticeButton.disabled = false;
+        this.$.addNoticeCancelButton.disabled = false;
       }
 
       onEditDialogClose() {
@@ -588,8 +598,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.eventInfoDialog.open();
       }
 
-      getName(key) {
-        return this.userList[key].name;
+      getUserInfo(key, data) {
+        if (this.userList[key] != undefined) {
+          return this.userList[key][data];
+        }
       }
 
       isAttendingFilter(person) {

@@ -401,10 +401,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             }).then(function(result) {
               Polymer.dom(document.body).appendChild(this.$.successToast);
               this.$.successToast.open();
-            }.bind(this)).catch((err) => {
+            }.bind(this)).catch(function(error) {
               Polymer.dom(document.body).appendChild(this.$.failToast);
               this.$.failToast.open();
-            });
+            }.bind(this));
           }
           this.prodKey = null;
           this.$.adminRestockQty.value = null;
@@ -431,7 +431,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               this.uploadProductImage();
             }.bind(this)).catch(function(err) {
               this.$.addProdDialog.close();
-            });
+            }.bind(this));
           }
           else{
             this.$.doc.path = '/products';
@@ -445,7 +445,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               this.uploadProductImage();
             }.bind(this)).catch(function(err) {
               this.$.addProdDialog.close();
-            });
+            }.bind(this));
           }
         }
       }
@@ -473,11 +473,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.successToast.open();
           }.bind(this))
           // Failed to upload
-          .catch((err) => {
+          .catch(function(error) {
             this.$.addProdDialog.close();
             Polymer.dom(document.body).appendChild(this.$.failToast);
             this.$.failToast.open();
-          });
+          }.bind(this));
         }
         else{
           this.$.addProdDialog.close();
@@ -501,7 +501,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           }.bind(this)).catch(function(error) {
             Polymer.dom(document.body).appendChild(this.$.failToast);
             this.$.failToast.open();
-          });
+          }.bind(this));
 
         this.$.delProdDialog.close();
         Polymer.dom(document.body).removeChild(this.$.delProdDialog);
@@ -540,23 +540,23 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 this.$.restockProdDialog.close();
                 Polymer.dom(document.body).appendChild(this.$.successToast);
                 this.$.successToast.open();
-              }.bind(this)).catch((err) => {
+              }.bind(this)).catch(function(error) {
                 // Failed to upload image
                 this.$.restockProdDialog.close();
                 Polymer.dom(document.body).appendChild(this.$.uploadFailToast);
                 this.$.uploadFailToast.open();
-              });
+              }.bind(this));
             }
             // No image to upload
             else {
               this.$.restockProdDialog.close();
             }
-          }.bind(this)).catch((err) => {
+          }.bind(this)).catch(function(error) {
             // Failed to create new restock request
             this.$.restockProdDialog.close();
             Polymer.dom(document.body).appendChild(this.$.failToast);
             this.$.failToast.open();
-          });
+          }.bind(this));
         }
       }
 
