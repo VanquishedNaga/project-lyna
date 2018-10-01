@@ -140,20 +140,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </app-header-layout>
 
     <paper-dialog id="editInfo" on-iron-overlay-closed="onEditInfoClose" modal>
+      <h2>Update information</h2>
       <paper-dialog-scrollable>
-        <div style="
-          display: block;
-          padding: 16px;
-          width: 80%;
-          margin: auto;">
-          <h1 style="text-align: center;">Update Information</h1>
+        <div>
           <paper-input
-            required
             error-message="Field required!"
             id="userName"
             label="Full Name"
             value="[[userData.name]]"
-            always-float-label>
+            always-float-label required auto-validate>
           </paper-input>
           <paper-input
             disabled
@@ -168,7 +163,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             always-float-label>
           </paper-input>
           <paper-input
-            required
             allowed-pattern="[0-9]"
             char-counter
             minlength="12"
@@ -177,18 +171,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             id="userIc"
             label="IC Number"
             value="[[userData.icNum]]"
-            always-float-label>
+            always-float-label required auto-validate>
           </paper-input>
           <paper-input
-            required
             error-message="Invalid Field"
             id="userWechat"
             label="WeChat ID"
             value="[[userData.wechat]]"
-            always-float-label>
+            always-float-label required auto-validate>
           </paper-input>
           <paper-input
-            required
             allowed-pattern="[0-9]"
             error-message="Invalid Field"
             id="userPhone"
@@ -197,15 +189,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             minlength="10"
             maxlength="11"
             value="[[userData.phone]]"
-            always-float-label>
+            always-float-label required auto-validate>
           </paper-input>
           <paper-input
-            required
             error-message="Field required!"
             id="userAddress"
             label="Address"
             value="[[userData.address]]"
-            always-float-label>
+            always-float-label required auto-validate>
           </paper-input>
         </div>
       </paper-dialog-scrollable>
@@ -228,10 +219,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get properties() {
         return {
           user: Object,
-          userData: Object,
-          userList: Array,
-          uplineData: Object,
-          uplineUid: String,
         };
       }
 
@@ -318,10 +305,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         valid = this.$.userPhone.validate() && valid;
         valid = this.$.userAddress.validate() && valid;
         valid = this.$.userWechat.validate() && valid;
+        valid = this.$.userIc.validate() && valid;
 
         if (valid) {
-          this.$.doc.path = '/users/' + this.user.uid;
-          this.$.doc.ref.update({
+          this.$.user.ref.update({
               name: this.$.userName.value,
               phone: this.$.userPhone.value,
               address: this.$.userAddress.value,
