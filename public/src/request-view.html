@@ -95,16 +95,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       .requestList {
         padding: 16px;
-        min-width: 800px;
+        min-width: 900px;
       }
 
       .title {
         font-weight: bold;
-        margin-right: 16px;
+        flex: 1 0 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .list-content {
-        margin-right: 16px;
+        flex: 1 0 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       paper-icon-button {
@@ -116,30 +122,31 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
     </style>
 
-    <h1>Sent Request</h1>
+    <h1>Sent Requests</h1>
     <paper-listbox class="requestList">
       <template is="dom-if" if="[[count]]">
-        <paper-item>
-          <div class="product" style="margin-right: 16px;"></div>
-          <div class="title" style="width: 30%;">Product</div>
-          <div class="title" style="width: 15%;">Quantity</div>
-          <div class="title" style="width: 15%;">Status</div>
-          <div class="title" style="width: 10%;">Date</div>
-          <div class="title" style="width: 10%;">Time</div>
-          <div class="title" style="width: 10%;">Payment</div>
-        </paper-item>
+        <paper-icon-item>
+          <div class="product" slot="item-icon"
+          style="background-image: url('../images/AR.png');"></div>
+          <div class="title" style="flex: 2 0 180px;">Product</div>
+          <div class="title">Quantity</div>
+          <div class="title">Status</div>
+          <div class="title" style="flex-basis: 180px;">Time</div>
+          <div class="title">Payable</div>
+          <div class="title">Payment</div>
+        </paper-icon-item>
       </template>
 
       <template is="dom-repeat" items="{{ownRequestList}}" observe="status item.status" rendered-item-count="{{count}}">
         <paper-icon-item>
           <div class="product" slot="item-icon"
           style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-          <div class="list-content" style="width: 30%; ">[[getProductName(productsList.*, item.productID)]]</div>
-          <div class="list-content" style="width: 15%;">[[item.quantity]]</div>
-          <div class="list-content" style="width: 15%;">[[item.status]]</div>
-          <div class="list-content" style="width: 10%;">[[_formatEpochDate(item.time)]]</div>
-          <div class="list-content" style="width: 10%;">[[_formatEpochTime(item.time)]]</div>
-          <div class="list-content" style="width: 10%;">
+          <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
+          <div class="list-content">[[item.quantity]]</div>
+          <div class="list-content">[[item.status]]</div>
+          <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+          <div class="list-content">[[getPayable(item.payable)]]</div>
+          <div class="list-content">
             <paper-icon-button
             icon="icons:file-upload"
             on-tap="openUploadPayProofDialog"
@@ -158,17 +165,19 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </template>
     </paper-listbox>
 
-    <h1>Received Request</h1>
+    <h1>Pending Received Requests</h1>
       <paper-listbox class="requestList">
         <template is="dom-if" if="[[pendingReq]]">
           <paper-icon-item>
             <div class="product" slot="item-icon"
             style="background-image: url('../images/AR.png');"></div>
-            <div class="title" style="width: 40%;">Product</div>
-            <div class="title" style="width: 15%;">Requestor</div>
-            <div class="title" style="width: 15%;">Quantity</div>
-            <div class="title" style="width: 15%;">Payment</div>
-            <div class="title" style="width: 15%; min-width: 90px;">Action</div>
+            <div class="title" style="flex: 2 0 180px;">Product</div>
+            <div class="title">Requestor</div>
+            <div class="title" style="flex-basis: 180px;">Time</div>
+            <div class="title">Quantity</div>
+            <div class="title">Payable</div>
+            <div class="title">Payment</div>
+            <div class="title">Action</div>
           </paper-icon-item>
         </template>
 
@@ -176,16 +185,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <paper-icon-item>
           <div class="product" slot="item-icon"
           style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-          <div class="list-content" style="width: 40%;">[[getProductName(productsList.*, item.productID)]]</div>
-          <div class="list-content" style="width: 15%;">[[getRequestorName(usersList.*, item.requestor)]]</div>
-          <div class="list-content" style="width: 15%;">[[item.quantity]]</div>
-          <div class="list-content" style="width: 15%;">
+          <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
+          <div class="list-content">[[getRequestorName(usersList.*, item.requestor)]]</div>
+          <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+          <div class="list-content">[[item.quantity]]</div>
+          <div class="list-content">[[getPayable(item.payable)]]</div>
+          <div class="list-content">
             <paper-icon-button
             icon="icons:info"
             on-tap="openDisplayPayProofDialog"
             hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
           </div>
-          <div class="list-content" style="width: 15%; min-width: 90px;">
+          <div class="list-content">
             <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Approve" on-tap="openDialog">
             </paper-icon-button>
             <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Approve</paper-tooltip>
@@ -201,30 +212,31 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </template>
     </paper-listbox>
 
-    <h1>Past Received Request</h1>
+    <h1>Responded Received Requests</h1>
     <paper-listbox class="requestList">
       <template is="dom-if" if="[[historyReq]]">
-        <paper-item>
-          <div class="product" style="margin-right: 16px;"></div>
-          <div class="title" style="width: 30%;">Product</div>
-          <div class="title" style="width: 30%;">Requestor</div>
-          <div class="title" style="width: 10%;">Quantity</div>
-          <div class="title" style="width: 10%;">Status</div>
-          <div class="title" style="width: 10%;">Date</div>
-          <div class="title" style="width: 10%;">Time</div>
-        </paper-item>
+        <paper-icon-item>
+          <div class="product" slot="item-icon"
+          style="background-image: url('../images/AR.png');"></div>
+          <div class="title" style="flex: 2 0 180px;">Product</div>
+          <div class="title">Requestor</div>
+          <div class="title">Quantity</div>
+          <div class="title">Payable</div>
+          <div class="title">Status</div>
+          <div class="title" style="flex-basis: 180px;">Time</div>
+        </paper-icon-item>
       </template>
 
       <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestNotPending}}" observe="status item.status" rendered-item-count="{{historyReq}}">
         <paper-icon-item>
           <div class="product" slot="item-icon"
           style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-          <div class="list-content" style="width: 30%;">[[getProductName(productsList.*, item.productID)]]</div>
-          <div class="list-content" style="width: 30%;">[[getRequestorName(usersList.*, item.requestor)]]</div>
-          <div class="list-content" style="width: 10%;">[[item.quantity]]</div>
-          <div class="list-content" style="width: 10%;">[[item.status]]</div>
-          <div class="list-content" style="width: 10%">[[_formatEpochDate(item.time)]]</div>
-          <div class="list-content" style="width: 10%">[[_formatEpochTime(item.time)]]</div>
+          <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
+          <div class="list-content">[[getRequestorName(usersList.*, item.requestor)]]</div>
+          <div class="list-content">[[item.quantity]]</div>
+          <div class="list-content">[[getPayable(item.payable)]]</div>
+          <div class="list-content">[[item.status]]</div>
+          <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
         </paper-icon-item>
       </template>
 
@@ -417,7 +429,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         processRestock({key: this.requestKey, action: action, privilege: this.userdata.privilege})
         .then(function(result) {
         })
-        .catch((err) => {
+        .catch(function(err) {
         });
 
         this.$.actionDialog.close();
@@ -479,13 +491,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.uploadSuccessfulToast.open();
           }.bind(this))
           // Failed to upload
-          .catch((err) => {
+          .catch(function(err) {
             this.$.uploadPayProofDialog.close();
 
             // Display error message
             Polymer.dom(document.body).appendChild(this.$.uploadFailedToast);
             this.$.uploadFailedToast.open();
-          });
+          }.bind(this));
         }
         else {
           this.$.payProof.invalid = true;
@@ -498,6 +510,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.payProof.invalid = false;
         this.$.uploadButton.disabled = false;
         this.$.cancelUploadButton.disabled = false;
+      }
+
+      getPayable(payable) {
+        if (payable) {
+          return 'RM' + payable;
+        }
+        else {
+          return '-';
+        }
       }
     }
 

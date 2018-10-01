@@ -260,10 +260,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           type="number"
           min="1"
           id="prodQuan"
+          value="{{prodQty}}"
           label="Product Quantity">
         </paper-input>
         <p>Unit price: RM[[getPrices(productsData.*, prodKey, userdata.level)]] </p>
-        <p>Total payable: RM[[getPayable(productsData.*, prodKey, userdata.level, quantity)]] </p>
+        <p>Total payable: RM[[getPayable(productsData.*, prodKey, userdata.level, prodQty)]] </p>
         <paper-input type="file" id="payProof" accept="image/jpeg" label="Upload payment proof"></paper-input>
         </paper-dialog-scrollable>
       <div class="buttons">
@@ -517,12 +518,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           // Create new restock request
           this.$.doc.path = '/productRequests';
           this.$.doc.ref.push({
+            payable: (this.productsData[this.prodKey]['prices'][this.userdata.level] * this.$.prodQuan.value).toFixed(2),
             productID: this.prodKey,
             quantity: this.$.prodQuan.value,
             requestor: this.user.uid,
-            upline: this.uplineUid,
             status: "Pending",
-            time: {".sv":"timestamp"}
+            time: {".sv":"timestamp"},
+            upline: this.uplineUid,
           }).then(function(reqSnap) {
             // Upload payment proof.
             var file = this.$.payProof.inputElement.inputElement.files[0];
@@ -600,11 +602,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       getPayable(change, prodKey, level, quantity) {
-        if (prodKey != undefined
-            && change.base[prodKey] != undefined
-            && change.base[prodKey]['prices'] != undefined
-            && !isNaN(quantity)) {
+        if (prodKey && change.base[prodKey] && change.base[prodKey]['prices'] && quantity) {
           return (change.base[prodKey]['prices'][level] * quantity).toFixed(2);
+        }
+        else {
+          return (0).toFixed(2);
         }
       }
     }
