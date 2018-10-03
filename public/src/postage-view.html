@@ -1,0 +1,247 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="shared-styles.html">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+
+<script src="../bower_components/strftime/strftime-min.js"></script>
+
+<dom-module id="postage-view">
+  <template>
+    <firebase-document
+      id="requests"
+      path = "/reloadPostageRequests"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-query
+      path = "/reloadPostageRequests"
+      order-by-child="uid"
+      equal-to="[[user.uid]]"
+      data="{{myRequests}}"
+      app-name="absolute-reborn">
+    </firebase-query>
+
+    <firebase-storage-ref
+      id="storage"
+      app-name="absolute-reborn"
+      path="/payProof"
+      force-unique>
+    </firebase-storage-ref>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 16px;
+      }
+
+      .postage {
+        padding: 16px;
+        background-color: white;
+      }
+
+      .list-column {
+        flex: 1 0 90px;
+      }
+
+      .editButton {
+        right: 25px;
+        bottom: 30px;
+        position: fixed;
+      }
+
+      h1 {
+        font-family: 'Roboto Condensed', sans-serif;
+      }
+    </style>
+
+    <h1>Postage</h1>
+    <div class="postage">
+      Balance: RM0.00
+      <paper-button on-tap="openReloadPostageDialog" class="custom" style="float: right;">
+        <iron-icon icon="icons:add-circle"></iron-icon>
+        <span>Reload</span>
+      </paper-button>
+      <span style="clear: right; display: block"></span>
+    </div>
+
+    <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}">
+      <paper-item style="font-weight: bold;">
+          <div class="list-column">Amount</div>
+          <div class="list-column">Status</div>
+          <div class="list-column">Payment</div>
+      </paper-item>
+      <template is="dom-repeat" items="{{myRequests}}">
+        <paper-item key="[[item.$key]]">
+          <div class="list-column">RM[[item.amount]]</div>
+          <div class="list-column">[[item.status]]</div>
+          <div class="list-column">
+            <paper-icon-button
+            icon="icons:info"
+            on-tap="openDisplayPayProofDialog"
+            hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
+          </div>
+        </paper-item>
+      </template>
+    </paper-listbox>
+
+    <!-- Dialogs -->
+    <paper-dialog id="reloadPostageDialog" on-iron-overlay-closed="onReloadPostageDialogClosed" modal>
+      <h2>Reload Postage</h2>
+      <div>Balance: RM0.00</div>
+      <paper-input
+      id="reloadAmount"
+      label="Reload Amount"
+      pattern="^\d*\.?\d{0,2}$"
+      error-message="Field required!"
+      always-float-label required auto-validate><div slot="prefix">RM</div></paper-input>
+      <paper-input type="file" id="payProof" accept="image/jpeg" label="Upload payment proof"></paper-input>
+      <div class="buttons">
+        <paper-button id="reloadPostageDialogCancelButton" dialog-dismiss>Cancel</paper-button>
+        <paper-button id="reloadPostageDialogOkButton" on-tap="reloadPostage">Reload</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog
+    id="displayPayProofDialog"
+    modal
+    style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: black;">
+      <img
+      src="[[payProof]]"
+      alt="payProof"
+      style="
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      padding: 0;
+      max-height: 100%;
+      max-width: 100%;"/>
+      <paper-icon-button
+      icon="icons:close"
+      on-tap="closeDisplayPayProofDialog"
+      style="
+      margin: 0;
+      padding: 8px;
+      color: white;
+      background-color: black;
+      float: right;"></paper-icon-button>
+    </paper-dialog>
+
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
+  </template>
+
+  <script>
+    class PostageView extends Polymer.Element {
+      static get is() { return 'postage-view'; }
+      static get properties() {
+        return {
+          user: Object,
+          userdata: Object,
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("PostageView ready.");
+      }
+
+      openReloadPostageDialog() {
+        Polymer.dom(document.body).appendChild(this.$.reloadPostageDialog);
+        this.$.reloadPostageDialog.open();
+      }
+
+      onReloadPostageDialogClosed() {
+        this.$.reloadAmount.value = null;
+        this.$.reloadAmount.invalid = false;
+        this.$.payProof.value = null;
+        this.$.payProof.invalid = false;
+        this.$.reloadPostageDialogCancelButton.disabled = false;
+        this.$.reloadPostageDialogOkButton.disabled = false;
+      }
+
+      reloadPostage() {
+        var inputValid = this.$.reloadAmount.validate();
+        var imageFile = this.$.payProof.inputElement.inputElement.files[0];
+        this.$.payProof.invalid = imageFile ? false : true;
+        inputValid = imageFile && inputValid;
+
+        if (inputValid) {
+          // Disable buttons
+          this.$.reloadPostageDialogCancelButton.disabled = true;
+          this.$.reloadPostageDialogOkButton.disabled = true;
+
+          // Upload image first
+          this.$.storage.put(imageFile).then(function(imageSnap) {
+            // Push reload request entry
+            this.$.requests.ref.push({
+              uid: this.user.uid,
+              amount: this.$.reloadAmount.value,
+              status: 'Pending',
+              payProof: {
+                path: imageSnap.metadata.fullPath,
+                downloadUrl: imageSnap.downloadURL,
+              }
+            }).then(function(snap) {
+              // Good case
+              this.$.reloadPostageDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.successToast);
+              this.$.successToast.open();
+            }.bind(this)).catch(function(err) {
+              // Failed to create new entry
+              this.$.reloadPostageDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.failToast);
+              this.$.failToast.open();
+            }.bind(this));
+          }.bind(this)).catch(function(error) {
+            // Failed to upload image
+            this.$.reloadPostageDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
+        }
+      }
+
+      hasPayProof(change) {
+        return (change.base['payProof']);
+      }
+
+      openDisplayPayProofDialog(event) {
+        if (event.model.item.payProof.downloadUrl) {
+          this.payProof = event.model.item.payProof.downloadUrl;
+          Polymer.dom(document.body).appendChild(this.$.displayPayProofDialog);
+          this.$.displayPayProofDialog.open();
+        }
+      }
+
+      closeDisplayPayProofDialog() {
+        this.$.displayPayProofDialog.close();
+      }
+    }
+
+    window.customElements.define(PostageView.is, PostageView);
+  </script>
+</dom-module>

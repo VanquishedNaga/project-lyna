@@ -29,6 +29,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="inventory-view.html">
 <link rel="import" href="request-view.html">
+<link rel="import" href="postage-view.html">
 
 <dom-module id="store-view">
   <template>
@@ -208,6 +209,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </div>
         <inventory-view user="[[user]]" page-name="Inventory"></inventory-view>
         <request-view user="[[user]]" userdata="[[userdata]]" page-name="Request"></request-view>
+        <postage-view user="[[user]]" userdata="[[userdata]]" page-name="Postage"></postage-view>
       </iron-pages>
     </app-header-layout>
 
@@ -319,7 +321,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           tabItems: {
             type: Array,
             value: function() {
-              return ['Product', 'Inventory', 'Request'];
+              return ['Product', 'Inventory', 'Request', 'Postage'];
             }
           },
           prodItems: Array,
