@@ -51,14 +51,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         background-color: white;
       }
 
-      .list-column {
+      .list-content {
         flex: 1 0 90px;
-      }
-
-      .editButton {
-        right: 25px;
-        bottom: 30px;
-        position: fixed;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       h1 {
@@ -78,15 +75,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}">
       <paper-item style="font-weight: bold;">
-          <div class="list-column">Amount</div>
-          <div class="list-column">Status</div>
-          <div class="list-column">Payment</div>
+          <div class="list-content">Amount</div>
+          <div class="list-content">Time</div>
+          <div class="list-content">Status</div>
+          <div class="list-content">Payment</div>
       </paper-item>
       <template is="dom-repeat" items="{{myRequests}}">
         <paper-item key="[[item.$key]]">
-          <div class="list-column">RM[[item.amount]]</div>
-          <div class="list-column">[[item.status]]</div>
-          <div class="list-column">
+          <div class="list-content">RM[[item.amount]]</div>
+          <div class="list-content">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+          <div class="list-content">[[item.status]]</div>
+          <div class="list-content">
             <paper-icon-button
             icon="icons:info"
             on-tap="openDisplayPayProofDialog"
@@ -201,6 +200,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               uid: this.user.uid,
               amount: this.$.reloadAmount.value,
               status: 'Pending',
+              time: {".sv":"timestamp"},
               payProof: {
                 path: imageSnap.metadata.fullPath,
                 downloadUrl: imageSnap.downloadURL,

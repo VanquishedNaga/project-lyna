@@ -1,0 +1,260 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="shared-styles.html">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+
+<script src="../bower_components/strftime/strftime-min.js"></script>
+
+<dom-module id="postage-admin-view">
+  <template>
+    <firebase-document
+      app-name="absolute-reborn"
+      path = "/users"
+      data="{{userList}}">
+    </firebase-document>
+
+    <firebase-document
+      id="requests"
+      path = "/reloadPostageRequests"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="selected"
+      app-name="absolute-reborn"
+      path = "/reloadPostageRequests/[[selectedKey]]"
+      data="{{selectedRequest}}">
+    </firebase-document>
+
+    <firebase-query
+      path = "/reloadPostageRequests"
+      order-by-child="uid"
+      equal-to="[[user.uid]]"
+      data="{{myRequests}}"
+      app-name="absolute-reborn">
+    </firebase-query>
+
+    <firebase-storage-ref
+      id="storage"
+      app-name="absolute-reborn"
+      path="/payProof"
+      force-unique>
+    </firebase-storage-ref>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 16px;
+      }
+
+      paper-item {
+        display: flex;
+      }
+
+      .list-content {
+        flex: 1 0 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .big-list-content {
+        flex: 2 0 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      h1 {
+        font-family: 'Roboto Condensed', sans-serif;
+      }
+    </style>
+
+    <h1>Postage reload requests</h1>
+    <paper-listbox id="salesList" class="custom" attr-for-selected="key" style="min-width: 650px;">
+      <paper-item style="font-weight: bold;">
+          <div class="list-content">User</div>
+          <div class="list-content">Amount</div>
+          <div class="big-list-content">Time</div>
+          <div class="list-content">Status</div>
+          <div class="list-content">Payment</div>
+          <div class="list-content">Action</div>
+      </paper-item>
+      <template is="dom-repeat" items="{{myRequests}}">
+        <paper-item key="[[item.$key]]">
+          <div class="list-content">[[getUserInfo(userList.*, item.uid, 'name')]]</div>
+          <div class="list-content">RM[[item.amount]]</div>
+          <div class="big-list-content">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+          <div class="list-content">[[item.status]]</div>
+          <div class="list-content">
+            <paper-icon-button
+            icon="icons:info"
+            on-click="openDisplayPayProofDialog"
+            hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
+          </div>
+          <div class="list-content">
+            <paper-icon-button icon="icons:more-horiz" alt="Accept" on-click="openActionDialog" hidden$="[[!isRequestPending(item.*)]]">
+            </paper-icon-button>
+          </div>
+        </paper-item>
+      </template>
+    </paper-listbox>
+
+    <!-- Dialogs -->
+    <paper-dialog id="actionDialog" on-iron-overlay-closed="onActionDialogClosed" modal>
+      <h2>Process reload request</h2>
+      <div>User: [[getUserInfo(userList.*, selectedRequest.uid, 'name')]]</div>
+      <div>Amount: RM[[selectedRequest.amount]]</div>
+      <div class="buttons">
+        <paper-button id="actionDialogCancelButton" dialog-dismiss>Cancel</paper-button>
+        <paper-button id="actionDialogRejectButton" on-click="rejectReload">Reject</paper-button>
+        <paper-button id="actionDialogApproveButton" on-click="approveReload">Approve</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog
+    id="displayPayProofDialog"
+    modal
+    style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: black;">
+      <img
+      src="[[payProof]]"
+      alt="payProof"
+      style="
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      padding: 0;
+      max-height: 100%;
+      max-width: 100%;"/>
+      <paper-icon-button
+      icon="icons:close"
+      on-click="closeDisplayPayProofDialog"
+      style="
+      margin: 0;
+      padding: 8px;
+      color: white;
+      background-color: black;
+      float: right;"></paper-icon-button>
+    </paper-dialog>
+
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
+  </template>
+
+  <script>
+    class PostageAdminView extends Polymer.Element {
+      static get is() { return 'postage-admin-view'; }
+      static get properties() {
+        return {
+          user: Object,
+          userdata: Object,
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("PostageAdminView ready.");
+      }
+
+      hasPayProof(change) {
+        return (change.base['payProof']);
+      }
+
+      openDisplayPayProofDialog(event) {
+        if (event.model.item.payProof.downloadUrl) {
+          this.payProof = event.model.item.payProof.downloadUrl;
+          Polymer.dom(document.body).appendChild(this.$.displayPayProofDialog);
+          this.$.displayPayProofDialog.open();
+        }
+      }
+
+      closeDisplayPayProofDialog() {
+        this.$.displayPayProofDialog.close();
+      }
+
+      _formatEpochDate(eTS) {
+        return strftime('%D', new Date(eTS));
+      }
+
+      _formatEpochTime(eTS) {
+        return strftime('%I:%M %P', new Date(eTS));
+      }
+
+      getUserInfo(change, key, data) {
+        if (change.base && change.base[key]){
+          return change.base[key][data];
+        }
+      }
+
+      openActionDialog(event) {
+        this.selectedKey = event.model.item.$key;
+
+        Polymer.dom(document.body).appendChild(this.$.actionDialog);
+        this.$.actionDialog.open();
+      }
+
+      onActionDialogClosed() {
+        this.$.actionDialogCancelButton.disabled = false;
+        this.$.actionDialogRejectButton.disabled = false;
+        this.$.actionDialogApproveButton.disabled = false;
+      }
+
+      approveReload() {
+        this.processReload('Approved');
+      }
+
+      rejectReload() {
+        this.processReload('Rejected');
+      }
+
+      processReload(action) {
+        // Disable buttons
+        this.$.actionDialogCancelButton.disabled = true;
+        this.$.actionDialogRejectButton.disabled = true;
+        this.$.actionDialogApproveButton.disabled = true;
+
+        // Update request status, cloud will delete image and update user balance
+        this.$.selected.ref.update({
+          status: action,
+        }).then(function(snap) {
+          this.$.actionDialog.close();
+          Polymer.dom(document.body).appendChild(this.$.successToast);
+          this.$.successToast.open();
+        }.bind(this)).catch(function(err) {
+          this.$.actionDialog.close();
+          Polymer.dom(document.body).appendChild(this.$.failToast);
+          this.$.failToast.open();
+        }.bind(this));
+      }
+
+      isRequestPending(change) {
+        return (change.base['status'] == 'Pending');
+      }
+    }
+
+    window.customElements.define(PostageAdminView.is, PostageAdminView);
+  </script>
+</dom-module>

@@ -1,0 +1,75 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/iron-overlay-behavior/iron-overlay-behavior.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="postage-admin-view.html">
+
+<dom-module id="warehouse-view">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <app-header-layout>
+      <app-header slot="header" condenses shadow fixed effect="waterfall">
+        <app-toolbar class="header">
+          <slot name="drawer-toggle"></slot>
+          <div>Warehouse</div>
+        </app-toolbar>
+        <app-toolbar class="tabs-bar" hidden$="{{!wideLayout}}" sticky>
+          <paper-tabs id="tabs" selected="{{selected}}" attr-for-selected="name">
+            <template is="dom-repeat" items="{{tabItems}}">
+              <paper-tab name$="{{item}}">{{item}}</paper-tab>
+            </template>
+          </paper-tabs>
+        </app-toolbar>
+      </app-header>
+
+      <iron-pages selected="{{selected}}" attr-for-selected="page-name">
+        <postage-admin-view user="[[user]]" userdata="[[userdata]]" page-name="Postage"></postage-admin-view>
+      </iron-pages>
+    </app-header-layout>
+
+  </template>
+
+  <script>
+    class WarehouseView extends Polymer.Element {
+      static get is() { return 'warehouse-view'; }
+      static get properties() {
+        return {
+          user: Object,
+          userdata: Object,
+          selected: {
+            type: String,
+            value: 'Postage'
+          },
+          tabItems: {
+            type: Array,
+            value: function() {
+              return ['Postage'];
+            }
+          },
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("WarehouseView ready.");
+      }
+    }
+    window.customElements.define(WarehouseView.is, WarehouseView);
+  </script>
+</dom-module>

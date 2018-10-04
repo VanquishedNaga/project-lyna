@@ -16,20 +16,21 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/maps-icons.html">
 <link rel="import" href="../bower_components/iron-icons/social-icons.html">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="my-icons.html">
 <link rel="import" href="shared-styles.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <script src="../bower_components/firebase/firebase-functions.js"></script>
 
 <!-- Lazy imports -->
+<link rel="lazy-import" href="admin-view.html">
 <link rel="lazy-import" href="home-view.html">
-<link rel="lazy-import" href="store-view.html">
+<link rel="lazy-import" href="not-found-view.html">
 <link rel="lazy-import" href="people-view.html">
 <link rel="lazy-import" href="profile-view.html">
-<link rel="lazy-import" href="admin-view.html">
-<link rel="lazy-import" href="not-found-view.html">
+<link rel="lazy-import" href="store-view.html">
+<link rel="lazy-import" href="warehouse-view.html">
 
 <dom-module id="app-view">
   <template>
@@ -171,6 +172,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <a name="profile" href="[[rootPath]]app/profile">
               <iron-icon icon="icons:account-circle"></iron-icon> Profile
             </a>
+            <template is="dom-if" if="[[isAdminOrManager(userdata.privilege)]]">
+              <a name="warehouse" href="[[rootPath]]app/warehouse">
+                <iron-icon icon="icons:dashboard"></iron-icon> Warehouse
+              </a>
+            </template>
             <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
               <a name="admin" href="[[rootPath]]app/admin">
                 <iron-icon icon="icons:supervisor-account"></iron-icon> Admin
@@ -229,6 +235,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <profile-view name="profile" user="[[user]]">
           <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
         </profile-view>
+        <div name="warehouse">
+          <template is="dom-if" if="[[isAdminOrManager(userdata.privilege)]]">
+            <warehouse-view user="[[user]]" userdata="[[userdata]]">
+              <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
+            </warehouse-view>
+          </template>
+        </div>
         <div name="admin">
           <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
             <admin-view user="[[user]]" userdata="[[userdata]]">
@@ -277,7 +290,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       ready(){
         super.ready();
         console.log("AppView is ready.");
-        this.userPic = this.shadowRoot.querySelector('#user-pic');
       }
 
       _routePageChanged(page) {
@@ -300,6 +312,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           case "sales":
           case "people":
           case "profile":
+          case "warehouse":
           case "admin":
             break;
           default: {
@@ -318,7 +331,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       _showPage404() {
         this.page = 'not-found';
-        console.log('app view error 404');
       }
 
       signOut() {
@@ -335,6 +347,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       isAdmin(privilege){
         return (privilege == "Admin");
+      }
+
+      isAdminOrManager(privilege){
+        return ((privilege == "Admin") || (privilege == "Store Manager"));
       }
 
       getLevelName(change, level) {
