@@ -65,7 +65,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <h1>Postage</h1>
     <div class="postage">
-      Balance: RM0.00
+      Balance: RM[[getBalance(userdata.*)]]
       <paper-button on-tap="openReloadPostageDialog" class="custom" style="float: right;">
         <iron-icon icon="icons:add-circle"></iron-icon>
         <span>Reload</span>
@@ -98,7 +98,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <!-- Dialogs -->
     <paper-dialog id="reloadPostageDialog" on-iron-overlay-closed="onReloadPostageDialogClosed" modal>
       <h2>Reload Postage</h2>
-      <div>Balance: RM0.00</div>
+      <div>Balance: RM[[getBalance(userdata.*)]]</div>
       <paper-input
       id="reloadAmount"
       label="Reload Amount"
@@ -198,7 +198,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             // Push reload request entry
             this.$.requests.ref.push({
               uid: this.user.uid,
-              amount: this.$.reloadAmount.value,
+              amount: parseFloat(this.$.reloadAmount.value).toFixed(2),
               status: 'Pending',
               time: {".sv":"timestamp"},
               payProof: {
@@ -239,6 +239,23 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       closeDisplayPayProofDialog() {
         this.$.displayPayProofDialog.close();
+      }
+
+      getBalance(change) {
+        if (change.base['postage']) {
+          return change.base['postage'];
+        }
+        else {
+          return (0).toFixed(2);
+        }
+      }
+
+      _formatEpochDate(eTS) {
+        return strftime('%D', new Date(eTS));
+      }
+
+      _formatEpochTime(eTS) {
+        return strftime('%I:%M %P', new Date(eTS));
       }
     }
 

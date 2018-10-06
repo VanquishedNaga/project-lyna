@@ -47,8 +47,8 @@ exports.processRestockRequestFunction = functions.https.onCall((data, context) =
       // Check if payment proof was uploaded
       if (snapshot.hasChild('payProof')) {
         // Delete the photo
-        var photoPath = snapshot.val().payProof.path;
-        admin.storage().bucket().file(photoPath).delete();
+        var imagePath = snapshot.val().payProof.path;
+        admin.storage().bucket().file(imagePath).delete();
         admin.database().ref('/productRequests/' + key + '/payProof').remove();
       }
 
@@ -237,3 +237,42 @@ function cleanupTokens(response, tokens) {
  });
  return admin.database().ref().update(tokensToRemove);
 }
+
+// When a postage reload request is processed, update user postage balance and remove attached payment proof
+exports.processPostageReload = functions.database.ref('/reloadPostageRequests/{requestId}').onWrite((change, context) => {
+  var retVal = null;
+  // Don't care new request
+  if (!change.before.exists()) {
+  }
+  // Request deleted
+  else if (!change.after.exists()) {
+    // Delete attached image
+    const before = change.before.val();
+    if (before.payProof) {
+      // Delete the photo
+      var imagePath = before.payProof.path;
+      admin.storage().bucket().file(imagePath).delete();
+    }
+  }
+  else {
+    const before = change.before.val();
+    const after = change.after.val();
+    if (((after.status == 'Approved') || (after.status == 'Rejected')) && (before.status != after.status)) {
+      if (after.status == 'Approved') {
+        // Update balance
+        admin.database().ref('/users/' + after.uid + '/postage').transaction(function(currentAmount) {
+          return (parseFloat(currentAmount || 0) + parseFloat(after.amount)).toFixed(2);
+        });
+      }
+
+      // Delete attached image
+      if (after.payProof) {
+        // Delete the photo
+        var imagePath = after.payProof.path;
+        admin.storage().bucket().file(imagePath).delete();
+        admin.database().ref('/reloadPostageRequests/' + context.params.requestId + '/payProof').remove();
+      }
+    }
+  }
+  return retVal;
+});
