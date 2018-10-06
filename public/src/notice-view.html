@@ -1,0 +1,597 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="shared-styles.html">
+
+<script src="../bower_components/strftime/strftime-min.js"></script>
+
+<dom-module id="notice-view">
+  <template>
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="userList"
+      path = "/users"
+      data = "{{userList}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-query
+      id="commentList"
+      path = "/messages/[[messagekey]]/comments"
+      data = "{{commentList}}"
+      app-name="absolute-reborn">
+    </firebase-query>
+
+    <firebase-document
+      id="messageData"
+      path = "/messages/[[messagekey]]"
+      data = "{{messageData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-query
+      id="messageResponse"
+      path = "/messages/{{messagekey}}/response"
+      data = "{{messageResponse}}"
+      app-name="absolute-reborn">
+    </firebase-query>
+
+    <firebase-storage-ref
+      id="storage"
+      app-name="absolute-reborn"
+      path="/messages"
+      force-unique>
+    </firebase-storage-ref>
+
+    <style include="shared-styles">
+      :root {
+        --radius: 5px;
+      }
+
+      .noti-card {
+        width: 80%;
+        min-width: 282px;
+        margin: 16px;
+        font-family: 'Roboto Condensed', sans-serif;
+        margin-left: auto;
+        margin-right: auto;
+        border-radius: var(--radius);
+      }
+
+      .noti-header {
+        background-color: var(--app-primary-color);
+        color: white;
+        display: flex;
+        flex-wrap: wrap;
+        border-radius: var(--radius) var(--radius) 0 0;
+      }
+
+      span.header {
+        padding: 8px;
+        font-size: 1.1em;
+      }
+
+      .noti-desc {
+        overflow: auto;
+        white-space: pre-line;
+      }
+
+      .board-content {
+        clear: right;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .noti-info {
+        min-width: 250px;
+        word-break: break-word;
+        hyphens: manual;
+        vertical-align: top;
+        margin: 16px;
+        max-height: 250px;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 250px;
+      }
+
+      .noti-act {
+        float: right;
+        margin-left: auto;
+      }
+
+      .msg-event-actions {
+        background-color: var(--app-primary-color);
+        color: white;
+        display: flex;
+        flex-wrap: wrap;
+        border-radius: 0 0 var(--radius) var(--radius);
+      }
+
+      .horizontal {
+        @apply(--layout-horizontal);
+      }
+
+      .avatar {
+        margin: 0 12px 0 12px;
+      }
+
+      paper-textarea.commentCustom {
+        width: 90%;
+        margin: 0 0 16px 0;
+        word-break: break-word;
+        --paper-input-container-color: black;
+        --paper-input-container-focus-color: black;
+        --paper-input-container-invalid-color: black;
+        border: 1px solid #BDBDBD;
+        border-radius: 20px;
+        background-color: #F2F3F5;
+
+        /* Reset some defaults */
+        --paper-input-container: {
+          padding: 3px;
+        };
+        --paper-input-container-underline: { display: none; height: 0;};
+        --paper-input-container-underline-focus: { display: none; };
+
+        --paper-input-container-label: {
+          margin: 4px;
+          font-size: 10pt;
+          color: gray;
+        };
+
+        /* New custom styles */
+        --paper-input-container-input: {
+          margin: 3px;
+          box-sizing: border-box;
+          font-size: 10pt;
+        };
+      }
+
+      .commentBox {
+        width: 90%;
+        border: 1px solid #BDBDBD;
+        border-radius: 20px;
+        background-color: #EFF1F3;
+        max-width: 90%;
+        margin: 0 12px 0 0;
+      }
+
+      .commentContent {
+        font-size: 10pt;
+        margin: 10px;
+        font-family: sans-serif;
+      }
+
+      img{
+        width: 90%;
+        height: 250px;
+        background-repeat: no-repeat;
+        object-fit: contain;
+        background-color: white;
+        background-size: cover;
+        margin: auto;
+        margin-top: 16px;
+      }
+
+      paper-icon-button.attend {
+        color: grey;
+      }
+
+      paper-icon-button.post {
+        color: var(--app-secondary-color);
+      }
+
+      paper-button.comments {
+        font-size: 11pt;
+        text-transform: none;
+        margin: 0 0 0 12px;
+        font-family: sans-serif;
+        width: 100%;
+        --paper-button: {
+          @apply(--layout-start-justified);
+        };
+      }
+
+      paper-button.comments:hover {
+        color: var(--app-primary-color);
+      }
+    </style>
+      <paper-card class="noti-card horizontal">
+        <div style="width: 100%;">
+          <div class="noti-header">
+            <span class="header">
+              <iron-icon icon="icons:speaker-notes"></iron-icon>
+              Notice Board
+            </span>
+            <div class="noti-act">
+              <paper-icon-button hidden$="[[!isAdmin(userdata.privilege)]]" icon="icons:create" on-tap="editNotice"></paper-icon-button>
+              <paper-icon-button hidden$="[[!isAdmin(userdata.privilege)]]" icon="icons:delete" on-tap="delNotice"></paper-icon-button>
+              <paper-icon-button hidden$="[[!messageData.event]]" icon="icons:info-outline" on-tap="openEventInfo"></paper-icon-button>
+            </div>
+          </div>
+          <div class="board-content">
+            <img src="[[messageData.images.downloadUrl]]" alt="boardPic"
+              onerror="this.style.display='none'"
+              onload="this.style.display='block'"/>
+            <div class="card-content noti-info">
+              <div class="noti-desc">[[messageData.message]]</div>
+              <br>
+              <span style="display: inline;">
+                <span style="font-weight: bold;">Posted on </span>
+                <span>[[_formatEpochDate(messageData.time)]] [[_formatEpochTime(messageData.time)]]</span>
+              </span>
+            </div>
+          </div>
+          <template is="dom-if" if="[[messageData.event]]" restamp class="msg-event-actions">
+            <div class="msg-event-actions">
+              <span class="header">Attend?</span>
+              <div style="margin-left: auto;">
+                <paper-icon-button icon="icons:check" on-tap="attend" class$="[[isAttending(messageData.*, 'true')]]"></paper-icon-button>
+                <paper-icon-button icon="icons:clear" on-tap="absent" class$="[[isAttending(messageData.*, 'false')]]"></paper-icon-button>
+              </div>
+            </div>
+          </template>
+          <hr>
+          <template is="dom-if" if="[[isLoadPostNeeded(commentList.*, loadedComments)]]" >
+            <paper-button id="loadCommentsButton" on-tap="loadPreviousComments" class="comments">
+              <iron-icon icon="refresh"></iron-icon>
+              <span> Load Previous Comments</span>
+            </paper-button>
+          </template>
+          <template is="dom-repeat" items="{{limitComments(commentList.*, loadedComments)}}">
+            <div style="display: flex;">
+              <div class="avatar" slot="item-icon" style="background-image: url([[getUserInfo(userList.*, item.userid, 'profilePic')]]);"></div>
+              <div class="commentBox">
+                <div class="commentContent horizontal">
+                  <div style="word-break: break-word;">
+                    <span style="font-weight: bold; color: #365899;">[[getUserInfo(userList.*, item.userid, 'name')]] </span>
+                    [[item.comment]]
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="margin: 1px 0 12px 74px; font-size: 0.9em; color: gray;">
+              [[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]
+            </div>
+          </template>
+          <div style="display: flex;">
+            <div class="avatar" slot="item-icon" style="background-image: url([[userdata.profilePic]]);"></div>
+            <paper-textarea
+              class="commentCustom"
+              id="commentField"
+              label="Write a comment..."
+              no-label-float>
+            </paper-textarea>
+            <paper-icon-button icon="icons:send" class="post" on-tap="postComment"></paper-icon-button>
+          </div>
+        </div>
+      </paper-card>
+
+      <paper-dialog id="updateNoticeDialog" on-iron-overlay-closed="onEditDialogClose" modal>
+        <h2>Notice Board Message</h2>
+        <paper-toggle-button id="eventToggle" >Event</paper-toggle-button>
+        <paper-dialog-scrollable>
+          <paper-textarea
+            required
+            error-message="Field required!"
+            always-float-label
+            id="messageDesc"
+            label="Notice Board Message">
+          </paper-textarea>
+        </paper-dialog-scrollable>
+        <paper-input type="file" id="noticePic" accept="image/jpeg"></paper-input>
+        <div class="buttons">
+          <paper-button id="addNoticeCancelButton" dialog-dismiss>Cancel</paper-button>
+          <paper-button id="addNoticeButton" autofocus on-tap="updateMessage">Submit</paper-button>
+        </div>
+      </paper-dialog>
+
+      <paper-dialog id="deleteNotiDialog" modal>
+        <p>Are you sure you want to delete this message?</p>
+        <div class="buttons">
+          <paper-button dialog-dismiss>No</paper-button>
+          <paper-button autofocus on-tap="deleteMessage">Yes
+          </paper-button>
+        </div>
+      </paper-dialog>
+
+      <paper-dialog id="eventInfoDialog" on-iron-overlay-closed="onDialogClose" modal>
+        <paper-dialog-scrollable>
+          <div class="eventInfoHeader">Attending: [[attendCount]]</div>
+          <paper-listbox class="custom">
+            <template is="dom-repeat" items="{{messageResponse}}" filter="{{isAttendingFilter}}" rendered-item-count="{{attendCount}}" observe="$val item.$val">
+              <paper-item>
+                [[getUserInfo(userList.*, item.$key, 'name')]]
+              </paper-item>
+            </template>
+          </paper-listbox>
+          <div class="eventInfoHeader">Not attending: [[absentCount]]</div>
+          <paper-listbox class="custom">
+            <template is="dom-repeat" items="{{messageResponse}}" filter="{{isAbsentFilter}}" rendered-item-count="{{absentCount}}" observe="$val item.$val">
+              <paper-item>
+                [[getUserInfo(userList.*, item.$key, 'name')]]
+              </paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-dismiss>OK</paper-button>
+        </div>
+      </paper-dialog>
+
+      <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+      <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
+  </template>
+
+  <script>
+    class NoticeView extends Polymer.Element {
+      static get is() { return 'notice-view'; }
+      static get properties() {
+        return {
+          userdata: Object,
+          user: Object,
+          messagekey: Object,
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("NoticeView ready.");
+
+        /* Initiate the value to load the posts. */
+        this.loadedComments = 5;
+      }
+
+      editNotice(e) {
+        this.$.messageDesc.value = this.messageData.message;
+        this.$.eventToggle.checked = this.messageData.event;
+        this.$.eventToggle.disabled = true;
+        Polymer.dom(document.body).appendChild(this.$.updateNoticeDialog);
+        this.$.updateNoticeDialog.open();
+      }
+
+      updateMessage() {
+        var valid = this.$.messageDesc.validate();
+
+        if (valid) {
+          if (this.messagekey) {
+            // Disable buttons to prevent exiting dialog before upload is done.
+            this.$.addNoticeButton.disabled = true;
+            this.$.addNoticeCancelButton.disabled = true;
+
+            // If updating existing message
+            this.$.doc.path = '/messages/' + this.messagekey;
+            this.$.doc.ref.update({
+              message: this.$.messageDesc.value
+            }).then(function(snapshot) {
+              this.uploadNoticeBoardImage();
+            }.bind(this))
+            .catch(function(error) {
+              this.$.updateNoticeDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.failToast);
+              this.$.failToast.open();
+            }.bind(this));
+          }
+        }
+      }
+
+      uploadNoticeBoardImage() {
+        // Upload notice board pic.
+        var file = this.$.noticePic.inputElement.inputElement.files[0];
+        if (file){
+
+          // Disable buttons to prevent exiting dialog before upload is done.
+          this.$.addNoticeCancelButton.disabled = true;
+          this.$.addNoticeButton.disabled = true;
+
+          this.$.storage.path = '/messages';
+          this.$.storage.put(file).then(function(snap) {
+            // TODO: Delete old image if exist
+            // Update product entry with image url
+            this.$.doc.path = '/messages/' + this.messagekey + '/images';
+            this.$.doc.ref.set({
+              path: snap.metadata.fullPath,
+              downloadUrl: snap.downloadURL,
+            });
+
+            this.$.updateNoticeDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          // Failed to upload
+          .catch(function(error) {
+            this.$.updateNoticeDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
+        }
+        else{
+          this.$.updateNoticeDialog.close();
+          Polymer.dom(document.body).appendChild(this.$.successToast);
+          this.$.successToast.open();
+        }
+      }
+
+      delNotice(e) {
+        Polymer.dom(document.body).appendChild(this.$.deleteNotiDialog);
+        this.$.deleteNotiDialog.open();
+      }
+
+      deleteMessage() {
+        var path;
+        this.$.doc.path = '/messages/' + this.messagekey;
+        this.$.doc.ref.once("value")
+         .then(function(snapshot) {
+            if (this.$.doc.data['images'] != undefined) {
+              path = this.$.doc.data['images']['path'];
+              this.$.storage.path = '/' + path;
+            }
+            this.messagekey = null;
+            this.$.doc.ref.remove()
+            .then(function(snapshot) {
+              if (path != undefined) {
+                this.$.storage.ref.delete()
+                .then(function(snapshot) {
+                  Polymer.dom(document.body).appendChild(this.$.successToast);
+                  this.$.successToast.open();
+                }.bind(this))
+                .catch(function(error) {
+                  Polymer.dom(document.body).appendChild(this.$.failToast);
+                  this.$.failToast.open();
+                }.bind(this));
+              }
+              else {
+                Polymer.dom(document.body).appendChild(this.$.successToast);
+                this.$.successToast.open();
+              }
+            }.bind(this))
+            .catch(function(error) {
+              Polymer.dom(document.body).appendChild(this.$.failToast);
+              this.$.failToast.open();
+            }.bind(this));
+          }.bind(this))
+         .catch(function(error){
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+         });
+
+        this.$.deleteNotiDialog.close();
+        Polymer.dom(document.body).removeChild(this.$.deleteNotiDialog);
+      }
+
+      _formatEpochDate(eTS) {
+        return strftime('%D', new Date(eTS));
+      }
+
+      _formatEpochTime(eTS) {
+        return strftime('%I:%M %P', new Date(eTS));
+      }
+
+      isAdmin(privilege){
+        return (privilege == "Admin");
+      }
+
+      isEmpty(change) {
+        return (change.base['message'] == undefined);
+      }
+
+      onDialogClose() {
+        this.$.messageDesc.value = null;
+        this.$.messageDesc.invalid = false;
+        this.$.eventToggle.checked = false;
+        this.$.noticePic.value = null;
+        this.$.addNoticeButton.disabled = false;
+        this.$.addNoticeCancelButton.disabled = false;
+      }
+
+      onEditDialogClose() {
+        this.onDialogClose();
+        Polymer.dom(document.body).removeChild(this.$.updateNoticeDialog);
+      }
+
+      attend(e) {
+        this.$.doc.path = '/messages/' + this.messagekey + '/response';
+        this.$.doc.ref.update({
+          [this.user.uid]: true
+        });
+      }
+
+      absent(e) {
+        this.$.doc.path = '/messages/' + this.messagekey + '/response';
+        this.$.doc.ref.update({
+          [this.user.uid]: false
+        });
+      }
+
+      isAttending(change, attendButton) {
+        var retVal = false;
+        if (change.base['response'] != undefined){
+          if (change.base['response'][this.user.uid]) {
+            if (attendButton == 'false') {
+              retVal = 'attend';
+            }
+          }
+          else {
+            if (attendButton == 'true') {
+              retVal = 'attend';
+            }
+          }
+        }
+        return retVal;
+      }
+
+      openEventInfo(e) {
+        Polymer.dom(document.body).appendChild(this.$.eventInfoDialog);
+        this.$.eventInfoDialog.open();
+      }
+
+      getUserInfo(change, key, data) {
+        if (change.base[key] != undefined) {
+          return change.base[key][data];
+        }
+      }
+
+      isAttendingFilter(person) {
+        return (person.$val == true);
+      }
+
+      isAbsentFilter(person) {
+        return (person.$val == false);
+      }
+
+      isLoadPostNeeded(change) {
+        return (this.loadedComments <= change.base.length);
+      }
+
+      postComment(e) {
+        var valid = this.$.commentField.validate();
+
+        if (valid) {
+          this.$.doc.path = '/messages/' + this.messagekey + '/comments';
+          this.$.doc.ref.push({
+            userid: this.user.uid,
+            comment: this.$.commentField.value,
+            time: {".sv":"timestamp"}
+          })
+          .then(function(snapshot) {
+            this.$.commentField.value = null;
+            this.$.commentField.invalid = false;
+          }.bind(this))
+          .catch(function(error) {
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
+        }
+      }
+
+      limitComments(change) {
+        return change.base.slice(-this.loadedComments);
+      }
+
+      loadPreviousComments() {
+        if (this.loadedComments <= this.commentList.length) {
+          this.loadedComments += 5;
+        }
+      }
+    }
+
+    window.customElements.define(NoticeView.is, NoticeView);
+  </script>
+</dom-module>

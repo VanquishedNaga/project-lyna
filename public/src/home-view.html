@@ -20,6 +20,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="notice-view.html">
 
 <script src="../bower_components/strftime/strftime-min.js"></script>
 
@@ -30,31 +31,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-document>
 
-    <firebase-document
-      id="userList"
-      path = "/users"
-      data = "{{userList}}"
-      app-name="absolute-reborn">
-    </firebase-document>
-
     <firebase-query
       id="messageList"
       path = "/messages"
       data = "{{messageList}}"
-      app-name="absolute-reborn">
-    </firebase-query>
-
-    <firebase-document
-      id="messageData"
-      path = "/messages"
-      data = "{{messageData}}"
-      app-name="absolute-reborn">
-    </firebase-document>
-
-    <firebase-query
-      id="messageResponse"
-      path = "/messages/{{msgKey}}/response"
-      data = "{{messageResponse}}"
       app-name="absolute-reborn">
     </firebase-query>
 
@@ -76,132 +56,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       app-toolbar {
         height: var(--app-toolbar-height);
-      }
-
-      .noti-card {
-        width: 80%;
-        min-width: 282px;
-        margin: 16px;
-        font-family: 'Roboto Condensed', sans-serif;
-        margin-left: auto;
-        margin-right: auto;
-        border-radius: var(--radius);
-      }
-
-      .noti-header {
-        background-color: var(--app-primary-color);
-        color: white;
-        display: flex;
-        flex-wrap: wrap;
-        border-radius: var(--radius) var(--radius) 0 0;
-      }
-
-      span.header {
-        padding: 8px;
-        font-size: 1.1em;
-      }
-
-      .noti-desc {
-        overflow: auto;
-        white-space: pre-line;
-      }
-
-      .board-content {
-        clear: right;
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      .noti-info {
-        min-width: 250px;
-        word-break: break-word;
-        hyphens: manual;
-        vertical-align: top;
-        margin: 16px;
-        max-height: 250px;
-        display: flex;
-        flex-direction: column;
-        flex: 1 1 250px;
-      }
-
-      .noti-act {
-        float: right;
-        margin-left: auto;
-      }
-
-      .msg-event-actions {
-        background-color: var(--app-primary-color);
-        color: white;
-        display: flex;
-        flex-wrap: wrap;
-        border-radius: 0 0 var(--radius) var(--radius);
-      }
-
-      .horizontal {
-        @apply(--layout-horizontal);
-      }
-
-      .avatar {
-        margin: 0 12px 0 12px;
-      }
-
-      paper-textarea.commentCustom {
-        width: 90%;
-        margin: 0 0 16px 0;
-        word-break: break-word;
-
-        --paper-input-container-color: black;
-        --paper-input-container-focus-color: black;
-        --paper-input-container-invalid-color: black;
-        border: 1px solid #BDBDBD;
-        border-radius: 20px;
-        background-color: #F2F3F5;
-
-        /* Reset some defaults */
-        --paper-input-container: {
-          padding: 3px;
-        };
-        --paper-input-container-underline: { display: none; height: 0;};
-        --paper-input-container-underline-focus: { display: none; };
-
-        --paper-input-container-label: {
-          margin: 4px;
-          font-size: 10pt;
-          color: gray;
-        };
-
-        /* New custom styles */
-        --paper-input-container-input: {
-          margin: 3px;
-          box-sizing: border-box;
-          font-size: 10pt;
-        };
-      }
-
-      .commentBox {
-        width: 90%;
-        border: 1px solid #BDBDBD;
-        border-radius: 20px;
-        background-color: #EFF1F3;
-        max-width: 90%;
-        margin: 0 12px 0 0;
-      }
-
-      .commentContent {
-        font-size: 10pt;
-        margin: 10px;
-        font-family: sans-serif;
-      }
-
-      img{
-        width: 90%;
-        height: 250px;
-        background-repeat: no-repeat;
-        object-fit: contain;
-        background-color: white;
-        background-size: cover;
-        margin: auto;
-        margin-top: 16px;
       }
 
       [condensed-title] {
@@ -237,14 +91,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         /* The difference in font size is used to calculate the scale of the title in the transition. */
         font-size: 15px;
       }
-
-      paper-icon-button.attend {
-        color: grey;
-      }
-
-      paper-icon-button.post {
-        color: var(--app-secondary-color);;
-      }
     </style>
     <app-header-layout>
       <app-header slot="header" condenses shadow fixed effects="resize-title waterfall" >
@@ -268,75 +114,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </template>
 
       <template is="dom-repeat" items="{{messageList}}">
-        <paper-card class="noti-card horizontal">
-          <div style="width: 100%;">
-            <div class="noti-header">
-              <span class="header">
-                <iron-icon icon="icons:speaker-notes"></iron-icon>
-                Notice Board
-              </span>
-              <div class="noti-act">
-                <paper-icon-button hidden$="[[!isAdmin(userdata.privilege)]]" icon="icons:create" on-tap="editNotice"></paper-icon-button>
-                <paper-icon-button hidden$="[[!isAdmin(userdata.privilege)]]" disabled$="[[isEmpty(item.*)]]" icon="icons:delete" on-tap="delNotice"></paper-icon-button>
-                <paper-icon-button hidden$="[[!item.event]]" icon="icons:info-outline" on-tap="openEventInfo"></paper-icon-button>
-              </div>
-            </div>
-            <div class="board-content">
-              <img src="[[item.images.downloadUrl]]" alt="boardPic"
-                onerror="this.style.display='none'"
-                onload="this.style.display='block'"/>
-              <div class="card-content noti-info">
-                <template is="dom-if" if="[[!isEmpty(item.*)]]" restamp>
-                  <div class="noti-desc">[[item.message]]</div>
-                  <br>
-                  <span style="display: inline;">
-                    <span style="font-weight: bold;">Posted on </span>
-                    <span>[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</span>
-                  </span>
-                </template>
-                <template is="dom-if" if="[[isEmpty(item.*)]]" restamp>
-                  No announcement.
-                </template>
-              </div>
-            </div>
-            <template is="dom-if" if="[[item.event]]" restamp class="msg-event-actions">
-              <div class="msg-event-actions">
-                <span class="header">Attend?</span>
-                <div style="margin-left: auto;">
-                  <paper-icon-button icon="icons:check" on-tap="attend" class$="[[isAttending(item.*, 'true')]]"></paper-icon-button>
-                  <paper-icon-button icon="icons:clear" on-tap="absent" class$="[[isAttending(item.*, 'false')]]"></paper-icon-button>
-                </div>
-              </div>
-            </template>
-            <hr>
-            <div style="display: flex;">
-              <div class="avatar" slot="item-icon" style="background-image: url([[userdata.profilePic]]);"></div>
-              <paper-textarea
-                class="commentCustom"
-                id="commentField[[index]]"
-                label="Write a comment..."
-                no-label-float>
-              </paper-textarea>
-              <paper-icon-button icon="icons:send" class="post" on-tap="postComment"></paper-icon-button>
-            </div>
-            <template is="dom-repeat" items="{{toArray(messageData.*, item.$key)}}">
-              <div style="display: flex;">
-                <div class="avatar" slot="item-icon" style="background-image: url([[getUserInfo(item.userid, 'profilePic')]]);"></div>
-                <div class="commentBox">
-                  <div class="commentContent horizontal">
-                    <div style="word-break: break-word;">
-                      <span style="font-weight: bold; color: #365899;">[[getUserInfo(item.userid, 'name')]] </span>
-                      [[item.comment]]
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div style="margin: 1px 0 12px 74px; font-size: 0.9em; color: gray;">
-                [[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]
-              </div>
-            </template>
-          </div>
-        </paper-card>
+        <notice-view
+          messagekey="[[item.$key]]"
+          user="[[user]]"
+          userdata="[[userdata]]">
+        </notice-view>
       </template>
     </app-header-layout>
 
@@ -355,40 +137,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <paper-input type="file" id="noticePic" accept="image/jpeg"></paper-input>
       <div class="buttons">
         <paper-button id="addNoticeCancelButton" dialog-dismiss>Cancel</paper-button>
-        <paper-button id="addNoticeButton" autofocus on-tap="updateMessage">Submit</paper-button>
-      </div>
-    </paper-dialog>
-
-    <paper-dialog id="deleteNotiDialog" modal>
-      <p>Are you sure you want to delete this message?</p>
-      <div class="buttons">
-        <paper-button dialog-dismiss>No</paper-button>
-        <paper-button autofocus on-tap="deleteMessage">Yes
-        </paper-button>
-      </div>
-    </paper-dialog>
-
-    <paper-dialog id="eventInfoDialog" on-iron-overlay-closed="onDialogClose" modal>
-      <paper-dialog-scrollable>
-        <div class="eventInfoHeader">Attending: [[attendCount]]</div>
-        <paper-listbox class="custom">
-          <template is="dom-repeat" items="{{messageResponse}}" filter="{{isAttendingFilter}}" rendered-item-count="{{attendCount}}">
-            <paper-item>
-              [[getUserInfo(item.$key, 'name')]]
-            </paper-item>
-          </template>
-        </paper-listbox>
-        <div class="eventInfoHeader">Not attending: [[absentCount]]</div>
-        <paper-listbox class="custom">
-          <template is="dom-repeat" items="{{messageResponse}}" filter="{{isAbsentFilter}}" rendered-item-count="{{absentCount}}">
-            <paper-item>
-              [getUserInfo(item.$key, 'name')]]
-            </paper-item>
-          </template>
-        </paper-listbox>
-      </paper-dialog-scrollable>
-      <div class="buttons">
-        <paper-button dialog-dismiss>OK</paper-button>
+        <paper-button id="addNoticeButton" autofocus on-tap="postNewMessage">Submit</paper-button>
       </div>
     </paper-dialog>
 
@@ -405,8 +154,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           user: Object,
           event: Object,
           msgKey: Object,
-          boardImg: String,
-          userList: Object,
+          messagekey: Object,
+          messageList: Array,
         };
       }
 
@@ -420,50 +169,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.updateNoticeDialog.open();
       }
 
-      editNotice(e) {
-        this.msgKey = e.model.item.$key;
-        this.$.messageDesc.value = e.model.item.message;
-        this.$.eventToggle.checked = e.model.item.event;
-        this.$.eventToggle.disabled = true;
-        Polymer.dom(document.body).appendChild(this.$.updateNoticeDialog);
-        this.$.updateNoticeDialog.open();
-      }
-
-      updateMessage() {
+      postNewMessage() {
         var valid = this.$.messageDesc.validate();
-
         if(valid) {
-          if (this.msgKey) {
-            // Disable buttons to prevent exiting dialog before upload is done.
-            this.$.addNoticeButton.disabled = true;
-            this.$.addNoticeCancelButton.disabled = true;
-
-            // If updating existing message
-            this.$.doc.path = '/messages/' + this.msgKey;
-            this.$.doc.ref.update({
-              message: this.$.messageDesc.value
-            }).then(function(snapshot) {
-              this.uploadNoticeBoardImage();
-            }.bind(this)).catch(function(error) {
-              console.log(error);
-              this.$.updateNoticeDialog.close();
-            }.bind(this));
-          }
-          else {
-            // New message
-            this.$.doc.path = '/messages';
-            this.$.doc.ref.push({
-              message: this.$.messageDesc.value,
-              time: {".sv":"timestamp"},
-              event: this.$.eventToggle.checked
-            }).then(function(snapshot) {
-              this.msgKey = snapshot.key;
-              this.uploadNoticeBoardImage();
-            }.bind(this)).catch(function(error) {
-              console.log(error);
-              this.$.updateNoticeDialog.close();
-            }.bind(this));
-          }
+          // New message
+          this.$.doc.path = '/messages';
+          this.$.doc.ref.push({
+            message: this.$.messageDesc.value,
+            time: {".sv":"timestamp"},
+            event: this.$.eventToggle.checked
+          }).then(function(snapshot) {
+            this.msgKey = snapshot.key;
+            this.uploadNoticeBoardImage();
+          }.bind(this)).catch(function(error) {
+            console.log(error);
+            this.$.updateNoticeDialog.close();
+          }.bind(this));
         }
       }
 
@@ -503,33 +224,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      delNotice(e) {
-        this.msgKey = e.model.item.$key;
-        Polymer.dom(document.body).appendChild(this.$.deleteNotiDialog);
-        this.$.deleteNotiDialog.open();
-      }
-
-      deleteMessage() {
-        var path;
-        this.$.doc.path = '/messages/' + this.msgKey;
-        this.$.doc.ref.once("value")
-         .then(function(snapshot) {
-            if (this.$.doc.data['images'] != undefined) {
-              path = this.$.doc.data['images']['path'];
-              this.$.storage.path = '/' + path;
-              this.$.storage.ref.delete();
-            }
-            this.msgKey = null;
-            this.$.doc.ref.remove();
-          }.bind(this))
-         .catch(function(error){
-            console.log(error);
-          }.bind(this));
-
-        this.$.deleteNotiDialog.close();
-        Polymer.dom(document.body).removeChild(this.$.deleteNotiDialog);
-      }
-
       _formatEpochDate(eTS) {
         return strftime('%D', new Date(eTS));
       }
@@ -540,10 +234,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       isAdmin(privilege){
         return (privilege == "Admin");
-      }
-
-      isEmpty(change) {
-        return (change.base['message'] == undefined);
       }
 
       onDialogClose() {
@@ -559,90 +249,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       onEditDialogClose() {
         this.onDialogClose();
         Polymer.dom(document.body).removeChild(this.$.updateNoticeDialog);
-      }
-
-      attend(e) {
-        this.$.doc.path = '/messages/' + e.model.item.$key + '/response';
-        this.$.doc.ref.update({
-          [this.user.uid]: true
-        });
-      }
-
-      absent(e) {
-        this.$.doc.path = '/messages/' + e.model.item.$key + '/response';
-        this.$.doc.ref.update({
-          [this.user.uid]: false
-        });
-      }
-
-      isAttending(change, attendButton) {
-        var retVal = false;
-        if (change.base['response'] != undefined){
-          if (change.base['response'][this.user.uid]) {
-            if (attendButton == 'false') {
-              retVal = 'attend';
-            }
-          }
-          else {
-            if (attendButton == 'true') {
-              retVal = 'attend';
-            }
-          }
-        }
-        return retVal;
-      }
-
-      openEventInfo(e) {
-        this.msgKey = e.model.item.$key;
-        Polymer.dom(document.body).appendChild(this.$.eventInfoDialog);
-        this.$.eventInfoDialog.open();
-      }
-
-      getUserInfo(key, data) {
-        if (this.userList[key] != undefined) {
-          return this.userList[key][data];
-        }
-      }
-
-      isAttendingFilter(person) {
-        return (person.$val == true);
-      }
-
-      isAbsentFilter(person) {
-        return (person.$val == false);
-      }
-
-      postComment(e) {
-        var commentField = Polymer.dom(this.root).querySelector('#commentField' + e.model.index);
-        var valid = commentField.validate();
-
-        if (valid) {
-          this.msgKey = e.model.item.$key;
-          this.$.doc.path = '/messages/' + e.model.item.$key + '/comments';
-          this.$.doc.ref.push({
-            userid: this.user.uid,
-            comment: commentField.value,
-            time: {".sv":"timestamp"}
-          })
-          .then(function(snapshot) {
-            commentField.value = null;
-            commentField.invalid = false;
-          });
-        }
-      }
-
-      toArray(input, messageKey) {
-        if(input.base[messageKey] != undefined && input.base[messageKey]['comments'] != undefined) {
-          var obj = input.base[messageKey]['comments'];
-          return Object.keys(obj).map(function(key) {
-            return {
-              key: key,
-              userid: obj[key]['userid'],
-              time: obj[key]['time'],
-              comment: obj[key]['comment']
-            };
-          });
-        }
       }
     }
 

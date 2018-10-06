@@ -498,19 +498,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      getProductName(change, productKey) {
-        if (change.base[productKey] != undefined){
-          this.productId = productKey;
-          return change.base[productKey]['name'];
-        }
-      }
-
-      getLevel(change, level) {
-        if (change.base[level] != undefined){
-          return change.base[level];
-        }
-      }
-
       addLevel() {
         Polymer.dom(document.body).appendChild(this.$.addLevelDialog);
         this.$.addLevelDialog.open();
