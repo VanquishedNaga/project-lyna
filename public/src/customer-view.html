@@ -55,6 +55,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <div class="big-list-content">Name</div>
         <div class="big-list-content">Address</div>
         <div class="list-content">Postcode</div>
+        <div class="list-content">Phone</div>
         <div class="big-list-content">Created</div>
         <div class="list-content">Action</div>
       </paper-item>
@@ -63,6 +64,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="big-list-content">[[item.custName]]</div>
           <div class="big-list-content">[[item.custAddr]]</div>
           <div class="list-content">[[item.custPostcode]]</div>
+          <div class="list-content">[[item.custPhone]]</div>
           <div class="big-list-content">[[formatEpochTime(item.createdTime)]]</div>
           <div class="list-content">
             <paper-icon-button icon="create" on-click="openCustomerDialog">
@@ -175,7 +177,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       onDialogResize(event) {
-        console.log(event);
         this.$.customerDialog.notifyResize();
       }
 

@@ -23,46 +23,50 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <dom-module id="order-view">
   <template>
     <firebase-document
-      id="doc"
+      id="selectedOrderElement"
+      path="/sales/[[selectedOrder]]"
       app-name="absolute-reborn">
     </firebase-document>
 
     <firebase-document
-      id="salesDoc"
+      id="salesDocElement"
       app-name="absolute-reborn"
       path="/sales"
       data="{{salesDoc}}">
     </firebase-document>
 
     <firebase-document
-      id="product-lists"
       path = "/products"
       data = "{{productsList}}"
       app-name="absolute-reborn">
     </firebase-document>
 
-    <!-- Used for checking if inventory amount is sufficient -->
-    <firebase-document
-      id="inventoryDataDoc"
-      app-name="absolute-reborn"
-      path="/users/[[user.uid]]/inventory"
-      data="{{inventoryListDoc}}">
-    </firebase-document>
-
     <firebase-query
-      id="inventoryData"
       app-name="absolute-reborn"
       path="/users/[[user.uid]]/inventory"
       data="{{inventoryList}}">
     </firebase-query>
 
     <firebase-query
-      id="sales"
       app-name="absolute-reborn"
       path="/sales"
       order-by-child="seller"
       equal-to="[[user.uid]]"
-      data="{{sales}}">
+      data="{{mySalesArray}}">
+    </firebase-query>
+
+    <firebase-document
+      app-name="absolute-reborn"
+      path="/customers"
+      data="{{customerList}}">
+    </firebase-document>
+
+    <firebase-query
+      app-name="absolute-reborn"
+      path="/customers"
+      order-by-child="createdBy"
+      equal-to="[[user.uid]]"
+      data="{{myCustArray}}">
     </firebase-query>
 
     <style include="shared-styles">
@@ -83,12 +87,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <div class="list-content">Tracking No.</div>
         <div class="list-content">Action</div>
       </paper-item>
-      <template is="dom-repeat" items="{{sales}}">
+      <template is="dom-repeat" items="{{mySalesArray}}">
         <paper-item key="[[item.$key]]">
           <div class="big-list-content">[[getProdName(productsList.*, item.prod)]]</div>
           <div class="list-content">[[item.qty]]</div>
-          <div class="list-content">[[item.custname]]</div>
-          <div class="list-content">[[item.custpos]]</div>
+          <div class="list-content">[[getCustInfo(customerList.*, item.custProfile, 'custName')]]</div>
+          <div class="list-content">[[getCustInfo(customerList.*, item.custProfile, 'custPostcode')]]</div>
           <div class="list-content">[[item.stat]]</div>
           <div class="big-list-content">[[formatEpochTime(item.time)]]</div>
           <div class="list-content">[[item.trackNum]]</div>
@@ -106,33 +110,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <!-- To place a sales order -->
     <paper-dialog id="orderDialog" on-iron-overlay-closed="onOrderDialogClosed" modal>
       <h2>Sales Order</h2>
-      <paper-input
-        id="custName"
-        label="Customer Name"
-        error-message="Invalid value!"
-        always-float-label required auto-validate>
-      </paper-input>
-      <paper-input
-        id="custPhone"
-        label="Customer Phone"
-        pattern="\d{7,15}"
-        error-message="Invalid value!"
-        always-float-label required auto-validate>
-      </paper-input>
-      <paper-input
-        id="custAddr"
-        label="Delivery Address"
-        error-message="Invalid value!"
-        always-float-label required auto-validate>
-      </paper-input>
-      <paper-input
-        id="custPos"
-        label="Postcode"
-        error-message="Invalid value!"
-        pattern="\d{5}"
-        always-float-label required auto-validate>
-      </paper-input>
-      <paper-dropdown-menu label="Select product" id="prodMenu" required error-message="Invalid value!">
+      <paper-dropdown-menu label="Select customer" id="custProfile" always-float-label required auto-validate error-message="Invalid value!">
+        <paper-listbox id="custList" slot="dropdown-content" attr-for-selected="key" selected="{{selectedCustKey}}">
+          <template is="dom-repeat" items="{{myCustArray}}">
+            <paper-item key="[[item.$key]]">[[item.custName]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <div style="white-space: pre-line;">Address: [[getCustInfo(customerList.*, selectedCustKey, 'custAddr')]]
+        Postcode: [[getCustInfo(customerList.*, selectedCustKey, 'custPostcode')]]
+        Phone: [[getCustInfo(customerList.*, selectedCustKey, 'custPhone')]]
+      </div>
+      <paper-dropdown-menu label="Select product" id="prodMenu" always-float-label required auto-validate error-message="Invalid value!">
         <paper-listbox id="prodList" slot="dropdown-content" attr-for-selected="key">
           <template is="dom-repeat" items="{{inventoryList}}">
             <paper-item key="[[item.$key]]">[[getProdName(productsList.*, item.$key)]]</paper-item>
@@ -207,10 +196,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.prodPrice.disabled = true;
 
             // Populate fields.
-            this.$.custName.value = this.salesDoc[this.selectedOrder].custname;
-            this.$.custPhone.value = this.salesDoc[this.selectedOrder].custphone;
-            this.$.custAddr.value = this.salesDoc[this.selectedOrder].custaddr;
-            this.$.custPos.value = this.salesDoc[this.selectedOrder].custpos;
+            this.$.custList.selected = this.salesDoc[this.selectedOrder].custProfile;
             this.$.prodQuan.value = this.salesDoc[this.selectedOrder].qty;
             this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
             this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
@@ -234,14 +220,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         // To prevent paper-dropdown-menu from closing paper-dialog.
         if (event.target == this.$.orderDialog) {
           // Reset all fields.
-          this.$.custName.value = null;
-          this.$.custName.invalid = false;
-          this.$.custPhone.value = null;
-          this.$.custPhone.invalid = false;
-          this.$.custAddr.value = null;
-          this.$.custAddr.invalid = false;
-          this.$.custPos.value = null;
-          this.$.custPos.invalid = false;
+          this.$.custList.selected = null;
+          this.$.custProfile.invalid = false;
           this.$.prodMenu.value = null;
           this.$.prodMenu.invalid = false;
           this.$.prodQuan.value = null;
@@ -282,10 +262,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       submitOrder() {
         // Check all inputs are valid, add new fields here.
-        var valid = this.$.custName.validate();
-        valid = this.$.custPhone.validate() && valid;
-        valid = this.$.custAddr.validate() && valid;
-        valid = this.$.custPos.validate() && valid;
+        var valid = this.$.custProfile.validate();
         valid = this.$.prodMenu.validate() && valid;
         valid = this.$.prodQuan.validate() && valid;
         valid = this.$.prodPrice.validate() && valid;
@@ -293,12 +270,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         if (valid) {
           // Update existing order.
           if (this.selectedOrder) {
-            this.$.doc.path = '/sales/' + this.selectedOrder;
-            this.$.doc.ref.update({
-              custname: this.$.custName.value,
-              custaddr: this.$.custAddr.value,
-              custphone: this.$.custPhone.value,
-              custpos: this.$.custPos.value
+            this.$.selectedOrderElement.ref.update({
+              custProfile: this.$.custList.selected,
             }).then(function(result) {
               this.promptToast(this.$.successToast);
             }.bind(this)).catch((err) => {
@@ -309,7 +282,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           }
           else {
             // Check if have enough units.
-            if (this.$.prodQuan.value > this.$.inventoryDataDoc.data[this.$.prodList.selected]) {
+            if (this.$.prodQuan.value > this.userdata.inventory[this.$.prodList.selected]) {
               Polymer.dom(document.body).appendChild(this.$.insufficientAmountToast);
               this.$.insufficientAmountToast.open();
             }
@@ -317,10 +290,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSalesFunction');
               addSales({
                 amount: this.$.prodPrice.value,
-                custname: this.$.custName.value,
-                custaddr: this.$.custAddr.value,
-                custphone: this.$.custPhone.value,
-                custpos: this.$.custPos.value,
+                custProfile: this.$.custList.selected,
                 prod: this.$.prodList.selected,
                 qty: this.$.prodQuan.value,
                 time: {".sv":"timestamp"},
@@ -355,6 +325,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         element.center();
         element.refit();
         element.open();
+      }
+
+      getCustInfo(change, custKey, info) {
+        if (change.base[custKey] != undefined){
+          return change.base[custKey][info];
+        }
       }
     }
 
