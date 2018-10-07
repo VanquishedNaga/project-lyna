@@ -3,19 +3,14 @@
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
-<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
@@ -74,13 +69,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       :host {
         display: block;
       }
-
-      paper-fab {
-        position: fixed;
-        right: 16px;
-        bottom: 16px;
-        background-color: var(--app-primary-color);
-      }
     </style>
 
     <!-- Visible contents -->
@@ -105,7 +93,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="big-list-content">[[formatEpochTime(item.time)]]</div>
           <div class="list-content">[[item.trackNum]]</div>
           <div class="list-content">
-            <paper-icon-button icon="create" on-click="openEditSalesDialog" hidden$="[[!isProcessing(item.stat)]]">
+            <paper-icon-button icon="create" on-click="openOrderDialog" hidden$="[[!isProcessing(item.stat)]]">
             </paper-icon-button>
             <paper-icon-button icon="delete" on-click="openCancelSalesDialog" hidden$="[[!isProcessing(item.stat)]]">
             </paper-icon-button>
@@ -113,44 +101,38 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </paper-item>
       </template>
     </paper-listbox>
-    <paper-fab icon="create" title="heart" on-click="openPlaceOrderDialog"></paper-fab>
+    <paper-fab icon="create" on-click="openOrderDialog"></paper-fab>
 
     <!-- To place a sales order -->
-    <paper-dialog id="placeOrderDialog" on-iron-overlay-closed="onPlaceOrderDialogClosed" modal>
+    <paper-dialog id="orderDialog" on-iron-overlay-closed="onOrderDialogClosed" modal>
       <h2>Sales Order</h2>
       <paper-input
         id="custName"
         label="Customer Name"
-        error-message="Field required!"
+        error-message="Invalid value!"
         always-float-label required auto-validate>
       </paper-input>
       <paper-input
         id="custPhone"
         label="Customer Phone"
-        allowed-pattern="[0-9]"
-        char-counter
-        minlength="10"
-        maxlength="11"
-        error-message="Field required!"
+        pattern="\d{7,15}"
+        error-message="Invalid value!"
         always-float-label required auto-validate>
       </paper-input>
       <paper-input
         id="custAddr"
         label="Delivery Address"
-        error-message="Field required!"
+        error-message="Invalid value!"
         always-float-label required auto-validate>
       </paper-input>
       <paper-input
         id="custPos"
         label="Postcode"
-        error-message="Field required!"
-        allowed-pattern="[0-9]"
-        char-counter
-        minlength="5"
-        maxlength="5"
+        error-message="Invalid value!"
+        pattern="\d{5}"
         always-float-label required auto-validate>
       </paper-input>
-      <paper-dropdown-menu label="Select product" id="prodMenu" required error-message="Field required!">
+      <paper-dropdown-menu label="Select product" id="prodMenu" required error-message="Invalid value!">
         <paper-listbox id="prodList" slot="dropdown-content" attr-for-selected="key">
           <template is="dom-repeat" items="{{inventoryList}}">
             <paper-item key="[[item.$key]]">[[getProdName(productsList.*, item.$key)]]</paper-item>
@@ -160,14 +142,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <paper-input always-float-label required auto-validate
         type="number"
         min="1"
-        error-message="Field required!"
+        error-message="Invalid value!"
         id="prodQuan"
         label="Product Quantity"
         style="display: inline-block;">
       </paper-input>
       <paper-input always-float-label required auto-validate
         pattern="^\d*\.?\d{0,2}$"
-        error-message="Field required!"
+        error-message="Invalid value!"
         id="prodPrice"
         label="Total Amount"
         style="display: inline-block;">
@@ -176,47 +158,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button autofocus on-click="submitOrder">Confirm</paper-button>
-      </div>
-    </paper-dialog>
-
-    <!-- To place a sales order -->
-    <paper-dialog id="newCustomerDialog" on-iron-overlay-closed="onNewCustomerDialogClosed" modal>
-      <h2>Sales Order</h2>
-      <paper-input
-        id="custName"
-        label="Customer Name"
-        error-message="Field required!"
-        always-float-label required auto-validate>
-      </paper-input>
-      <paper-input
-        id="custPhone"
-        label="Customer Phone"
-        allowed-pattern="[0-9]"
-        char-counter
-        minlength="10"
-        maxlength="11"
-        error-message="Field required!"
-        always-float-label required auto-validate>
-      </paper-input>
-      <paper-input
-        id="custAddr"
-        label="Delivery Address"
-        error-message="Field required!"
-        always-float-label required auto-validate>
-      </paper-input>
-      <paper-input
-        id="custPos"
-        label="Postcode"
-        error-message="Field required!"
-        allowed-pattern="[0-9]"
-        char-counter
-        minlength="5"
-        maxlength="5"
-        always-float-label required auto-validate>
-      </paper-input>
-      <div class="buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
-        <paper-button autofocus on-click="addNewCustomer">Confirm</paper-button>
       </div>
     </paper-dialog>
 
@@ -246,10 +187,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           user: Object,
           userdata: Object,
           narrow: Object,
-          selectedOrder: {
-            type: Object,
-            value: null,
-          }
         };
       }
 
@@ -258,40 +195,44 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         console.log("OrderView ready.");
       }
 
-      openCancelSalesDialog(e) {
-        if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
-          Polymer.dom(document.body).appendChild(this.$.cancelSalesDialog);
-          this.$.cancelSalesDialog.open();
+      openOrderDialog(event) {
+        // If user is modifying order
+        if (event.model) {
+          this.selectedOrder = event.model.item.$key;
+
+          if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
+            // Disable some fields.
+            this.$.prodMenu.disabled = true;
+            this.$.prodQuan.disabled = true;
+            this.$.prodPrice.disabled = true;
+
+            // Populate fields.
+            this.$.custName.value = this.salesDoc[this.selectedOrder].custname;
+            this.$.custPhone.value = this.salesDoc[this.selectedOrder].custphone;
+            this.$.custAddr.value = this.salesDoc[this.selectedOrder].custaddr;
+            this.$.custPos.value = this.salesDoc[this.selectedOrder].custpos;
+            this.$.prodQuan.value = this.salesDoc[this.selectedOrder].qty;
+            this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
+            this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
+
+            Polymer.dom(document.body).appendChild(this.$.orderDialog);
+            this.$.orderDialog.open();
+          }
+          else {
+            this.promptToast(this.$.invalidToast);
+          }
         }
+        // Else user is creating a new order
         else {
-          this.promptToast(this.$.invalidToast);
+          this.selectedOrder = null;
+          Polymer.dom(document.body).appendChild(this.$.orderDialog);
+          this.$.orderDialog.open();
         }
       }
 
-      onCancelSalesDialogClosed(event) {
-        if (this.$.cancelSalesDialog.closingReason.confirmed) {
-          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSalesFunction');
-          processSales({
-            key: this.selectedOrder,
-            action: 'Cancelled',
-          }).then(function(result) {
-            this.promptToast(this.$.successToast);
-          }.bind(this)).catch((err) => {
-            this.promptToast(this.$.failToast);
-          });
-        }
-        Polymer.dom(document.body).removeChild(this.$.cancelSalesDialog);
-      }
-
-      openPlaceOrderDialog() {
-        this.selectedOrder = null;
-        Polymer.dom(document.body).appendChild(this.$.placeOrderDialog);
-        this.$.placeOrderDialog.open();
-      }
-
-      onPlaceOrderDialogClosed(event) {
+      onOrderDialogClosed(event) {
         // To prevent paper-dropdown-menu from closing paper-dialog.
-        if (event.target == this.$.placeOrderDialog) {
+        if (event.target == this.$.orderDialog) {
           // Reset all fields.
           this.$.custName.value = null;
           this.$.custName.invalid = false;
@@ -314,38 +255,29 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.prodQuan.disabled = false;
           this.$.prodPrice.disabled = false;
 
-          Polymer.dom(document.body).removeChild(this.$.placeOrderDialog);
+          Polymer.dom(document.body).removeChild(this.$.orderDialog);
         }
       }
 
-      openEditSalesDialog(event) {
-        console.log(event);
-        if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
-          // Disable some fields.
-          this.$.prodMenu.disabled = true;
-          this.$.prodQuan.disabled = true;
-          this.$.prodPrice.disabled = true;
-
-          // Populate fields.
-          this.$.custName.value = this.salesDoc[this.selectedOrder].custname;
-          this.$.custPhone.value = this.salesDoc[this.selectedOrder].custphone;
-          this.$.custAddr.value = this.salesDoc[this.selectedOrder].custaddr;
-          this.$.custPos.value = this.salesDoc[this.selectedOrder].custpos;
-          this.$.prodQuan.value = this.salesDoc[this.selectedOrder].qty;
-          this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
-          this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
-
-          Polymer.dom(document.body).appendChild(this.$.placeOrderDialog);
-          this.$.placeOrderDialog.open();
-        }
-        else {
-          this.promptToast(this.$.invalidToast);
-        }
+      openCancelSalesDialog(event) {
+        this.selectedOrder = event.model.item.$key;
+        Polymer.dom(document.body).appendChild(this.$.cancelSalesDialog);
+        this.$.cancelSalesDialog.open();
       }
 
-      openNewCustomerDialog(event) {
-        Polymer.dom(document.body).appendChild(this.$.newCustomerDialog);
-        this.$.newCustomerDialog.open();
+      onCancelSalesDialogClosed(event) {
+        if (this.$.cancelSalesDialog.closingReason.confirmed) {
+          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSalesFunction');
+          processSales({
+            key: this.selectedOrder,
+            action: 'Cancelled',
+          }).then(function(result) {
+            this.promptToast(this.$.successToast);
+          }.bind(this)).catch((err) => {
+            this.promptToast(this.$.failToast);
+          });
+        }
+        Polymer.dom(document.body).removeChild(this.$.cancelSalesDialog);
       }
 
       submitOrder() {
@@ -373,7 +305,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               this.promptToast(this.$.failToast);
             });
 
-            this.$.placeOrderDialog.close();
+            this.$.orderDialog.close();
           }
           else {
             // Check if have enough units.
@@ -398,19 +330,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               }).catch((err) => {
               });
 
-              this.$.placeOrderDialog.close();
+              this.$.orderDialog.close();
             }
           }
         }
       }
 
       isProcessing(status) {
-        if (status == 'Processing') {
-          return true;
-        }
-        else {
-          return false;
-        }
+        return (status == 'Processing');
       }
 
       getProdName(change, prod) {

@@ -1,0 +1,237 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+
+<link rel="import" href="shared-styles.html">
+
+<script src="../bower_components/strftime/strftime-min.js"></script>
+
+<dom-module id="customer-view">
+  <template>
+    <firebase-document
+      id="custDocElem"
+      path="/customers"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="custDataElement"
+      app-name="absolute-reborn"
+      path="/customers/[[selectedCustKey]]"
+      data="{{custDataData}}">
+    </firebase-document>
+
+    <firebase-query
+      id="custQueryElement"
+      app-name="absolute-reborn"
+      path="/customers"
+      order-by-child="createdBy"
+      equal-to="[[user.uid]]"
+      data="{{custQueryArray}}">
+    </firebase-query>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <!-- Visible contents -->
+    <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedCustKey}}" style="min-width: 842px;">
+      <paper-item style="font-weight: bold;">
+        <div class="big-list-content">Name</div>
+        <div class="big-list-content">Address</div>
+        <div class="list-content">Postcode</div>
+        <div class="big-list-content">Created</div>
+        <div class="list-content">Action</div>
+      </paper-item>
+      <template is="dom-repeat" items="{{custQueryArray}}">
+        <paper-item key="[[item.$key]]">
+          <div class="big-list-content">[[item.custName]]</div>
+          <div class="big-list-content">[[item.custAddr]]</div>
+          <div class="list-content">[[item.custPostcode]]</div>
+          <div class="big-list-content">[[formatEpochTime(item.createdTime)]]</div>
+          <div class="list-content">
+            <paper-icon-button icon="create" on-click="openCustomerDialog">
+            </paper-icon-button>
+          </div>
+        </paper-item>
+      </template>
+    </paper-listbox>
+    <paper-fab icon="face" on-click="openCustomerDialog"></paper-fab>
+
+    <!-- Dialogs -->
+    <paper-dialog id="customerDialog" on-iron-overlay-closed="onCustomerDialogClosed" modal>
+      <h2>Customer profile</h2>
+      <paper-input
+        id="custName"
+        label="Name"
+        error-message="Invalid value!"
+        always-float-label required auto-validate>
+      </paper-input>
+      <paper-input
+        id="custPhone"
+        label="Phone Number"
+        pattern="\d{7,15}"
+        error-message="Invalid value!"
+        always-float-label required auto-validate>
+      </paper-input>
+      <paper-input
+        id="custAddr"
+        label="Delivery Address"
+        error-message="Invalid value!"
+        always-float-label required auto-validate>
+      </paper-input>
+      <paper-input
+        id="custPostcode"
+        label="Postcode"
+        error-message="Invalid value!"
+        pattern="\d{5}"
+        always-float-label required auto-validate>
+      </paper-input>
+      <paper-dialog-scrollable>
+        <paper-textarea
+          id="custNote"
+          label="Note"
+          on-value-changed="onDialogResize"
+          always-float-label>
+        </paper-textarea>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button id="customerDialogCancelButton" dialog-dismiss>Cancel</paper-button>
+        <paper-button id="customerDialogConfirmButton" autofocus on-click="addNewCustomer">Confirm</paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- Toasts -->
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
+
+  </template>
+
+  <script>
+    class CustomerView extends Polymer.Element {
+      static get is() { return 'customer-view'; }
+      static get properties() {
+        return {
+          user: Object,
+          userdata: Object,
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("CustomerView ready.");
+      }
+
+      openCustomerDialog(event) {
+        this.$.custNote.value = null;
+        if (event.model) {
+          this.selectedCustKey = event.model.item.$key;
+
+          // Populate inputs with current data
+          this.$.custAddr.value = event.model.item.custAddr;
+          this.$.custName.value = event.model.item.custName;
+          this.$.custNote.value = event.model.item.custNote || null;
+          this.$.custPhone.value = event.model.item.custPhone;
+          this.$.custPostcode.value = event.model.item.custPostcode;
+        }
+        Polymer.dom(document.body).appendChild(this.$.customerDialog);
+        this.$.customerDialog.open();
+      }
+
+      onCustomerDialogClosed(event) {
+        if (event.target == this.$.customerDialog) {
+          // Reset all dialog fields.
+          this.$.custName.value = null;
+          this.$.custName.invalid = false;
+          this.$.custPhone.value = null;
+          this.$.custPhone.invalid = false;
+          this.$.custAddr.value = null;
+          this.$.custAddr.invalid = false;
+          this.$.custPostcode.value = null;
+          this.$.custPostcode.invalid = false;
+          this.$.custNote.value = null;
+
+          // Enable buttons
+          this.$.customerDialogCancelButton.disabled = false;
+          this.$.customerDialogConfirmButton.disabled = false;
+
+          this.selectedCustKey = null;
+        }
+      }
+
+      onDialogResize(event) {
+        console.log(event);
+        this.$.customerDialog.notifyResize();
+      }
+
+      addNewCustomer() {
+        // Check all inputs are valid, add new fields here.
+        var inputValid = this.$.custName.validate();
+        inputValid = this.$.custPhone.validate() && inputValid;
+        inputValid = this.$.custAddr.validate() && inputValid;
+        inputValid = this.$.custPostcode.validate() && inputValid;
+
+        if (inputValid) {
+          // Disable buttons
+          this.$.customerDialogCancelButton.disabled = true;
+          this.$.customerDialogConfirmButton.disabled = true;
+
+          // Update existing profile.
+          if (this.selectedCustKey) {
+            this.$.custDataElement.ref.update({
+              custAddr: this.$.custAddr.value,
+              custName: this.$.custName.value,
+              custNote: this.$.custNote.value,
+              custPhone: this.$.custPhone.value,
+              custPostcode: this.$.custPostcode.value,
+            }).then(function(snap) {
+              this.$.customerDialog.close();
+            }.bind(this)).catch(function(error) {
+              this.$.customerDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.failToast);
+              this.$.failToast.open();
+            }.bind(this));
+          }
+          else {
+            this.$.custDocElem.ref.push({
+              custAddr: this.$.custAddr.value,
+              custName: this.$.custName.value,
+              custNote: this.$.custNote.value,
+              custPhone: this.$.custPhone.value,
+              custPostcode: this.$.custPostcode.value,
+              createdBy: this.user.uid,
+              createdTime: {".sv":"timestamp"},
+            }).then(function(snap) {
+              this.$.customerDialog.close();
+            }.bind(this)).catch(function(error) {
+              this.$.customerDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.failToast);
+              this.$.failToast.open();
+            }.bind(this));
+          }
+        }
+      }
+
+      formatEpochTime(eTS) {
+        return strftime('%D %I:%M %P', new Date(eTS));
+      }
+    }
+
+    window.customElements.define(CustomerView.is, CustomerView);
+  </script>
+</dom-module>
