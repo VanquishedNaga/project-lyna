@@ -105,39 +105,25 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </app-toolbar>
       </app-header>
       <div>
-        <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}">
+        <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}" style="min-width: 842px;">
           <paper-item style="font-weight: bold;">
-            <paper-item-body two-line style="width: 20%;">
-              <div>Product name</div>
-              <div secondary>Quantity</div>
-            </paper-item-body>
-            <paper-item-body two-line style="width: 20%;">
-              <div>Customer Name</div>
-              <div secondary>Address</div>
-            </paper-item-body>
-            <div style="width: 20%;">Status</div>
-            <paper-item-body two-line style="width: 20%;">
-              <div>Date</div>
-              <div secondary>Time</div>
-            </paper-item-body>
-            <div style="width: 20%;">Tracking No.</div>
+            <div class="big-list-content">Product</div>
+            <div class="list-content">Quantity</div>
+            <div class="list-content">Customer</div>
+            <div class="list-content">Address</div>
+            <div class="list-content">Status</div>
+            <div class="big-list-content">Time</div>
+            <div class="list-content">Tracking No.</div>
           </paper-item>
           <template is="dom-repeat" items="{{sales}}">
             <paper-item key="[[item.$key]]">
-              <paper-item-body two-line style="width: 20%;">
-                <div>[[getProdName(productsList.*, item.prod)]]</div>
-                <div secondary>[[item.qty]]</div>
-              </paper-item-body>
-              <paper-item-body two-line style="width: 20%;">
-                <div>[[item.custname]]</div>
-                <div secondary>[[item.custaddr]]</div>
-              </paper-item-body>
-              <div style="width: 20%; min-width: 85px">[[item.stat]]</div>
-              <paper-item-body two-line style="width: 20%;">
-                <div>[[_formatEpochDate(item.time)]]</div>
-                <div secondary>[[_formatEpochTime(item.time)]]</div>
-              </paper-item-body>
-              <div style="width: 20%; min-width: 85px">[[item.trackNum]]</div>
+              <div class="big-list-content">[[getProdName(productsList.*, item.prod)]]</div>
+              <div class="list-content">[[item.qty]]</div>
+              <div class="list-content">[[item.custname]]</div>
+              <div class="list-content">[[item.custaddr]]</div>
+              <div class="list-content">[[item.stat]]</div>
+              <div class="big-list-content">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+              <div class="list-content">[[item.trackNum]]</div>
             </paper-item>
           </template>
         </paper-listbox>
