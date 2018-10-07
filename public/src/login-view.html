@@ -86,7 +86,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                   name: response.user.displayName,
                   profilePic: response.user.photoURL,
                   email: response.user.email,
-                  status: "Inactive"
+                  status: "Inactive",
+                  joinedDate: {".sv":"timestamp"}
                 });
               }
             }.bind(this));
