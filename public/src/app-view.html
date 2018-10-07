@@ -237,7 +237,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </profile-view>
         <div name="warehouse">
           <template is="dom-if" if="[[isAdminOrManager(userdata.privilege)]]">
-            <warehouse-view user="[[user]]" userdata="[[userdata]]">
+            <warehouse-view user="[[user]]" userdata="[[userdata]]" narrow="[[narrow]]">
               <paper-icon-button icon="my-icons:menu" drawer-toggle slot="drawer-toggle"></paper-icon-button>
             </warehouse-view>
           </template>

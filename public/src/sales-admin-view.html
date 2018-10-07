@@ -1,0 +1,524 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+<link rel="import" href="shared-styles.html">
+
+<script src="../bower_components/strftime/strftime-min.js"></script>
+
+<dom-module id="sales-admin-view">
+  <template>
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="salesDoc"
+      app-name="absolute-reborn"
+      path="/sales"
+      data="{{salesDoc}}">
+    </firebase-document>
+
+    <firebase-document
+      id="product-lists"
+      path = "/products"
+      data = "{{productsList}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="inventoryDataDoc"
+      app-name="absolute-reborn"
+      path="/users/[[user.uid]]/inventory"
+      data="{{inventoryListDoc}}">
+    </firebase-document>
+
+    <firebase-query
+      id="inventoryData"
+      app-name="absolute-reborn"
+      path="/users/[[user.uid]]/inventory"
+      data="{{inventoryList}}">
+    </firebase-query>
+
+    <firebase-query
+      id="sales"
+      app-name="absolute-reborn"
+      path="/sales"
+      order-by-child="seller"
+      equal-to="[[user.uid]]"
+      data="{{sales}}">
+    </firebase-query>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <!-- Visible contents -->
+    <app-header slot="header" condenses shadow fixed>
+      <app-toolbar class="tabs-bar" sticky>
+        <paper-button class="custom" on-tap="placeOrder">
+          <iron-icon icon="credit-card"></iron-icon>
+          <span>New order</span>
+        </paper-button>
+        <div style="margin-left: auto; margin-right: 0;">
+          <paper-button class="custom" on-tap="openEditSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+            <iron-icon icon="create"></iron-icon>
+            <span hidden="[[narrow]]">Edit</span>
+          </paper-button>
+          <paper-button class="custom" on-tap="openCancelSalesDialog" disabled$="[[!isSelected(selectedOrder)]]">
+            <iron-icon icon="delete"></iron-icon>
+            <span hidden="[[narrow]]">Cancel</span>
+          </paper-button>
+          <paper-button class="custom" on-tap="openApproveSalesDialog" disabled$="[[!isSelected(selectedOrder)]]" hidden="[[!isAdminOrStoreManager(userdata.privilege)]]">
+            <iron-icon icon="check"></iron-icon>
+            <span hidden="[[narrow]]">Accept</span>
+          </paper-button>
+          <paper-button class="custom" on-tap="openRejectSalesDialog" disabled$="[[!isSelected(selectedOrder)]]" hidden="[[!isAdminOrStoreManager(userdata.privilege)]]">
+            <iron-icon icon="clear"></iron-icon>
+            <span hidden="[[narrow]]">Reject</span>
+          </paper-button>
+        </div>
+      </app-toolbar>
+    </app-header>
+    <div>
+      <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}" style="min-width: 842px;">
+        <paper-item style="font-weight: bold;">
+          <div class="big-list-content">Product</div>
+          <div class="list-content">Quantity</div>
+          <div class="list-content">Customer</div>
+          <div class="list-content">Address</div>
+          <div class="list-content">Status</div>
+          <div class="big-list-content">Time</div>
+          <div class="list-content">Tracking No.</div>
+        </paper-item>
+        <template is="dom-repeat" items="{{sales}}">
+          <paper-item key="[[item.$key]]">
+            <div class="big-list-content">[[getProdName(productsList.*, item.prod)]]</div>
+            <div class="list-content">[[item.qty]]</div>
+            <div class="list-content">[[item.custname]]</div>
+            <div class="list-content">[[item.custaddr]]</div>
+            <div class="list-content">[[item.stat]]</div>
+            <div class="big-list-content">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+            <div class="list-content">[[item.trackNum]]</div>
+          </paper-item>
+        </template>
+      </paper-listbox>
+    </div>
+
+    <!-- To place a sales order -->
+    <paper-dialog id="placeOrder" on-iron-overlay-closed="onPlaceOrderClosed" modal>
+      <h2>Sales Order</h2>
+      <paper-input
+        id="custName"
+        label="Customer Name"
+        error-message="Field required!"
+        always-float-label required auto-validate>
+      </paper-input>
+      <paper-input
+        id="custPhone"
+        label="Customer Phone"
+        allowed-pattern="[0-9]"
+        char-counter
+        minlength="10"
+        maxlength="11"
+        error-message="Field required!"
+        always-float-label required auto-validate>
+      </paper-input>
+      <paper-input
+        id="custAddr"
+        label="Delivery Address"
+        error-message="Field required!"
+        always-float-label required auto-validate>
+      </paper-input>
+      <paper-input
+        id="custPos"
+        label="Postcode"
+        error-message="Field required!"
+        allowed-pattern="[0-9]"
+        char-counter
+        minlength="5"
+        maxlength="5"
+        always-float-label required auto-validate>
+      </paper-input>
+
+      <paper-dropdown-menu label="Select product" id="prodMenu" required error-message="Field required!">
+        <paper-listbox id="prodList" slot="dropdown-content" attr-for-selected="key">
+          <template is="dom-repeat" items="{{inventoryList}}">
+            <paper-item key="[[item.$key]]">[[getProdName(productsList.*, item.$key)]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+
+      <paper-input always-float-label required auto-validate
+        type="number"
+        min="1"
+        error-message="Field required!"
+        id="prodQuan"
+        label="Product Quantity"
+        style="display: inline-block;">
+      </paper-input>
+
+      <paper-input always-float-label required auto-validate
+        pattern="^\d*\.?\d{0,2}$"
+        error-message="Field required!"
+        id="prodPrice"
+        label="Total Amount"
+        style="display: inline-block;">
+        <div slot="prefix">RM</div>
+      </paper-input>
+
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button autofocus on-tap="submitOrder">Confirm</paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- To confirm accepting a sales request -->
+    <paper-dialog id="approveSalesDialog" on-iron-overlay-closed="onApproveSalesDialogClosed" modal>
+      <h2>Mark Order as Processed</h2>
+      <p>Are you sure you want to mark this order as processed?</p>
+      <paper-input always-float-label required auto-validate
+        error-message="Field required!"
+        id="trackNum"
+        label="Parcel tracking number">
+      </paper-input>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button autofocus on-tap="approveSales">Yes</paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- To confirm rejecting a sales request -->
+    <paper-dialog id="rejectSalesDialog" on-iron-overlay-closed="onRejectSalesDialogClosed" modal>
+      <h2>Reject Sales Order</h2>
+      <p>Are you sure you want to reject this order?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button dialog-confirm autofocus>Yes</paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- To confirm cancelling a sales request -->
+    <paper-dialog id="cancelSalesDialog" on-iron-overlay-closed="onCancelSalesDialogClosed" modal>
+      <h2>Cancel Sales Order</h2>
+      <p>Are you sure you want to cancel this order?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button dialog-confirm autofocus>Yes</paper-button>
+      </div>
+    </paper-dialog>
+
+    <!-- Toasts -->
+    <paper-toast id="invalidToast" class="bad" text="You can't perform this action!"> </paper-toast>
+    <paper-toast id="insufficientAmountToast" class="bad" text="You don't have enough in your inventory!"> </paper-toast>
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
+
+  </template>
+
+  <script>
+    class SalesAdminView extends Polymer.Element {
+      static get is() { return 'sales-admin-view'; }
+      static get properties() {
+        return {
+          inventoryList: Array,
+          inventoryListDoc: Object,
+          productsList: Array,
+          sales: Array,
+          user: Object,
+          userdata: Object,
+          narrow: Object,
+          selectedOrder: {
+            type: Object,
+            value: null,
+          }
+        };
+      }
+
+      static get observers() {
+        return [
+          'userPrivChanged(userdata.privilege)'
+        ]
+      }
+
+      ready() {
+        super.ready();
+        console.log("SalesAdminView ready.");
+      }
+
+      // To disable buttons when nothing is selected.
+      isSelected(order) {
+        if (order) {
+          return true;
+        }
+        else {
+          return false;
+        }
+      }
+
+      userPrivChanged(priv) {
+        if ((priv == 'Admin') || (priv == 'Store Manager')) {
+          this.$.sales.orderByChild = null;
+          this.$.sales.equalTo = null;
+        }
+        else {
+          this.$.sales.orderByChild = 'seller';
+          this.$.sales.equalTo = this.user.uid;
+        }
+      }
+
+      openApproveSalesDialog(e) {
+        if ((this.salesDoc[this.selectedOrder].stat == 'Processing') ||
+          (this.salesDoc[this.selectedOrder].stat == 'Processed')) {
+          // Display tracking number if exists
+          this.$.doc.path = '/sales/' + this.selectedOrder + '/trackNum'
+          this.$.doc.ref.once('value')
+          .then(function(snapshot) {
+            this.$.trackNum.value = snapshot.val();
+            this.$.trackNum.invalid = false;
+          }.bind(this));
+
+          Polymer.dom(document.body).appendChild(this.$.approveSalesDialog);
+          this.$.approveSalesDialog.open();
+        }
+        else {
+          this.promptToast(this.$.invalidToast);
+        }
+      }
+
+      approveSales() {
+        if (this.$.trackNum.validate()) {
+          // Update sales
+          this.$.doc.path = '/sales/' + this.selectedOrder;
+          this.$.doc.ref.update({
+            stat: 'Processed',
+            trackNum: this.$.trackNum.value,
+          }).then(function(result) {
+            this.promptToast(this.$.successToast);
+          }.bind(this)).catch((err) => {
+            this.promptToast(this.$.failToast);
+          });
+
+          this.$.approveSalesDialog.close();
+        }
+      }
+
+      onApproveSalesDialogClosed(event) {
+        this.$.trackNum.value = null;
+        this.$.trackNum.invalid = false;
+        Polymer.dom(document.body).removeChild(this.$.approveSalesDialog);
+      }
+
+      openRejectSalesDialog(e) {
+        if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
+          Polymer.dom(document.body).appendChild(this.$.rejectSalesDialog);
+          this.$.rejectSalesDialog.open();
+        }
+        else {
+          this.promptToast(this.$.invalidToast);
+        }
+      }
+
+      onRejectSalesDialogClosed(event) {
+        if (this.$.rejectSalesDialog.closingReason.confirmed) {
+          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSalesFunction');
+          processSales({
+            key: this.selectedOrder,
+            action: 'Rejected',
+          }).then(function(result) {
+            this.promptToast(this.$.successToast);
+          }.bind(this)).catch((err) => {
+            this.promptToast(this.$.failToast);
+          });
+        }
+        Polymer.dom(document.body).removeChild(this.$.rejectSalesDialog);
+      }
+
+      openCancelSalesDialog(e) {
+        if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
+          Polymer.dom(document.body).appendChild(this.$.cancelSalesDialog);
+          this.$.cancelSalesDialog.open();
+        }
+        else {
+          this.promptToast(this.$.invalidToast);
+        }
+      }
+
+      onCancelSalesDialogClosed(event) {
+        if (this.$.cancelSalesDialog.closingReason.confirmed) {
+          var processSales = firebase.app('absolute-reborn').functions().httpsCallable('processSalesFunction');
+          processSales({
+            key: this.selectedOrder,
+            action: 'Cancelled',
+          }).then(function(result) {
+            this.promptToast(this.$.successToast);
+          }.bind(this)).catch((err) => {
+            this.promptToast(this.$.failToast);
+          });
+        }
+        Polymer.dom(document.body).removeChild(this.$.cancelSalesDialog);
+      }
+
+      placeOrder() {
+        this.selectedOrder = null;
+        Polymer.dom(document.body).appendChild(this.$.placeOrder);
+        this.$.placeOrder.open();
+      }
+
+      submitOrder() {
+        // Check all inputs are valid, add new fields here.
+        var valid = this.$.custName.validate();
+        valid = this.$.custPhone.validate() && valid;
+        valid = this.$.custAddr.validate() && valid;
+        valid = this.$.custPos.validate() && valid;
+        valid = this.$.prodMenu.validate() && valid;
+        valid = this.$.prodQuan.validate() && valid;
+        valid = this.$.prodPrice.validate() && valid;
+
+        if (valid) {
+          // Update existing order.
+          if (this.selectedOrder) {
+            this.$.doc.path = '/sales/' + this.selectedOrder;
+            this.$.doc.ref.update({
+              custname: this.$.custName.value,
+              custaddr: this.$.custAddr.value,
+              custphone: this.$.custPhone.value,
+              custpos: this.$.custPos.value
+            }).then(function(result) {
+              this.promptToast(this.$.successToast);
+            }.bind(this)).catch((err) => {
+              this.promptToast(this.$.failToast);
+            });
+
+            this.$.placeOrder.close();
+          }
+          else {
+            // Check if have enough units.
+            if (this.$.prodQuan.value > this.$.inventoryDataDoc.data[this.$.prodList.selected]) {
+              Polymer.dom(document.body).appendChild(this.$.insufficientAmountToast);
+              this.$.insufficientAmountToast.open();
+            }
+            else {
+              var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSalesFunction');
+              addSales({
+                amount: this.$.prodPrice.value,
+                custname: this.$.custName.value,
+                custaddr: this.$.custAddr.value,
+                custphone: this.$.custPhone.value,
+                custpos: this.$.custPos.value,
+                prod: this.$.prodList.selected,
+                qty: this.$.prodQuan.value,
+                time: {".sv":"timestamp"},
+                seller: this.user.uid,
+                stat: "Processing",
+              }).then(function(result) {
+              }).catch((err) => {
+              });
+
+              this.$.placeOrder.close();
+            }
+          }
+        }
+      }
+
+      onPlaceOrderClosed(event) {
+        // To prevent paper-dropdown-menu from closing paper-dialog.
+        if (event.target == this.$.placeOrder) {
+          // Reset all fields.
+          this.$.custName.value = null;
+          this.$.custName.invalid = false;
+          this.$.custPhone.value = null;
+          this.$.custPhone.invalid = false;
+          this.$.custAddr.value = null;
+          this.$.custAddr.invalid = false;
+          this.$.custPos.value = null;
+          this.$.custPos.invalid = false;
+          this.$.prodMenu.value = null;
+          this.$.prodMenu.invalid = false;
+          this.$.prodQuan.value = null;
+          this.$.prodQuan.invalid = false;
+          this.$.prodList.selected = null;
+          this.$.prodPrice.value = null;
+          this.$.prodPrice.invalid = false;
+
+          // Reset disabled fields.
+          this.$.prodMenu.disabled = false;
+          this.$.prodQuan.disabled = false;
+          this.$.prodPrice.disabled = false;
+
+          Polymer.dom(document.body).removeChild(this.$.placeOrder);
+        }
+      }
+
+      getProdName(change, prod) {
+        if (change.base[prod] != undefined){
+          return change.base[prod]['name'];
+        }
+      }
+
+      _formatEpochDate(eTS) {
+        return strftime('%D', new Date(eTS));
+      }
+
+      _formatEpochTime(eTS) {
+        return strftime('%I:%M %P', new Date(eTS));
+      }
+
+      openEditSalesDialog(eTS) {
+        if (this.salesDoc[this.selectedOrder].stat == 'Processing') {
+          // Disable some fields.
+          this.$.prodMenu.disabled = true;
+          this.$.prodQuan.disabled = true;
+          this.$.prodPrice.disabled = true;
+
+          // Populate fields.
+          this.$.custName.value = this.salesDoc[this.selectedOrder].custname;
+          this.$.custPhone.value = this.salesDoc[this.selectedOrder].custphone;
+          this.$.custAddr.value = this.salesDoc[this.selectedOrder].custaddr;
+          this.$.custPos.value = this.salesDoc[this.selectedOrder].custpos;
+          this.$.prodQuan.value = this.salesDoc[this.selectedOrder].qty;
+          this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
+          this.$.prodList.selected = this.salesDoc[this.selectedOrder].prod;
+
+          Polymer.dom(document.body).appendChild(this.$.placeOrder);
+          this.$.placeOrder.open();
+        }
+        else {
+          this.promptToast(this.$.invalidToast);
+        }
+      }
+
+      promptToast(element) {
+        Polymer.dom(document.body).appendChild(element);
+        element.center();
+        element.refit();
+        element.open();
+      }
+
+      isAdminOrStoreManager(privilege) {
+        return ((privilege == "Admin") || (privilege == "Store Manager"));
+      }
+    }
+
+    window.customElements.define(SalesAdminView.is, SalesAdminView);
+  </script>
+</dom-module>
