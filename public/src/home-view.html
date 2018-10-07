@@ -182,7 +182,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.msgKey = snapshot.key;
             this.uploadNoticeBoardImage();
           }.bind(this)).catch(function(error) {
-            console.log(error);
             this.$.updateNoticeDialog.close();
           }.bind(this));
         }
@@ -213,7 +212,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           }.bind(this))
           // Failed to upload
           .catch(function(error) {
-            console.log(error);
             this.$.updateNoticeDialog.close();
             Polymer.dom(document.body).appendChild(this.$.failToast);
             this.$.failToast.open();

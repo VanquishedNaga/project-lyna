@@ -2,23 +2,25 @@
 @license
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
-<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
-<link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
@@ -281,14 +283,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                           <iron-icon icon="pan-tool"></iron-icon>
                           <span>Unsuspend</span>
                         </paper-button>
-                        <paper-button on-tap="openPromoteAdminDialog" class="custom" hidden="[[isUserAdmin(userList.*, item.key)]]">
-                          <iron-icon icon="arrow-upward"></iron-icon>
-                          <span>Promote as admin</span>
-                        </paper-button>
-                        <paper-button on-tap="openDemoteAdminDialog" class="custom" hidden="[[!isUserAdmin(userList.*, item.key)]]">
-                          <iron-icon icon="arrow-downward"></iron-icon>
-                          <span>Demote admin</span>
-                        </paper-button>
                         <paper-button on-tap="openEditDialog" class="custom">
                           <iron-icon icon="create"></iron-icon>
                           <span>Edit</span>
@@ -352,24 +346,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               </div>
             </paper-dialog>
 
-            <paper-dialog id="promoteAdminDialog" on-iron-overlay-closed="onPromoteAdminDialogClosed" modal>
-              <h2>Promote as Admin</h2>
-              <p>Are you sure you want to promote this user as admin?</p>
-              <div class="buttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button dialog-confirm autofocus>Promote</paper-button>
-              </div>
-            </paper-dialog>
-
-            <paper-dialog id="demoteAdminDialog" on-iron-overlay-closed="onDemoteAdminDialogClosed" modal>
-              <h2>Demote Admin</h2>
-              <p>Are you sure you want to demote this admin?</p>
-              <div class="buttons">
-                <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button dialog-confirm autofocus>Demote</paper-button>
-              </div>
-            </paper-dialog>
-
             <paper-dialog id="editDialog" on-iron-overlay-closed="onEditInfoClose" modal>
               <paper-dialog-scrollable>
                 <div style="
@@ -385,6 +361,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                     label="Name"
                     always-float-label>
                   </paper-input>
+                  <paper-dropdown-menu label="Select access" id="privilegeMenu">
+                    <paper-listbox id="userPrivilege" slot="dropdown-content">
+                      <paper-item>Admin</paper-item>
+                      <paper-item>Stock Manager</paper-item>
+                      <paper-item>User</paper-item>
+                    </paper-listbox>
+                  </paper-dropdown-menu>
                   <paper-dropdown-menu label="Select level" id="userLevelMenu">
                     <paper-listbox id="userLevel" slot="dropdown-content" attr-for-selected="key">
                       <template is="dom-repeat" items="{{toArray(levelData.*)}}">
@@ -441,6 +424,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </div>
         </iron-pages>
     </app-header-layout>
+
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
   </template>
 
   <script>
@@ -521,9 +507,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.doc.path = '/level';
           this.$.doc.ref.update({
             [[index]]: this.$.newLevel.value
-          });
-
-          this.$.addLevelDialog.close();
+          })
+          .then(function(snapshot) {
+            this.$.addLevelDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          .catch(function(error) {
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
         }
       }
 
@@ -541,9 +534,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.doc.path = '/level';
           this.$.doc.ref.update({
             [[i]]: levelName.value
-          });
+          })
+          .then(function(snapshot) {
+            this.$.editLevelDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          .catch(function(error) {
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
         }
-        this.$.editLevelDialog.close();
       }
 
       delLastLevel() {
@@ -610,9 +611,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.doc.path = '/products/' + this.prodKey + '/prices';
           this.$.doc.ref.update({
             [[i]]: priceInput.value
-          });
+          })
+          .then(function(snapshot) {
+            this.$.editPriceDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          .catch(function(error) {
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
         }
-        this.$.editPriceDialog.close();
       }
 
       getUserInfo(change, user, data) {
@@ -640,10 +649,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.doc.path = '/users/'+ uid;
           this.$.doc.ref.update({
             status: 'Suspended',
-          });
+          })
+          .then(function(snapshot) {
+            this.event = null;
+            Polymer.dom(document.body).removeChild(this.$.suspendUserDialog);
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          .catch(function(error) {
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
         }
-        this.event = null;
-        Polymer.dom(document.body).removeChild(this.$.suspendUserDialog);
       }
 
       openUnsuspendUserDialog(event) {
@@ -658,58 +675,31 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.doc.path = '/users/'+ uid;
           this.$.doc.ref.update({
             status: 'Approved',
-          });
+          })
+          .then(function(snapshot) {
+            this.event = null;
+            Polymer.dom(document.body).removeChild(this.$.unsuspendUserDialog);
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          .catch(function(error) {
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
         }
-        this.event = null;
-        Polymer.dom(document.body).removeChild(this.$.unsuspendUserDialog);
-      }
-
-      openPromoteAdminDialog(event) {
-        this.event = event;
-        Polymer.dom(document.body).appendChild(this.$.promoteAdminDialog);
-        this.$.promoteAdminDialog.open();
-      }
-
-      onPromoteAdminDialogClosed() {
-        if (this.$.promoteAdminDialog.closingReason.confirmed) {
-          var uid = this.event.model.__data.item.key;
-          this.$.doc.path = '/users/'+ uid;
-          this.$.doc.ref.update({
-            privilege: 'Admin',
-          });
-        }
-        this.event = null;
-        Polymer.dom(document.body).removeChild(this.$.promoteAdminDialog);
-      }
-
-      openDemoteAdminDialog(event) {
-        this.event = event;
-        Polymer.dom(document.body).appendChild(this.$.demoteAdminDialog);
-        this.$.demoteAdminDialog.open();
-      }
-
-      onDemoteAdminDialogClosed() {
-        if (this.$.demoteAdminDialog.closingReason.confirmed) {
-          var uid = this.event.model.__data.item.key;
-          this.$.doc.path = '/users/'+ uid;
-          this.$.doc.ref.update({
-            privilege: 'User',
-          });
-        }
-        this.event = null;
-        Polymer.dom(document.body).removeChild(this.$.demoteAdminDialog);
       }
 
       openEditDialog(event) {
         this.event = event;
 
         this.$.userName.value = this.userList[this.event.model.__data.item.key]['name'] || null;
-        this.$.userLevel.selected = this.userList[this.event.model.__data.item.key]['level'] || null;
+        this.$.userLevel.selected = isNaN(this.userList[this.event.model.__data.item.key]['level']) ? null : this.userList[this.event.model.__data.item.key]['level'];
         this.$.userWechat.value = this.userList[this.event.model.__data.item.key]['wechat'] || null;
         this.$.userIc.value = this.userList[this.event.model.__data.item.key]['icNum'] || null;
         this.$.userEmail.value = this.userList[this.event.model.__data.item.key]['email'] || null;
         this.$.userPhone.value = this.userList[this.event.model.__data.item.key]['phone'] || null;
         this.$.userAddress.value = this.userList[this.event.model.__data.item.key]['address'] || null;
+        this.$.privilegeMenu.value = this.userList[this.event.model.__data.item.key]['privilege'] || null;
 
         Polymer.dom(document.body).appendChild(this.$.editDialog);
         this.$.editDialog.open();
@@ -720,6 +710,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         var valid = this.$.userName.validate();
         valid = this.$.userPhone.validate() && valid;
         valid = this.$.userAddress.validate() && valid;
+        valid = this.$.privilegeMenu.validate() && valid;
 
         if (valid) {
           this.$.doc.path = '/users/' + this.event.model.__data.item.key;
@@ -728,10 +719,20 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             level: parseInt(this.$.userLevel.selected),
             email: this.$.userEmail.value,
             phone: this.$.userPhone.value,
-            address: this.$.userAddress.value
-          });
-
-          this.$.editDialog.close();
+            address: this.$.userAddress.value,
+            icNum: this.$.userIc.value,
+            wechat: this.$.userWechat.value,
+            privilege: this.$.privilegeMenu.value
+          })
+          .then(function(snapshot) {
+            this.$.editDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          .catch(function(error) {
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
         }
       }
 
@@ -755,7 +756,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
           Polymer.dom(document.body).removeChild(this.$.editDialog);
         }
-        // console.log(this.$.userLevelList.selected);
       }
 
       isUserApproved(change, user) {
@@ -767,12 +767,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       isUserSuspended(change, user) {
         if (change.base[user] != undefined) {
           return (change.base[user]['status'] == 'Suspended');
-        }
-      }
-
-      isUserAdmin(change, user) {
-        if (change.base[user] != undefined) {
-          return (change.base[user]['privilege'] == 'Admin');
         }
       }
 
