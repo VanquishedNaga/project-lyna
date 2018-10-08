@@ -15,6 +15,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="postage-admin-view.html">
 <link rel="import" href="sales-admin-view.html">
+<link rel="import" href="customer-admin-view.html">
 
 <dom-module id="warehouse-view">
   <template>
@@ -40,8 +41,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-header>
 
       <iron-pages selected="{{selected}}" attr-for-selected="page-name">
-        <sales-admin-view user="[[user]]" userdata="[[userdata]]" narrow="[[narrow]]" page-name="Sales"></sales-admin-view>
+        <sales-admin-view user="[[user]]" userdata="[[userdata]]" page-name="Sales"></sales-admin-view>
         <postage-admin-view user="[[user]]" userdata="[[userdata]]" page-name="Postage"></postage-admin-view>
+        <customer-admin-view user="[[user]]" userdata="[[userdata]]" page-name="Customers"></customer-admin-view>
       </iron-pages>
     </app-header-layout>
 
@@ -62,7 +64,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           tabItems: {
             type: Array,
             value: function() {
-              return ['Sales', 'Postage'];
+              return ['Sales', 'Postage', 'Customers'];
             }
           },
         };

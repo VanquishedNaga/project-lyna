@@ -60,9 +60,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <!-- Visible contents -->
     <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrderKey}}" style="min-width: calc(32px + 90px * 11 + 16px * 9);">
       <paper-item style="font-weight: bold;">
+        <div class="list-content">Seller</div>
         <div class="big-list-content">Product</div>
         <div class="list-content">Quantity</div>
-        <div class="list-content">Seller</div>
         <div class="list-content">Customer</div>
         <div class="list-content">Postcode</div>
         <div class="list-content">Status</div>
@@ -72,9 +72,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-item>
       <template is="dom-repeat" items="{{salesArray}}">
         <paper-item key="[[item.$key]]">
+          <div class="list-content">[[getUserInfo(userList.*, item.seller, 'name')]]</div>
           <div class="big-list-content">[[getProdName(productsList.*, item.prod)]]</div>
           <div class="list-content">[[item.qty]]</div>
-          <div class="list-content">[[getUserInfo(userList.*, item.seller, 'name')]]</div>
           <div class="list-content">[[getCustInfo(customerList.*, item.custProfile, 'custName')]]</div>
           <div class="list-content">[[getCustInfo(customerList.*, item.custProfile, 'custPostcode')]]</div>
           <div class="list-content">[[item.stat]]</div>
@@ -95,6 +95,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <div>Customer: [[getCustInfo(customerList.*, selectedOrderData.custProfile, 'custName')]]</div>
       <div>Address: [[getCustInfo(customerList.*, selectedOrderData.custProfile, 'custAddr')]]</div>
       <div>Postcode: [[getCustInfo(customerList.*, selectedOrderData.custProfile, 'custPostcode')]]</div>
+      <div>Status: [[selectedOrderData.stat]]</div>
       <div>Time created: [[formatEpochTime(selectedOrderData.time)]]</div>
       <paper-input always-float-label required auto-validate
         error-message="Field required!"
@@ -122,7 +123,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return {
           user: Object,
           userdata: Object,
-          narrow: Object,
         };
       }
 
