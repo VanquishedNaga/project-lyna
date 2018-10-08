@@ -22,6 +22,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <dom-module id="customer-view">
   <template>
     <firebase-document
+      id="customerIdElem"
+      path="/common/customerId"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
       id="custDocElem"
       path="/customers"
       app-name="absolute-reborn">
@@ -50,8 +56,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </style>
 
     <!-- Visible contents -->
-    <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedCustKey}}" style="min-width: 986px;">
+    <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedCustKey}}" style="min-width: calc(32px + 90px*10 + 16px*7);">
       <paper-item style="font-weight: bold;">
+        <div class="list-content">ID</div>
         <div class="big-list-content">Name</div>
         <div class="big-list-content">Address</div>
         <div class="list-content">Postcode</div>
@@ -61,6 +68,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-item>
       <template is="dom-repeat" items="{{custQueryArray}}">
         <paper-item key="[[item.$key]]">
+          <div class="list-content">[[pad(item.custId)]]</div>
           <div class="big-list-content">[[item.custName]]</div>
           <div class="big-list-content">[[item.custAddr]]</div>
           <div class="list-content">[[item.custPostcode]]</div>
@@ -209,20 +217,35 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             }.bind(this));
           }
           else {
-            this.$.custDocElem.ref.push({
-              custAddr: this.$.custAddr.value,
-              custName: this.$.custName.value,
-              custNote: this.$.custNote.value,
-              custPhone: this.$.custPhone.value,
-              custPostcode: this.$.custPostcode.value,
-              createdBy: this.user.uid,
-              createdTime: {".sv":"timestamp"},
-            }).then(function(snap) {
-              this.$.customerDialog.close();
-            }.bind(this)).catch(function(error) {
+            this.$.customerIdElem.ref.transaction(function(id) {
+              if (id) {
+                id++;
+              }
+              return id;
+            }).then(function(id) {
+              this.$.custDocElem.ref.push({
+                custAddr: this.$.custAddr.value,
+                custId: id.snapshot.val(),
+                custName: this.$.custName.value,
+                custNote: this.$.custNote.value,
+                custPhone: this.$.custPhone.value,
+                custPostcode: this.$.custPostcode.value,
+                createdBy: this.user.uid,
+                createdTime: {".sv":"timestamp"},
+              }).then(function(snap) {
+                this.$.customerDialog.close();
+                Polymer.dom(document.body).appendChild(this.$.successToast);
+                this.$.successToast.open();
+              }.bind(this)).catch(function(error) {
+                this.$.customerDialog.close();
+                Polymer.dom(document.body).appendChild(this.$.failToast);
+                this.$.failToast.open();
+              }.bind(this));
+            }.bind(this)).catch(function(err) {
               this.$.customerDialog.close();
               Polymer.dom(document.body).appendChild(this.$.failToast);
               this.$.failToast.open();
+              console.log(err);
             }.bind(this));
           }
         }
@@ -230,6 +253,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       formatEpochTime(eTS) {
         return strftime('%D %I:%M %P', new Date(eTS));
+      }
+
+      pad(id) {
+        if (id) {
+          return id.toString().padStart(4, '0');
+        }
       }
     }
 
