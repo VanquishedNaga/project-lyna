@@ -58,8 +58,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </style>
 
     <!-- Visible contents -->
-    <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrderKey}}" style="min-width: calc(32px + 90px * 11 + 16px * 9);">
+    <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrderKey}}" style="min-width: calc(32px + 90px * 12 + 16px * 10);">
       <paper-item style="font-weight: bold;">
+        <div class="list-content">ID</div>
         <div class="list-content">Seller</div>
         <div class="big-list-content">Product</div>
         <div class="list-content">Quantity</div>
@@ -72,6 +73,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-item>
       <template is="dom-repeat" items="{{salesArray}}">
         <paper-item key="[[item.$key]]">
+          <div class="list-content">[[pad(item.id)]]</div>
           <div class="list-content">[[getUserInfo(userList.*, item.seller, 'name')]]</div>
           <div class="big-list-content">[[getProdName(productsList.*, item.prod)]]</div>
           <div class="list-content">[[item.qty]]</div>
@@ -228,6 +230,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           retVal = change.base[user][data];
         }
         return retVal;
+      }
+
+      pad(id) {
+        if (id) {
+          return id.toString().padStart(4, '0');
+        }
       }
     }
 

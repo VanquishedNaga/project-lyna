@@ -76,8 +76,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </style>
 
     <!-- Visible contents -->
-    <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}" style="min-width: 1092px;">
+    <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}" style="min-width: calc(32px + 90px*11 + 16px*9);">
       <paper-item style="font-weight: bold;">
+        <div class="list-content">ID</div>
         <div class="big-list-content">Product</div>
         <div class="list-content">Quantity</div>
         <div class="list-content">Customer</div>
@@ -89,6 +90,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-item>
       <template is="dom-repeat" items="{{mySalesArray}}">
         <paper-item key="[[item.$key]]">
+          <div class="list-content">[[pad(item.id)]]</div>
           <div class="big-list-content">[[getProdName(productsList.*, item.prod)]]</div>
           <div class="list-content">[[item.qty]]</div>
           <div class="list-content">[[getCustInfo(customerList.*, item.custProfile, 'custName')]]</div>
@@ -330,6 +332,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       getCustInfo(change, custKey, info) {
         if (change.base[custKey] != undefined){
           return change.base[custKey][info];
+        }
+      }
+
+      pad(id) {
+        if (id) {
+          return id.toString().padStart(4, '0');
         }
       }
     }

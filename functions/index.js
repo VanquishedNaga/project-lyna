@@ -83,28 +83,35 @@ exports.addSalesFunction = functions.https.onCall((data, context) => {
   const seller = data.seller;
   const stat = data.stat;
 
-  return admin.database().ref('/sales').push({
-    amount: amount,
-    custProfile: custProfile,
-    prod: prod,
-    qty: qty,
-    time: time,
-    seller: seller,
-    stat: stat,
-  }).then((snap) => {
-    var ref = admin.database().ref('/users/' + seller + '/inventory/' + prod);
-    ref.transaction(function(currentAmount) {
-      return (currentAmount - qty);
-    });
+  return admin.database().ref('/common/salesId').transaction(function(id){
+    return ++id;
+  }).then((id) => {
+    admin.database().ref('/sales').push({
+      id: id.snapshot.val(),
+      amount: amount,
+      custProfile: custProfile,
+      prod: prod,
+      qty: qty,
+      time: time,
+      seller: seller,
+      stat: stat,
+    }).then((snap) => {
+      var ref = admin.database().ref('/users/' + seller + '/inventory/' + prod);
+      ref.transaction(function(currentAmount) {
+        return (currentAmount - qty);
+      });
 
-    // Update user total revenue.
-    var ref = admin.database().ref('/users/' + seller + '/revenue');
-    ref.transaction(function(currentAmount) {
-      return (parseFloat(currentAmount || 0) + parseFloat(amount)).toFixed(2);
-    });
+      // Update user total revenue.
+      var ref = admin.database().ref('/users/' + seller + '/revenue');
+      ref.transaction(function(currentAmount) {
+        return (parseFloat(currentAmount || 0) + parseFloat(amount)).toFixed(2);
+      });
 
-    return snap.key;
-  });
+      return snap.key;
+    });
+  }).catch((err) => {
+    console.log(err);
+  })
 });
 
 exports.processSalesFunction = functions.https.onCall((data, context) => {
