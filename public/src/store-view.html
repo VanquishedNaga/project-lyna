@@ -13,6 +13,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
@@ -23,13 +24,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+<link rel="import" href="inventory-view.html">
+<link rel="import" href="postage-view.html">
+<link rel="import" href="request-view.html">
+<link rel="import" href="shared-styles.html">
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
-
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="inventory-view.html">
-<link rel="import" href="request-view.html">
-<link rel="import" href="postage-view.html">
 
 <dom-module id="store-view">
   <template>
@@ -171,26 +171,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       <iron-pages selected="{{selected}}" attr-for-selected="page-name">
         <div page-name="Product">
-          <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
-            <app-toolbar>
-              <paper-button on-tap="openAddProdDialog" class="custom">
-                <iron-icon icon="add-circle-outline"></iron-icon>
-                <span>Add product</span>
-              </paper-button>
-            </app-toolbar>
-          </template>
-
           <template is="dom-repeat" items="{{prodItems}}">
             <paper-card class="prod-card horizontal">
               <div style="width: 100%;">
                 <div class="prod-header">
                   <span class="header">[[item.name]]</span>
                   <div class="prod-act">
-                    <paper-icon-button icon="icons:add-circle" on-tap="openRestockProdDialog"></paper-icon-button>
+                    <paper-icon-button icon="icons:add-circle" on-click="openRestockProdDialog"></paper-icon-button>
                     <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
-                      <paper-icon-button icon="icons:input" on-tap="openAdminRestockDialog"></paper-icon-button>
-                      <paper-icon-button icon="icons:create" on-tap="openEditProdDialog"></paper-icon-button>
-                      <paper-icon-button icon="icons:delete" on-tap="openDelProdDialog"></paper-icon-button>
+                      <paper-icon-button icon="icons:input" on-click="openAdminRestockDialog"></paper-icon-button>
+                      <paper-icon-button icon="icons:create" on-click="openEditProdDialog"></paper-icon-button>
+                      <paper-icon-button icon="icons:delete" on-click="openDelProdDialog"></paper-icon-button>
                     </template>
                   </div>
                 </div>
@@ -205,6 +196,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 </div>
               </div>
             </paper-card>
+          </template>
+          <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
+            <paper-fab icon="add" on-click="openAddProdDialog"></paper-fab>
           </template>
         </div>
         <inventory-view user="[[user]]" page-name="Inventory"></inventory-view>
@@ -230,7 +224,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <paper-input type="file" id="prodPic" accept="image/jpeg"></paper-input>
       <div class="buttons">
         <paper-button id="addProdCancelButton" dialog-dismiss>Cancel</paper-button>
-        <paper-button id="addProdButton" on-tap="saveNewProd" autofocus>Save</paper-button>
+        <paper-button id="addProdButton" on-click="saveNewProd" autofocus>Save</paper-button>
       </div>
     </paper-dialog>
 
@@ -239,7 +233,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <p>Are you sure you want to delete this product?</p>
       <div class="buttons">
         <paper-button dialog-dismiss>No</paper-button>
-        <paper-button autofocus on-tap="deleteProduct">Yes
+        <paper-button autofocus on-click="deleteProduct">Yes
         </paper-button>
       </div>
     </paper-dialog>
@@ -271,7 +265,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </paper-dialog-scrollable>
       <div class="buttons">
         <paper-button id="restockProdDialogCancelButton" dialog-dismiss>Cancel</paper-button>
-        <paper-button id="restockProdDialogSubmitButton" on-tap="submitProdRequest">Submit Request</paper-button>
+        <paper-button id="restockProdDialogSubmitButton" on-click="submitProdRequest">Submit Request</paper-button>
       </div>
     </paper-dialog>
 
