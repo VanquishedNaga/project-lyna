@@ -79,10 +79,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       .list-content {
         margin-right: 16px;
       }
-
-      h1 {
-        font-family: 'Roboto Condensed', sans-serif;
-      }
     </style>
 
     <h1>Your Inventory</h1>
@@ -128,7 +124,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       getRequestPic(change, productKey) {
-        if (change.base[productKey] != undefined){
+        if (change.base[productKey] && change.base[productKey]['images']){
           return change.base[productKey]['images']['downloadUrl'];
         }
       }

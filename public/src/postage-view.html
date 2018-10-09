@@ -50,19 +50,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         padding: 16px;
         background-color: white;
       }
-
-      h1 {
-        font-family: 'Roboto Condensed', sans-serif;
-      }
     </style>
 
-    <h1>Postage</h1>
     <div class="postage">
       Balance: RM[[getBalance(userdata.*)]]
-      <paper-button on-tap="openReloadPostageDialog" class="custom" style="float: right;">
-        <iron-icon icon="icons:add-circle"></iron-icon>
-        <span>Reload</span>
-      </paper-button>
       <span style="clear: right; display: block"></span>
     </div>
 
@@ -76,7 +67,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <template is="dom-repeat" items="{{myRequests}}">
         <paper-item key="[[item.$key]]">
           <div class="list-content">RM[[item.amount]]</div>
-          <div class="list-content">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+          <div class="list-content">[[formatEpochTime(item.time)]]</div>
           <div class="list-content">[[item.status]]</div>
           <div class="list-content">
             <paper-icon-button
@@ -87,6 +78,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </paper-item>
       </template>
     </paper-listbox>
+
+    <paper-fab icon="add" on-click="openReloadPostageDialog"></paper-fab>
 
     <!-- Dialogs -->
     <paper-dialog id="reloadPostageDialog" on-iron-overlay-closed="onReloadPostageDialogClosed" modal>
@@ -243,12 +236,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
-      _formatEpochDate(eTS) {
-        return strftime('%D', new Date(eTS));
-      }
-
-      _formatEpochTime(eTS) {
-        return strftime('%I:%M %P', new Date(eTS));
+      formatEpochTime(eTS) {
+        return strftime('%D %I:%M %P', new Date(eTS));
       }
     }
 
