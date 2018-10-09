@@ -26,6 +26,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       app-name="absolute-reborn">
     </firebase-document>
 
+    <firebase-document
+      id="userIdElem"
+      path="/common/userId"
+      app-name="absolute-reborn">
+    </firebase-document>
+
     <style include="shared-styles">
       :host {
         display: block;
@@ -70,31 +76,37 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       signIn() {
-        this.$.auth.signInWithPopup()
-          .then(function(response){
-            console.log('Login successful.');
-            this.$.doc.path = '/users/' + response.user.uid;
-            //Check if user is first time login
-            var isUserExistInFirebase = false;
-            this.$.doc.ref.once("value")
-            .then(function(snapshot) {
-              isUserExistInFirebase = snapshot.exists();
-              console.log("signIn check: " + isUserExistInFirebase);
-              if(isUserExistInFirebase == false)
-              {
+        this.$.auth.signInWithPopup().then(function(response){
+          this.$.doc.path = '/users/' + response.user.uid;
+          //Check if user is first time login
+          var isUserExistInFirebase = false;
+          this.$.doc.ref.once("value")
+          .then(function(snapshot) {
+            isUserExistInFirebase = snapshot.exists();
+            if(isUserExistInFirebase == false)
+            {
+              this.$.userIdElem.ref.transaction(function(id) {
+                console.log(id);
+                return ++id;
+              }).then(function(id) {
                 this.$.doc.ref.set({
+                  id: id.snapshot.val(),
                   name: response.user.displayName,
                   profilePic: response.user.photoURL,
                   email: response.user.email,
                   status: "Inactive",
                   joinedDate: {".sv":"timestamp"}
                 });
-              }
-            }.bind(this));
-          }.bind(this))
-          .catch(function(error){
+              }.bind(this)).catch(function(error) {
+                console.log(error);
+              });
+            }
+          }.bind(this)).catch(function(error){
             console.log(error);
           });
+        }.bind(this)).catch(function(error){
+          console.log(error);
+        });
       }
     }
 

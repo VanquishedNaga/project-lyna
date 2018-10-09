@@ -290,6 +290,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                       </div>
                       <table width="100%" class="infoTable">
                         <tr>
+                          <td class="tbLabel">ID</td>
+                          <td class="tbValue">[[getUserInfo(userList.*, item.key, 'id')]]</td>
+                        </tr>
+                        <tr>
                           <td class="tbLabel">Access</td>
                           <td class="tbValue">[[getUserInfo(userList.*, item.key, 'privilege')]]</td>
                         </tr>
@@ -628,6 +632,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         var retVal;
         if (change.base[user] != undefined) {
           retVal = change.base[user][data];
+          if (retVal && data == 'id') {
+            retVal = retVal.toString().padStart(4, '0');
+          }
         }
         if (data == 'upline') {
           if (this.userList[change.base[user][data]] != undefined) {
