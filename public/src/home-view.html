@@ -2,25 +2,24 @@
 @license
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
-<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
-<link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
-<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../bower_components/paper-card/paper-card.html">
-<link rel="import" href="../bower_components/paper-item/paper-item.html">
-<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
-<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
-<link rel="import" href="shared-styles.html">
 <link rel="import" href="notice-view.html">
+<link rel="import" href="shared-styles.html">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <script src="../bower_components/strftime/strftime-min.js"></script>
 
@@ -104,15 +103,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </app-toolbar>
       </app-header>
 
-      <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
-        <app-toolbar>
-          <paper-button on-tap="addNotice" class="custom">
-            <iron-icon icon="add-circle-outline"></iron-icon>
-            <span>Add notice</span>
-          </paper-button>
-        </app-toolbar>
-      </template>
-
       <template is="dom-repeat" items="{{messageList}}">
         <notice-view
           messagekey="[[item.$key]]"
@@ -120,9 +110,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           userdata="[[userdata]]">
         </notice-view>
       </template>
+
+      <!-- FAB to create new notice -->
+      <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
+        <paper-fab icon="add" on-click="openAddNoticeDialog"></paper-fab>
+      </template>
+
     </app-header-layout>
 
-    <paper-dialog id="updateNoticeDialog" on-iron-overlay-closed="onEditDialogClose" modal>
+    <paper-dialog id="addNoticeDialog" on-iron-overlay-closed="onAddNoticeDialogClosed" modal>
       <h2>Notice Board Message</h2>
       <paper-toggle-button id="eventToggle" >Event</paper-toggle-button>
       <paper-dialog-scrollable>
@@ -137,7 +133,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <paper-input type="file" id="noticePic" accept="image/jpeg"></paper-input>
       <div class="buttons">
         <paper-button id="addNoticeCancelButton" dialog-dismiss>Cancel</paper-button>
-        <paper-button id="addNoticeButton" autofocus on-tap="postNewMessage">Submit</paper-button>
+        <paper-button id="addNoticeButton" autofocus on-click="postNewMessage">Submit</paper-button>
       </div>
     </paper-dialog>
 
@@ -150,12 +146,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get is() { return 'home-view'; }
       static get properties() {
         return {
-          userdata: Object,
           user: Object,
-          event: Object,
-          msgKey: Object,
-          messagekey: Object,
-          messageList: Array,
+          userdata: Object,
         };
       }
 
@@ -164,9 +156,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         console.log("HomeView ready.");
       }
 
-      addNotice() {
-        Polymer.dom(document.body).appendChild(this.$.updateNoticeDialog);
-        this.$.updateNoticeDialog.open();
+      openAddNoticeDialog() {
+        Polymer.dom(document.body).appendChild(this.$.addNoticeDialog);
+        this.$.addNoticeDialog.open();
       }
 
       postNewMessage() {
@@ -182,7 +174,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.msgKey = snapshot.key;
             this.uploadNoticeBoardImage();
           }.bind(this)).catch(function(error) {
-            this.$.updateNoticeDialog.close();
+            this.$.addNoticeDialog.close();
           }.bind(this));
         }
       }
@@ -206,35 +198,27 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               downloadUrl: snap.downloadURL,
             });
 
-            this.$.updateNoticeDialog.close();
+            this.$.addNoticeDialog.close();
             Polymer.dom(document.body).appendChild(this.$.successToast);
             this.$.successToast.open();
           }.bind(this))
           // Failed to upload
           .catch(function(error) {
-            this.$.updateNoticeDialog.close();
+            this.$.addNoticeDialog.close();
             Polymer.dom(document.body).appendChild(this.$.failToast);
             this.$.failToast.open();
           }.bind(this));
         }
         else{
-          this.$.updateNoticeDialog.close();
+          this.$.addNoticeDialog.close();
         }
-      }
-
-      _formatEpochDate(eTS) {
-        return strftime('%D', new Date(eTS));
-      }
-
-      _formatEpochTime(eTS) {
-        return strftime('%I:%M %P', new Date(eTS));
       }
 
       isAdmin(privilege){
         return (privilege == "Admin");
       }
 
-      onDialogClose() {
+      onAddNoticeDialogClosed() {
         this.$.messageDesc.value = null;
         this.$.messageDesc.invalid = false;
         this.$.eventToggle.checked = false;
@@ -242,11 +226,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.noticePic.value = null;
         this.$.addNoticeButton.disabled = false;
         this.$.addNoticeCancelButton.disabled = false;
-      }
-
-      onEditDialogClose() {
-        this.onDialogClose();
-        Polymer.dom(document.body).removeChild(this.$.updateNoticeDialog);
+        Polymer.dom(document.body).removeChild(this.$.addNoticeDialog);
       }
     }
 
