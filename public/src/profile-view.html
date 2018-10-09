@@ -2,25 +2,25 @@
 @license
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
-<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
-<link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
 <link rel="import" href="shared-styles.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <dom-module id="profile-view">
   <template>
@@ -66,12 +66,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       :host {
         display: block;
       }
-      paper-fab.editButton {
-        --paper-fab-background: var(--app-secondary-color);
-        position: absolute;
-        right: 0;
-        margin: 0 16px;
-      }
     </style>
 
     <app-header-layout>
@@ -85,7 +79,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <div class="content">
         <paper-material elevation="3">
           <div>Status: [[userData.status]]</div>
-          <paper-dropdown-menu label="Select upline" id="uplinemenu">
+          <paper-dropdown-menu id="uplinemenu" label="Select upline" always-float-label>
             <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
               <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
                 <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
@@ -99,7 +93,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <div class="content">
         <template is="dom-if" if="[[!isFirstTimeLogin(userData.status)]]">
           <paper-material elevation="3" style="position: relative;">
-            <paper-fab mini class="editButton" icon="icons:create" on-tap="editInfo"></paper-fab>
             <table width="100%" class="infoTable">
               <tr>
                 <td class="tbLabel">Name</td>
@@ -141,6 +134,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </paper-material>
         </template>
       </div>
+      <paper-fab icon="icons:create" on-tap="editInfo"></paper-fab>
     </app-header-layout>
 
     <paper-dialog id="editInfo" on-iron-overlay-closed="onEditInfoClose" modal>

@@ -3,13 +3,17 @@
 Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
@@ -17,14 +21,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
-<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
-<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
-<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
 <link rel="import" href="shared-styles.html">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <dom-module id="admin-view">
   <template>
@@ -199,9 +200,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                   <span class="header">
                     Product Price
                   </span>
-                  <div class="paper-act">
-                    <paper-icon-button icon="icons:create" on-tap="editPrice"></paper-icon-button>
-                  </div>
                 </div>
                 <div class="card-content paper-info">
                   <table width="100%" >
@@ -229,6 +227,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 </div>
               </div>
             </paper-card>
+            <paper-fab icon="icons:create" on-tap="editPrice"></paper-fab>
             <paper-dialog id="editPriceDialog" on-iron-overlay-closed="onEditPriceDialogClose" modal>
               <h2>Edit Price</h2>
               <paper-dropdown-menu label="Select product" id="productMenu">

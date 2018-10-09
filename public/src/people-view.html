@@ -95,9 +95,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       <iron-pages selected="[[selected]]" attr-for-selected="page-name">
         <div page-name="Requests" class="content">
-          <div>You have [[requestList.length]] pending downline requests.</div>
           <paper-listbox id="request">
-            <template is="dom-repeat" items="{{requestList}}">
+            <template is="dom-repeat" items="{{requestList}}" rendered-item-count="{{count}}">
               <paper-icon-item>
                 <div class="avatar" slot="item-icon"
                 style="background-image: url([[getUserInfo(userList.*, item.user, 'profilePic')]]);"></div>
@@ -112,6 +111,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 </paper-icon-button>
                 <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
               </paper-icon-item>
+            </template>
+            <template is="dom-if" if="[[!count]]">
+              You don't have any request.
             </template>
           </paper-listbox>
         </div>

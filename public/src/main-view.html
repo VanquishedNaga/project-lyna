@@ -144,7 +144,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               default:{
                 // Routing to 404 page.
                 page = "not-found";
-                console.log('Routing to 404 page.');
                 break;
               }
             }
@@ -160,11 +159,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       onAuthChange(signedIn) {
-        console.log('signedIn changed: ' + signedIn);
         if(this.statusKnown){
           if(signedIn){
-            console.log("User signed in.");
-            console.log(this.get('route.path'));
             if (this.get('route.path') == '/login/'){
               // Direct to home page.
               this.set('route.path', '/app/');
@@ -176,7 +172,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             });
           }
           else{
-            console.log("User signed out.");
             // Direct to sign in page.
             this.set('route.path', '/login/');
           }
@@ -186,9 +181,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       // Called when firebase-auth is done initializing
       // Refer to https://github.com/firebase/polymerfire/pull/24
       onStatusKnown(statusKnown){
-        console.log('statusKnown changed: ' + statusKnown);
-        console.log('signedIn: ' + this.signedIn);
-
         if (statusKnown){
           // Call onAuthChange to handle user sign-in/sign-out
           this.onAuthChange(this.signedIn);
