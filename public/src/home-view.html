@@ -58,19 +58,21 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       [condensed-title] {
-        position: absolute;
         top: 0;
         bottom: 0;
         left: 0;
         right: 0;
         background-size: 350px;
         /*background-size: calc(var(--app-toolbar-height) * 2);*/
-        background-image: url('../images/small_banner.png');
+        /*background-image: url('../images/small_banner.png');*/
         background-repeat: no-repeat;
         background-position: center center;
 
         /* The difference in font size is used to calculate the scale of the title in the transition. */
-        font-size: 5px;
+        font-size: 1em;
+        display: flex;
+        justify-content: center;
+        line-height: 70px;
       }
 
       [main-title] {
@@ -88,14 +90,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         z-index: -1;  /*not to cover drawer toggle button*/
 
         /* The difference in font size is used to calculate the scale of the title in the transition. */
-        font-size: 15px;
+        font-size: 3em;
+      }
+
+      img {
+        height: 60px;
+        padding: 5px 16px 5px 0;
       }
     </style>
     <app-header-layout>
-      <app-header slot="header" condenses shadow fixed effects="resize-title waterfall" >
+      <app-header slot="header" condenses shadow fixed effects="resize-title">
         <app-toolbar>
           <slot name="drawer-toggle"></slot>
-          <div condensed-title></div>
+          <div condensed-title>
+            <img src="../images/AR_dark.png"/>
+            <div>ABSOLUTE REBORN</div>
+          </div>
         </app-toolbar>
         <app-toolbar></app-toolbar>
         <app-toolbar>
