@@ -79,12 +79,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <!-- Visible contents -->
     <app-header-layout>
-      <app-header slot="header" condenses shadow fixed>
-        <app-toolbar class="header">
+      <app-header slot="header" shadow fixed>
+        <app-toolbar class="view-header">
           <slot name="drawer-toggle"></slot>
           <div>People</div>
         </app-toolbar>
-        <app-toolbar class="tabs-bar" sticky>
+        <app-toolbar class="tabs-bar">
           <paper-tabs selected="{{selected}}" attr-for-selected="name">
             <template is="dom-repeat" items="{{tabItems}}">
               <paper-tab name$="{{item}}">{{item}}</paper-tab>
