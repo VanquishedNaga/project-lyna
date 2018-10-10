@@ -7,58 +7,57 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="login-view">
   <template>
     <firebase-auth
-      id="auth"
-      app-name="absolute-reborn"
-      provider="google"
-      signed-in="{{signedIn}}"
-      user="{{user}}">
+        id="auth"
+        app-name="absolute-reborn"
+        provider="google"
+        signed-in="{{signedIn}}"
+        user="{{user}}">
     </firebase-auth>
 
     <firebase-document
-      id="doc"
-      app-name="absolute-reborn">
+        id="doc"
+        app-name="absolute-reborn">
     </firebase-document>
 
     <firebase-document
-      id="userIdElem"
-      path="/common/userId"
-      app-name="absolute-reborn">
+        id="userIdElem"
+        path="/common/userId"
+        app-name="absolute-reborn">
     </firebase-document>
 
     <style include="shared-styles">
       :host {
         display: block;
-
-        padding: 10px;
       }
 
-      .google {
-        background-color: #db3236;
-        color: white;
+      .google-sign-in-button {
+        background-image: url('../images/btn_google_signin_dark_normal_web.png');
+        height: 46px;
+        width: 191px;
       }
 
+      .google-sign-in-button[focused] {
+        background-image: url('../images/btn_google_signin_dark_focus_web.png');
+      }
+
+      .google-sign-in-button[pressed] {
+        background-image: url('../images/btn_google_signin_dark_pressed_web.png');
+      }
     </style>
 
     <app-header-layout fullbleed class="welcome">
-      <app-header>
-        <app-toolbar>
-        </app-toolbar>
-      </app-header>
+      <app-header></app-header>
       <div class="login-card">
-        <h1>Login</h1>
-        <paper-button on-tap="signIn" class="google">
-          <span>Sign in with Google</span>
-        </paper-button>
+        <h1>Sign in</h1>
+        <paper-button on-tap="signIn" class="google-sign-in-button" noink></paper-button>
       </div>
     </app-header-layout>
-
   </template>
 
   <script>
@@ -66,7 +65,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       static get is() { return 'login-view'; }
       static get properties() {
         return {
-          productName: String,
         };
       }
 
@@ -89,12 +87,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 return ++id;
               }).then(function(id) {
                 this.$.doc.ref.set({
+                  email: response.user.email,
                   id: id.snapshot.val(),
+                  joinedDate: {".sv":"timestamp"}
                   name: response.user.displayName,
                   profilePic: response.user.photoURL,
-                  email: response.user.email,
                   status: "Inactive",
-                  joinedDate: {".sv":"timestamp"}
                 });
               }.bind(this)).catch(function(error) {
                 console.log(error);
