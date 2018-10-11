@@ -4,6 +4,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link href="https://fonts.googleapis.com/css?family=Playfair+Display" rel="stylesheet">
 
 <!-- shared styles for all views -->
 <dom-module id="shared-styles">
@@ -16,13 +17,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         --app-secondary-color: #813c04;
         --app-secondary-color-l: #b66831;
         --app-secondary-color-d: #511100;
+        --app-drawer-width: 210px;
+        --app-toolbar-height: 70px;
         --radius: 5px;
       }
 
       /*For login and 404*/
+
       app-header-layout.welcome {
         background-color: var(--app-primary-color);
       }
+
       app-header-layout.welcome app-header {
         height: 220px;
         background-color: #000;
@@ -30,6 +35,24 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         background-size: 900px;
         background-repeat: no-repeat;
         background-position: center 20%;
+      }
+
+      /*Card components*/
+
+      .card-common {
+        border-radius: var(--radius);
+        font-family: 'Roboto Condensed', sans-serif;
+        margin: 16px auto;
+        max-width: 800px;
+        width: 90%;
+      }
+
+      .card-header {
+        background-color: var(--app-primary-color-d);
+        border-radius: var(--radius) var(--radius) 0 0;
+        color: white;
+        display: flex;
+        flex-wrap: wrap;
       }
 
       .login-card {
@@ -50,7 +73,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         margin-right: auto;
       }
 
+      /*View header components*/
+
       .view-header {
+        background-color: var(--app-primary-color);
         color: white;
         text-transform: uppercase;
       }
@@ -62,23 +88,20 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       .tabs-bar paper-tabs {
-        --paper-tabs-selection-bar-color: var(--app-secondary-color);
+        --paper-tabs-selection-bar-color: var(--app-secondary-color-d);
       }
 
       .tabs-bar paper-tab {
+        --paper-tab-ink: var(--app-secondary-color-d);
         font-family: 'Roboto Condensed', sans-serif;
         text-transform: uppercase;
-        --paper-tab-ink: var(--app-secondary-color-l);
       }
 
       .tabs-bar paper-tab.iron-selected {
-        background-color: var(--app-secondary-color);
-      }
-
-      app-header {
-        color: #fff;
         background-color: var(--app-primary-color-d);
       }
+
+      /*Buttons*/
 
       paper-button {
         padding: 0.25em;
@@ -93,11 +116,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         font-size: 14px;
         font-weight: bold;
         border-radius: 5px;
-      }
-
-      paper-button.side {
-        margin: 0 0.29em;
-        padding: 0.7em 0.57em;
       }
 
       paper-button.custom iron-icon {
@@ -117,12 +135,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         border-radius: 5px;
       }
 
+      paper-button.side {
+        margin: 0 0.29em;
+        padding: 0.7em 0.57em;
+      }
+
       h1 {
-        color: #212121;
-        font-family: 'Roboto Condensed', sans-serif;
-        font-size: 22px;
+        font: bold 1.375em 'Roboto Condensed', sans-serif;
         margin: 16px 0;
       }
+
+      /*Listboxes*/
 
       paper-listbox paper-icon-item.iron-selected {
         font-weight: normal;
@@ -167,7 +190,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         min-width: 300px;
         box-sizing: border-box;
         padding: 16px;
-        border-radius: 2px;
+        border-radius: var(--radius);
       }
 
       .infoTable {
@@ -208,6 +231,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       /*For flex tables*/
+
       div.list-content {
         flex: 1 0 90px;
         overflow: hidden;
@@ -225,11 +249,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       /*Floating action button*/
+
       paper-fab {
         position: fixed;
         right: 16px;
         bottom: 16px;
-        background-color: var(--app-primary-color);
+        background-color: var(--app-secondary-color);
         border: solid white;
       }
     </style>

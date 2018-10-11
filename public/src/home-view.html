@@ -45,12 +45,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </firebase-storage-ref>
 
     <style include="shared-styles">
-      :root {
-        --radius: 5px;
-      }
       app-header {
-        color: #fff;
-        background-color: #000;
+        background-color: black;
+        color: white;
       }
 
       app-toolbar {
@@ -58,21 +55,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       [condensed-title] {
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-size: 350px;
-        /*background-size: calc(var(--app-toolbar-height) * 2);*/
-        /*background-image: url('../images/small_banner.png');*/
-        background-repeat: no-repeat;
-        background-position: center center;
-
-        /* The difference in font size is used to calculate the scale of the title in the transition. */
-        font-size: 1em;
         display: flex;
+        font: 1em / 70px 'Playfair Display', serif;
         justify-content: center;
-        line-height: 70px;
+        white-space: nowrap;
       }
 
       [main-title] {
@@ -81,10 +67,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         bottom: 0;
         left: 0;
         right: 0;
-        background-image: url('../images/banner.png');
-        background-repeat: no-repeat;
-        background-position: center 25%;
-        background-size: 900px;
+        background: url('../images/banner.png') center 25% / 900px no-repeat;
         -webkit-transform-origin: center top !important;
         transform-origin: center top !important;
         z-index: -1;  /*not to cover drawer toggle button*/
@@ -94,8 +77,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       img {
-        height: 60px;
-        padding: 5px 16px 5px 0;
+        height: 40px;
+        padding: 15px 10px 15px 0;
       }
     </style>
     <app-header-layout>

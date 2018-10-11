@@ -52,8 +52,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <style include="shared-styles">
       :host {
-        --app-drawer-width: 210px;
-        --app-toolbar-height: 70px;
         display: block;
       }
 
@@ -71,7 +69,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       app-drawer {
         --app-drawer-content-container: {
-          background-color: var(--app-primary-color)
+          background-color: var(--app-primary-color);
+          border: solid var(--app-primary-color-d);
         };
       }
 
@@ -90,7 +89,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       .drawer-list a.iron-selected {
         color: white;
-        background-color: var(--app-secondary-color);
+        background-color: var(--app-primary-color-d);
       }
 
       .profile-pic img{

@@ -77,7 +77,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-header>
 
       <div class="content">
-        <paper-material elevation="3">
+        <paper-material elevation="1">
           <div>Status: [[userData.status]]</div>
           <paper-dropdown-menu id="uplinemenu" label="Select upline" always-float-label>
             <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
@@ -92,7 +92,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       <div class="content">
         <template is="dom-if" if="[[!isFirstTimeLogin(userData.status)]]">
-          <paper-material elevation="3" style="position: relative;">
+          <paper-material elevation="1" style="position: relative;">
             <table width="100%" class="infoTable">
               <tr>
                 <td class="tbLabel">Name</td>

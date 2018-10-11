@@ -69,20 +69,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       th {
         text-align: left;
       }
-      .paper-card {
-        width: 80%;
-        min-width: 282px;
-        margin: 16px;
-        font-family: 'Roboto Condensed', sans-serif;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .paper-header {
-        background-color: var(--app-primary-color);
-        color: white;
-        display: flex;
-        flex-wrap: wrap;
-      }
       span.header {
         padding: 8px;
         font-size: 1.1em;
@@ -128,9 +114,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <iron-pages selected="{{selected}}" attr-for-selected="page-name">
           <div page-name="Level">
             <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">
-              <paper-card class="paper-card horizontal">
+              <paper-card class="card-common horizontal">
                 <div style="width: 100%;">
-                  <div class="paper-header">
+                  <div class="card-header">
                     <span class="header">
                       Level
                     </span>
@@ -194,9 +180,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
           </div>
           <div page-name="Product Price">
-            <paper-card style="min-width: 1000px;" class="paper-card horizontal">
+            <paper-card style="min-width: 1000px;" class="card-common horizontal">
               <div style="width: 100%;">
-                <div class="paper-header">
+                <div class="card-header">
                   <span class="header">
                     Product Price
                   </span>

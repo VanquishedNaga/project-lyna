@@ -85,20 +85,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         display: block;
       }
 
-      .prod-card {
-        width: 90%;
-        max-width: 800px;
-        margin: 16px auto;
-        font-family: 'Roboto Condensed', sans-serif;
-      }
-
-      .prod-header {
-        background-color: var(--app-primary-color);
-        color: white;
-        display: flex;
-        flex-wrap: wrap;
-      }
-
       span.header {
         padding: 8px;
         font-size: 1.1em;
@@ -170,9 +156,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <iron-pages selected="{{selected}}" attr-for-selected="page-name">
         <div page-name="Product">
           <template is="dom-repeat" items="{{prodItems}}">
-            <paper-card class="prod-card horizontal">
+            <paper-card class="card-common horizontal">
               <div style="width: 100%;">
-                <div class="prod-header">
+                <div class="card-header">
                   <span class="header">[[item.name]]</span>
                   <div class="prod-act">
                     <paper-icon-button icon="icons:add-circle" on-click="openRestockProdDialog"></paper-icon-button>
