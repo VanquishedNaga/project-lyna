@@ -144,7 +144,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <paper-dialog-scrollable>
         <div>
           <paper-input
-            error-message="Field required!"
             id="userName"
             label="Full Name"
             value="[[userData.name]]"
@@ -163,36 +162,26 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             always-float-label>
           </paper-input>
           <paper-input
-            allowed-pattern="[0-9]"
-            char-counter
-            minlength="12"
-            maxlength="12"
-            error-message="Invalid Field"
             id="userIc"
             label="IC Number"
+            pattern="\d{12}"
             value="[[userData.icNum]]"
             always-float-label required auto-validate>
           </paper-input>
           <paper-input
-            error-message="Invalid Field"
             id="userWechat"
             label="WeChat ID"
             value="[[userData.wechat]]"
             always-float-label required auto-validate>
           </paper-input>
           <paper-input
-            allowed-pattern="[0-9]"
-            error-message="Invalid Field"
             id="userPhone"
             label="Phone"
-            char-counter
-            minlength="10"
-            maxlength="11"
+            pattern="\d{7,15}"
             value="[[userData.phone]]"
             always-float-label required auto-validate>
           </paper-input>
           <paper-input
-            error-message="Field required!"
             id="userAddress"
             label="Address"
             value="[[userData.address]]"

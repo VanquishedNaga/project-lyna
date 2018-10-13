@@ -1,0 +1,381 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="user-overview-collapse">
+  <template>
+    <firebase-document
+      id="doc"
+      path="/users/[[item.key]]"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      path="/level"
+      data="{{levelData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      app-name="absolute-reborn"
+      path="/users"
+      data="{{userList}}">
+    </firebase-document>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      .expandInfo {
+        background-color: var(--app-primary-color);
+        color: white;
+        border: solid thick white;
+      }
+    </style>
+
+    <paper-icon-item on-tap="toggle">
+      <div class="avatar" slot="item-icon"
+      style="background-image: url([[getUserInfo(userList.*, item.key, 'profilePic')]]);"></div>
+      <paper-item-body two-line style="width: 100%;">
+        <div>[[getUserInfo(userList.*, item.key, 'name')]]</div>
+        <div secondary class="secondLine">[[getUserInfo(userList.*, item.key, 'status')]]</div>
+      </paper-item-body>
+      <iron-icon id="collapseIcon" icon="expand-more"></iron-icon>
+    </paper-icon-item>
+    <iron-collapse id="collapseElem">
+      <div class="expandInfo">
+        <div>
+          <paper-button on-tap="openSuspendUserDialog" class="custom" hidden="[[!isUserApproved(userList.*, item.key)]]">
+            <iron-icon icon="pan-tool"></iron-icon>
+            <span>Suspend</span>
+          </paper-button>
+          <paper-button on-tap="openUnsuspendUserDialog" class="custom" hidden="[[!isUserSuspended(userList.*, item.key)]]">
+            <iron-icon icon="pan-tool"></iron-icon>
+            <span>Unsuspend</span>
+          </paper-button>
+          <paper-button on-tap="openEditDialog" class="custom">
+            <iron-icon icon="create"></iron-icon>
+            <span>Edit</span>
+          </paper-button>
+        </div>
+        <table width="100%" class="infoTable">
+          <tr>
+            <td class="tbLabel">User ID</td>
+            <td class="tbValue">[[getUserInfo(userList.*, item.key, 'id')]]</td>
+          </tr>
+          <tr>
+            <td class="tbLabel">Access</td>
+            <td class="tbValue">[[getUserInfo(userList.*, item.key, 'privilege')]]</td>
+          </tr>
+          <tr>
+            <td class="tbLabel">Level</td>
+            <td class="tbValue">[[getLevelName(userList.*, item.key)]]</td>
+          </tr>
+          <tr>
+            <td class="tbLabel">Upline</td>
+            <td class="tbValue">[[getUserInfo(userList.*, item.key, 'upline')]]</td>
+          </tr>
+          <tr>
+            <td class="tbLabel">Email</td>
+            <td class="tbValue">[[getUserInfo(userList.*, item.key, 'email')]]</td>
+          </tr>
+          <tr>
+            <td class="tbLabel">IC Number</td>
+            <td class="tbValue">[[getUserInfo(userList.*, item.key, 'icNum')]]</td>
+          </tr>
+          <tr>
+            <td class="tbLabel">WeChat</td>
+            <td class="tbValue">[[getUserInfo(userList.*, item.key, 'wechat')]]</td>
+          </tr>
+          <tr>
+            <td class="tbLabel">Phone</td>
+            <td class="tbValue">[[getUserInfo(userList.*, item.key, 'phone')]]</td>
+          </tr>
+          <tr>
+            <td class="tbLabel">Address</td>
+            <td class="tbValue">[[getUserInfo(userList.*, item.key, 'address')]]</td>
+          </tr>
+        </table>
+      </div>
+    </iron-collapse>
+
+    <!-- Dialogs -->
+    <paper-dialog id="suspendUserDialog" on-iron-overlay-closed="onSuspendUserDialogClosed" modal>
+      <h2>Suspend user</h2>
+      <p>Are you sure you want to suspend this user account?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Suspend</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="unsuspendUserDialog" on-iron-overlay-closed="onUnsuspendUserDialogClosed" modal>
+      <h2>Unsuspend user</h2>
+      <p>Are you sure you want to unsuspend this user account?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Unsuspend</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="editDialog" on-iron-overlay-closed="onEditInfoClose" modal>
+      <h1>Update user information</h1>
+      <paper-dialog-scrollable>
+        <div>
+          <paper-input
+          id="userName"
+          label="Name"
+          required auto-validate always-float-label></paper-input>
+          <paper-dropdown-menu label="Select access" id="privilegeMenu">
+            <paper-listbox id="userPrivilege" slot="dropdown-content">
+              <paper-item>Admin</paper-item>
+              <paper-item>Stock Manager</paper-item>
+              <paper-item>User</paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+          <paper-dropdown-menu label="Select level" id="userLevelMenu">
+            <paper-listbox id="userLevel" slot="dropdown-content" attr-for-selected="key">
+              <template is="dom-repeat" items="{{toArray(levelData.*)}}">
+                <paper-item key="[[item.key]]">[[item.value]]</paper-item>
+              </template>
+            </paper-listbox>
+          </paper-dropdown-menu>
+          <paper-input
+          id="userEmail"
+          label="Email"
+          required auto-validate always-float-label></paper-input>
+          <paper-input
+          id="userIc"
+          label="IC Number"
+          pattern="\d{12}"
+          required auto-validate always-float-label></paper-input>
+          <paper-input
+          id="userPhone"
+          label="Phone"
+          pattern="\d{7,15}"
+          required auto-validate always-float-label></paper-input>
+          <paper-input
+          id="userWechat"
+          label="WeChat ID"
+          required auto-validate always-float-label></paper-input>
+          <paper-input
+          id="userAddress"
+          label="Address"
+          required auto-validate always-float-label></paper-input>
+        </div>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-tap="submitInfo">Submit</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
+  </template>
+
+  <script>
+    class UserOverviewCollapse extends Polymer.Element {
+      static get is() { return 'user-overview-collapse'; }
+
+      static get properties() {
+        return {
+          item: Object,
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("UserOverviewCollapse ready.");
+      }
+
+      toArray(input) {
+        if (input) {
+          var obj = input.base;
+          if (obj) {
+            return Object.keys(obj).map(function(key) {
+              return {
+                key: key,
+                value: obj[key]
+              };
+            });
+          }
+          else {
+            obj = input;
+            return Object.keys(obj).map(function(key) {
+              return {
+                key: key,
+                value: obj[key]
+              };
+            });
+          }
+        }
+      }
+
+      openSuspendUserDialog(event) {
+        Polymer.dom(document.body).appendChild(this.$.suspendUserDialog);
+        this.$.suspendUserDialog.open();
+      }
+
+      onSuspendUserDialogClosed() {
+        if (this.$.suspendUserDialog.closingReason.confirmed) {
+          this.$.doc.ref.update({
+            status: 'Suspended',
+          })
+          .then(function(snapshot) {
+            Polymer.dom(document.body).removeChild(this.$.suspendUserDialog);
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          .catch(function(error) {
+            Polymer.dom(document.body).removeChild(this.$.suspendUserDialog);
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
+        }
+      }
+
+      openUnsuspendUserDialog(event) {
+        Polymer.dom(document.body).appendChild(this.$.unsuspendUserDialog);
+        this.$.unsuspendUserDialog.open();
+      }
+
+      onUnsuspendUserDialogClosed() {
+        if (this.$.unsuspendUserDialog.closingReason.confirmed) {
+          this.$.doc.ref.update({
+            status: 'Approved',
+          })
+          .then(function(snapshot) {
+            Polymer.dom(document.body).removeChild(this.$.unsuspendUserDialog);
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          .catch(function(error) {
+            Polymer.dom(document.body).removeChild(this.$.unsuspendUserDialog);
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
+        }
+      }
+
+      openEditDialog(event) {
+        this.$.userName.value = this.userList[this.item.key]['name'] || null;
+        this.$.privilegeMenu.value = this.userList[this.item.key]['privilege'] || null;
+        this.$.userLevel.selected = isNaN(this.userList[this.item.key]['level']) ? null : this.userList[this.item.key]['level'];
+        this.$.userEmail.value = this.userList[this.item.key]['email'] || null;
+        this.$.userIc.value = this.userList[this.item.key]['icNum'] || null;
+        this.$.userPhone.value = this.userList[this.item.key]['phone'] || null;
+        this.$.userWechat.value = this.userList[this.item.key]['wechat'] || null;
+        this.$.userAddress.value = this.userList[this.item.key]['address'] || null;
+
+        Polymer.dom(document.body).appendChild(this.$.editDialog);
+        this.$.editDialog.open();
+      }
+
+      onEditInfoClose() {
+        if (event.target == this.$.editDialog) {
+          Polymer.dom(document.body).removeChild(this.$.editDialog);
+        }
+      }
+
+      submitInfo(event) {
+        // Check all inputs are valid, add new fields here.
+        var valid = this.$.userName.validate();
+        valid = this.$.userEmail.validate() && valid;
+        valid = this.$.userIc.validate() && valid;
+        valid = this.$.userPhone.validate() && valid;
+        valid = this.$.userWechat.validate() && valid;
+        valid = this.$.userAddress.validate() && valid;
+
+        if (valid) {
+          this.$.doc.ref.update({
+            name: this.$.userName.value,
+            privilege: this.$.privilegeMenu.value,
+            level: parseInt(this.$.userLevel.selected) || null,
+            email: this.$.userEmail.value,
+            icNum: this.$.userIc.value,
+            phone: this.$.userPhone.value,
+            wechat: this.$.userWechat.value,
+            address: this.$.userAddress.value,
+          })
+          .then(function(snapshot) {
+            this.$.editDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this))
+          .catch(function(error) {
+            this.$.editDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
+        }
+      }
+
+      isUserApproved(change, user) {
+        if (change.base && change.base[user]) {
+          return (change.base[user]['status'] == 'Approved');
+        }
+      }
+
+      isUserSuspended(change, user) {
+        if (change.base && change.base[user]) {
+          return (change.base[user]['status'] == 'Suspended');
+        }
+      }
+
+      toggle(event) {
+        var collapseElem = this.$.collapseElem;
+        var iconElem = this.$.collapseIcon;
+        collapseElem.toggle();
+        if (collapseElem.opened) {
+          Polymer.dom(iconElem).setAttribute('icon', 'expand-less');
+        }
+        else {
+          Polymer.dom(iconElem).setAttribute('icon', 'expand-more');
+        }
+      }
+
+      getUserInfo(change, user, data) {
+        var retVal;
+        if (change.base && change.base[user]) {
+          retVal = change.base[user][data];
+          if (retVal && data == 'id') {
+            retVal = retVal.toString().padStart(4, '0');
+          }
+          else if (data == 'upline' && this.userList) {
+            if (this.userList[change.base[user][data]]) {
+              retVal = this.userList[change.base[user][data]]['name'];
+            }
+          }
+        }
+        return retVal;
+      }
+
+      getLevelName(change, user) {
+        if (change.base && change.base[user] && this.levelData){
+          const level = change.base[user]['level'];
+          return this.levelData[level];
+        }
+      }
+    }
+    window.customElements.define(UserOverviewCollapse.is, UserOverviewCollapse);
+  </script>
+</dom-module>
