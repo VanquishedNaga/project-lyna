@@ -76,64 +76,67 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </app-toolbar>
       </app-header>
 
-      <paper-card class="card-common horizontal">
-        <div class="card-content">
-          <div>Status: [[userData.status]]</div>
-          <paper-dropdown-menu id="uplinemenu" label="Select upline" always-float-label>
-            <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
-              <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
-                <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
-              </template>
-            </paper-listbox>
-          </paper-dropdown-menu>
-          <paper-button id="submitButton" class="custom" on-tap="submitRequest">Submit</paper-button>
-        </div>
-      </paper-card>
-
-      <template is="dom-if" if="[[!isFirstTimeLogin(userData.status)]]">
+      <div class="default-view-content">
         <paper-card class="card-common horizontal">
           <div class="card-content">
-            <table width="100%" class="infoTable">
-              <tr>
-                <td class="tbLabel">Name</td>
-                <td class="tbValue">[[userData.name]]</td>
-              </tr>
-              <tr>
-                <td class="tbLabel">ID</td>
-                <td class="tbValue">[[pad(userData.id)]]</td>
-              </tr>
-              <tr>
-                <td class="tbLabel">Level</td>
-                <td class="tbValue">[[getLevelName(levelData.*,userData.level)]]</td>
-              </tr>
-              <tr>
-                <td class="tbLabel">Upline</td>
-                <td class="tbValue">[[getUplineName(uplineData.*, userData.upline)]]</td>
-              </tr>
-              <tr>
-                <td class="tbLabel">Email</td>
-                <td class="tbValue">[[userData.email]]</td>
-              </tr>
-              <tr>
-                <td class="tbLabel">IC Number</td>
-                <td class="tbValue">[[userData.icNum]]</td>
-              </tr>
-              <tr>
-                <td class="tbLabel">WeChat</td>
-                <td class="tbValue">[[userData.wechat]]</td>
-              </tr>
-              <tr>
-                <td class="tbLabel">Phone</td>
-                <td class="tbValue">[[userData.phone]]</td>
-              </tr>
-              <tr>
-                <td class="tbLabel">Address</td>
-                <td class="tbValue">[[userData.address]]</td>
-              </tr>
-            </table>
+            <div>Status: [[userData.status]]</div>
+            <paper-dropdown-menu id="uplinemenu" label="Select upline" always-float-label>
+              <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
+                <template is="dom-repeat" items="{{userList}}" filter="isNotSelf">
+                  <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
+                </template>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            <paper-button id="submitButton" class="custom" on-tap="submitRequest">Submit</paper-button>
           </div>
         </paper-card>
-      </template>
+
+        <template is="dom-if" if="[[!isFirstTimeLogin(userData.status)]]">
+          <paper-card class="card-common horizontal">
+            <div class="card-content">
+              <table width="100%" class="infoTable">
+                <tr>
+                  <td class="tbLabel">Name</td>
+                  <td class="tbValue">[[userData.name]]</td>
+                </tr>
+                <tr>
+                  <td class="tbLabel">ID</td>
+                  <td class="tbValue">[[pad(userData.id)]]</td>
+                </tr>
+                <tr>
+                  <td class="tbLabel">Level</td>
+                  <td class="tbValue">[[getLevelName(levelData.*,userData.level)]]</td>
+                </tr>
+                <tr>
+                  <td class="tbLabel">Upline</td>
+                  <td class="tbValue">[[getUplineName(uplineData.*, userData.upline)]]</td>
+                </tr>
+                <tr>
+                  <td class="tbLabel">Email</td>
+                  <td class="tbValue">[[userData.email]]</td>
+                </tr>
+                <tr>
+                  <td class="tbLabel">IC Number</td>
+                  <td class="tbValue">[[userData.icNum]]</td>
+                </tr>
+                <tr>
+                  <td class="tbLabel">WeChat</td>
+                  <td class="tbValue">[[userData.wechat]]</td>
+                </tr>
+                <tr>
+                  <td class="tbLabel">Phone</td>
+                  <td class="tbValue">[[userData.phone]]</td>
+                </tr>
+                <tr>
+                  <td class="tbLabel">Address</td>
+                  <td class="tbValue">[[userData.address]]</td>
+                </tr>
+              </table>
+            </div>
+          </paper-card>
+        </template>
+      </div>
+
 
       <paper-fab icon="icons:create" on-tap="editInfo"></paper-fab>
 

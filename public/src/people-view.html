@@ -94,7 +94,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-header>
 
       <iron-pages selected="[[selected]]" attr-for-selected="page-name">
-        <div page-name="Requests" class="content">
+        <div page-name="Requests" class="default-view-content">
           <paper-listbox id="request">
             <template is="dom-repeat" items="{{requestList}}" rendered-item-count="{{count}}">
               <paper-icon-item>
@@ -118,7 +118,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </paper-listbox>
         </div>
 
-        <div page-name="Line" class="content">
+        <div page-name="Line" class="default-view-content">
           <h1>Upline</h1>
           <paper-listbox>
             <paper-icon-item>
@@ -145,7 +145,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </template>
           </paper-listbox>
         </div>
-        <div page-name="OrgChart" class="content">
+        <div page-name="OrgChart" class="wide-view-content">
           <org-view></org-view>
         </div>
       </iron-pages>

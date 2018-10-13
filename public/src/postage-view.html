@@ -43,7 +43,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <style include="shared-styles">
       :host {
         display: block;
-        padding: 16px;
       }
 
       .postage {
@@ -52,33 +51,35 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
     </style>
 
-    <div class="postage">
-      Balance: RM[[getBalance(userdata.*)]]
-      <span style="clear: right; display: block"></span>
-    </div>
+    <div class="default-view-content">
+      <div class="postage">
+        Balance: RM[[getBalance(userdata.*)]]
+        <span style="clear: right; display: block"></span>
+      </div>
 
-    <h1>Reload transactions</h1>
-    <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}">
-      <paper-item style="font-weight: bold;">
+      <h1>Reload transactions</h1>
+      <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}">
+        <paper-item style="font-weight: bold;">
           <div class="list-content">Amount</div>
           <div class="list-content">Time</div>
           <div class="list-content">Status</div>
           <div class="list-content">Payment</div>
-      </paper-item>
-      <template is="dom-repeat" items="{{myRequests}}">
-        <paper-item key="[[item.$key]]">
-          <div class="list-content">RM[[item.amount]]</div>
-          <div class="list-content">[[formatEpochTime(item.time)]]</div>
-          <div class="list-content">[[item.status]]</div>
-          <div class="list-content">
-            <paper-icon-button
-            icon="icons:info"
-            on-tap="openDisplayPayProofDialog"
-            hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
-          </div>
         </paper-item>
-      </template>
-    </paper-listbox>
+        <template is="dom-repeat" items="{{myRequests}}">
+          <paper-item key="[[item.$key]]">
+            <div class="list-content">RM[[item.amount]]</div>
+            <div class="list-content">[[formatEpochTime(item.time)]]</div>
+            <div class="list-content">[[item.status]]</div>
+            <div class="list-content">
+              <paper-icon-button
+              icon="icons:info"
+              on-tap="openDisplayPayProofDialog"
+              hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
+            </div>
+          </paper-item>
+        </template>
+      </paper-listbox>
+    </div>
 
     <paper-fab icon="add" on-click="openReloadPostageDialog"></paper-fab>
 

@@ -81,7 +81,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <style include="shared-styles">
       :host {
         display: block;
-        padding: 16px;
       }
 
       .product {
@@ -118,128 +117,130 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
     </style>
 
-    <h1>Sent Requests</h1>
-    <paper-listbox class="requestList">
-      <template is="dom-if" if="[[count]]">
-        <paper-icon-item>
-          <div class="product" slot="item-icon"
-          style="background-image: url('../images/AR.png');"></div>
-          <div class="title" style="flex: 2 0 180px;">Product</div>
-          <div class="title">Quantity</div>
-          <div class="title">Status</div>
-          <div class="title" style="flex-basis: 180px;">Time</div>
-          <div class="title">Payable</div>
-          <div class="title">Payment</div>
-        </paper-icon-item>
-      </template>
-
-      <template is="dom-repeat" items="{{ownRequestList}}" observe="status item.status" rendered-item-count="{{count}}">
-        <paper-icon-item>
-          <div class="product" slot="item-icon"
-          style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-          <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
-          <div class="list-content">[[item.quantity]]</div>
-          <div class="list-content">[[item.status]]</div>
-          <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
-          <div class="list-content">[[getPayable(item.payable)]]</div>
-          <div class="list-content">
-            <paper-icon-button
-            icon="icons:file-upload"
-            on-tap="openUploadPayProofDialog"
-            hidden$="[[hasPayProof(item.*)]]"></paper-icon-button>
-            <paper-icon-button
-            icon="icons:info"
-            on-tap="openDisplayPayProofDialog"
-            hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
-          </div>
-
-        </paper-icon-item>
-      </template>
-
-      <template is="dom-if" if="[[!count]]">
-        You don't have any request.
-      </template>
-    </paper-listbox>
-
-    <h1>Pending Received Requests</h1>
+    <div class="wide-view-content">
+      <h1>Sent Requests</h1>
       <paper-listbox class="requestList">
-        <template is="dom-if" if="[[pendingReq]]">
+        <template is="dom-if" if="[[count]]">
+          <paper-icon-item>
+            <div class="product" slot="item-icon"
+            style="background-image: url('../images/AR.png');"></div>
+            <div class="title" style="flex: 2 0 180px;">Product</div>
+            <div class="title">Quantity</div>
+            <div class="title">Status</div>
+            <div class="title" style="flex-basis: 180px;">Time</div>
+            <div class="title">Payable</div>
+            <div class="title">Payment</div>
+          </paper-icon-item>
+        </template>
+
+        <template is="dom-repeat" items="{{ownRequestList}}" observe="status item.status" rendered-item-count="{{count}}">
+          <paper-icon-item>
+            <div class="product" slot="item-icon"
+            style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
+            <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
+            <div class="list-content">[[item.quantity]]</div>
+            <div class="list-content">[[item.status]]</div>
+            <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+            <div class="list-content">[[getPayable(item.payable)]]</div>
+            <div class="list-content">
+              <paper-icon-button
+              icon="icons:file-upload"
+              on-tap="openUploadPayProofDialog"
+              hidden$="[[hasPayProof(item.*)]]"></paper-icon-button>
+              <paper-icon-button
+              icon="icons:info"
+              on-tap="openDisplayPayProofDialog"
+              hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
+            </div>
+
+          </paper-icon-item>
+        </template>
+
+        <template is="dom-if" if="[[!count]]">
+          You don't have any request.
+        </template>
+      </paper-listbox>
+
+      <h1>Pending Received Requests</h1>
+        <paper-listbox class="requestList">
+          <template is="dom-if" if="[[pendingReq]]">
+            <paper-icon-item>
+              <div class="product" slot="item-icon"
+              style="background-image: url('../images/AR.png');"></div>
+              <div class="title" style="flex: 2 0 180px;">Product</div>
+              <div class="title">Requestor</div>
+              <div class="title" style="flex-basis: 180px;">Time</div>
+              <div class="title">Quantity</div>
+              <div class="title">Payable</div>
+              <div class="title">Payment</div>
+              <div class="title">Action</div>
+            </paper-icon-item>
+          </template>
+
+        <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestPending}}" observe="status item.status" rendered-item-count="{{pendingReq}}">
+          <paper-icon-item>
+            <div class="product" slot="item-icon"
+            style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
+            <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
+            <div class="list-content">[[getRequestorName(usersList.*, item.requestor)]]</div>
+            <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+            <div class="list-content">[[item.quantity]]</div>
+            <div class="list-content">[[getPayable(item.payable)]]</div>
+            <div class="list-content">
+              <paper-icon-button
+              icon="icons:info"
+              on-tap="openDisplayPayProofDialog"
+              hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
+            </div>
+            <div class="list-content">
+              <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Approve" on-tap="openDialog">
+              </paper-icon-button>
+              <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Approve</paper-tooltip>
+              <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
+              </paper-icon-button>
+              <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
+            </div>
+          </paper-icon-item>
+        </template>
+
+        <template is="dom-if" if="[[!pendingReq]]">
+          You don't have any pending request.
+        </template>
+      </paper-listbox>
+
+      <h1>Responded Received Requests</h1>
+      <paper-listbox class="requestList">
+        <template is="dom-if" if="[[historyReq]]">
           <paper-icon-item>
             <div class="product" slot="item-icon"
             style="background-image: url('../images/AR.png');"></div>
             <div class="title" style="flex: 2 0 180px;">Product</div>
             <div class="title">Requestor</div>
-            <div class="title" style="flex-basis: 180px;">Time</div>
             <div class="title">Quantity</div>
             <div class="title">Payable</div>
-            <div class="title">Payment</div>
-            <div class="title">Action</div>
+            <div class="title">Status</div>
+            <div class="title" style="flex-basis: 180px;">Time</div>
           </paper-icon-item>
         </template>
 
-      <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestPending}}" observe="status item.status" rendered-item-count="{{pendingReq}}">
-        <paper-icon-item>
-          <div class="product" slot="item-icon"
-          style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-          <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
-          <div class="list-content">[[getRequestorName(usersList.*, item.requestor)]]</div>
-          <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
-          <div class="list-content">[[item.quantity]]</div>
-          <div class="list-content">[[getPayable(item.payable)]]</div>
-          <div class="list-content">
-            <paper-icon-button
-            icon="icons:info"
-            on-tap="openDisplayPayProofDialog"
-            hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
-          </div>
-          <div class="list-content">
-            <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Approve" on-tap="openDialog">
-            </paper-icon-button>
-            <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Approve</paper-tooltip>
-            <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
-            </paper-icon-button>
-            <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
-          </div>
-        </paper-icon-item>
-      </template>
+        <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestNotPending}}" observe="status item.status" rendered-item-count="{{historyReq}}">
+          <paper-icon-item>
+            <div class="product" slot="item-icon"
+            style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
+            <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
+            <div class="list-content">[[getRequestorName(usersList.*, item.requestor)]]</div>
+            <div class="list-content">[[item.quantity]]</div>
+            <div class="list-content">[[getPayable(item.payable)]]</div>
+            <div class="list-content">[[item.status]]</div>
+            <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+          </paper-icon-item>
+        </template>
 
-      <template is="dom-if" if="[[!pendingReq]]">
-        You don't have any pending request.
-      </template>
-    </paper-listbox>
-
-    <h1>Responded Received Requests</h1>
-    <paper-listbox class="requestList">
-      <template is="dom-if" if="[[historyReq]]">
-        <paper-icon-item>
-          <div class="product" slot="item-icon"
-          style="background-image: url('../images/AR.png');"></div>
-          <div class="title" style="flex: 2 0 180px;">Product</div>
-          <div class="title">Requestor</div>
-          <div class="title">Quantity</div>
-          <div class="title">Payable</div>
-          <div class="title">Status</div>
-          <div class="title" style="flex-basis: 180px;">Time</div>
-        </paper-icon-item>
-      </template>
-
-      <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestNotPending}}" observe="status item.status" rendered-item-count="{{historyReq}}">
-        <paper-icon-item>
-          <div class="product" slot="item-icon"
-          style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-          <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
-          <div class="list-content">[[getRequestorName(usersList.*, item.requestor)]]</div>
-          <div class="list-content">[[item.quantity]]</div>
-          <div class="list-content">[[getPayable(item.payable)]]</div>
-          <div class="list-content">[[item.status]]</div>
-          <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
-        </paper-icon-item>
-      </template>
-
-      <template is="dom-if" if="[[!historyReq]]">
-        You don't have any request.
-      </template>
-    </paper-listbox>
+        <template is="dom-if" if="[[!historyReq]]">
+          You don't have any request.
+        </template>
+      </paper-listbox>
+    </div>
 
     <!-- To confirm accepting/rejecting a stock request -->
     <paper-dialog id="actionDialog" modal>

@@ -96,13 +96,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </app-toolbar>
       </app-header>
 
-      <template is="dom-repeat" items="{{messageList}}">
-        <notice-view
-          messagekey="[[item.$key]]"
-          user="[[user]]"
-          userdata="[[userdata]]">
-        </notice-view>
-      </template>
+      <div class="default-view-content">
+        <template is="dom-repeat" items="{{messageList}}">
+          <notice-view
+              messagekey="[[item.$key]]"
+              user="[[user]]"
+              userdata="[[userdata]]"></notice-view>
+        </template>
+      </div>
+
 
       <!-- FAB to create new notice -->
       <template is="dom-if" if="[[isAdmin(userdata.privilege)]]">

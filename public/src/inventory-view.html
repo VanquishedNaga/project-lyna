@@ -54,7 +54,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <style include="shared-styles">
       :host {
         display: block;
-        padding: 16px;
       }
 
       .product {
@@ -81,29 +80,31 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
     </style>
 
-    <h1>Your Inventory</h1>
-    <paper-listbox class="itemsList">
-      <paper-item>
-        <div class="product" style="margin-right: 16px;"></div>
-        <div class="title" style="width: 60%;">Product</div>
-        <div class="title" style="width: 30%;">Quantity</div>
-      </paper-item>
-      <template is="dom-repeat" items="{{inventoryList}}">
-        <paper-icon-item>
-          <div class="product" slot="item-icon"
-          style="background-image: url([[getRequestPic(productsList.*, item.$key)]]);"></div>
-          <div class="list-content" style="width: 60%;">[[getProductName(productsList.*, item.$key)]]</div>
-          <div class="list-content" style="width: 30%;">[[getInventoryQuantity(inventoryData.*, item.$key)]]</div>
-        </paper-icon-item>
-      </template>
-    </paper-listbox>
+    <div class="default-view-content">
+      <h1>Your Inventory</h1>
+      <paper-listbox class="itemsList">
+        <paper-item>
+          <div class="product" style="margin-right: 16px;"></div>
+          <div class="title" style="width: 60%;">Product</div>
+          <div class="title" style="width: 30%;">Quantity</div>
+        </paper-item>
+        <template is="dom-repeat" items="{{inventoryList}}">
+          <paper-icon-item>
+            <div class="product" slot="item-icon"
+            style="background-image: url([[getRequestPic(productsList.*, item.$key)]]);"></div>
+            <div class="list-content" style="width: 60%;">[[getProductName(productsList.*, item.$key)]]</div>
+            <div class="list-content" style="width: 30%;">[[getInventoryQuantity(inventoryData.*, item.$key)]]</div>
+          </paper-icon-item>
+        </template>
+      </paper-listbox>
 
-    <h1>Downline Inventory</h1>
-    <paper-listbox class="itemsList">
-      <template is="dom-repeat" items="{{downlineList}}">
-        <user-inventory-collapsible userid="[[item.$key]]"></user-inventory-collapsible>
-      </template>
-    </paper-listbox>
+      <h1>Downline Inventory</h1>
+      <paper-listbox class="itemsList">
+        <template is="dom-repeat" items="{{downlineList}}">
+          <user-inventory-collapsible userid="[[item.$key]]"></user-inventory-collapsible>
+        </template>
+      </paper-listbox>
+    </div>
   </template>
 
   <script>
