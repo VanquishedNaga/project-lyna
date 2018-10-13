@@ -62,11 +62,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </firebase-storage-ref>
 
     <style include="shared-styles">
-      span.header {
-        padding: 8px;
-        font-size: 1.1em;
-      }
-
       .noti-desc {
         overflow: auto;
         white-space: pre-line;
@@ -100,10 +95,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         color: white;
         display: flex;
         flex-wrap: wrap;
-      }
-
-      .avatar {
-        margin: 0 12px 0 12px;
       }
 
       paper-textarea.commentCustom {
@@ -231,7 +222,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </template>
           <template is="dom-repeat" items="{{limitComments(commentList.*, loadedComments)}}">
             <div style="display: flex;">
-              <div class="avatar" slot="item-icon" style="background-image: url([[getUserInfo(userList.*, item.userid, 'profilePic')]]);"></div>
+              <div class="item-icon" slot="item-icon" style="background-image: url([[getUserInfo(userList.*, item.userid, 'profilePic')]]); margin: 0 12px;"></div>
               <div class="commentBox">
                 <div class="commentContent horizontal">
                   <div style="word-break: break-word;">
@@ -246,7 +237,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </div>
           </template>
           <div style="display: flex;">
-            <div class="avatar" slot="item-icon" style="background-image: url([[userdata.profilePic]]);"></div>
+            <div class="item-icon" slot="item-icon" style="background-image: url([[userdata.profilePic]]); margin: 0 12px;"></div>
             <paper-textarea
               class="commentCustom"
               id="commentField"

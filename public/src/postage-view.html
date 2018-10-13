@@ -52,13 +52,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </style>
 
     <div class="default-view-content">
-      <div class="postage">
-        Balance: RM[[getBalance(userdata.*)]]
-        <span style="clear: right; display: block"></span>
-      </div>
+      <paper-card class="card-common">
+        <div class="card-content">
+          Balance: RM[[getBalance(userdata.*)]]
+        </div>
+      </paper-card>
 
       <h1>Reload transactions</h1>
-      <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}">
+      <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}" style="min-width: calc(32px + 90px*4 + 16px*4)">
         <paper-item style="font-weight: bold;">
           <div class="list-content">Amount</div>
           <div class="list-content">Time</div>

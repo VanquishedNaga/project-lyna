@@ -55,27 +55,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         display: block;
       }
 
-      app-toolbar {
-        height: var(--app-toolbar-height);
-      }
-
       app-drawer-layout:not([narrow]) [drawer-toggle] {
         display: none;
-      }
-
-      paper-icon-button {
-        --paper-icon-button-ink-color: white;
       }
 
       app-drawer {
         --app-drawer-content-container: {
           background-color: var(--app-primary-color);
-          border: solid var(--app-primary-color-d);
+          box-shadow: 2px 0 2px 0 rgba(0, 0, 0, 0.14),
+                      1px 0 5px 0 rgba(0, 0, 0, 0.12),
+                      3px 0 1px -2px rgba(0, 0, 0, 0.2);
         };
-      }
-
-      .drawer-list {
-        margin: 0 20px;
       }
 
       .drawer-list a {
@@ -116,6 +106,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         font-family: 'Roboto Condensed', sans-serif;
       }
 
+      /*For sign out button*/
+
       paper-button.drawerButton{
         color: white;
         text-transform: none;
@@ -128,7 +120,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       hr{
         background-color: var(--app-primary-color-l);
-        height: 3px;
+        height: 1px;
         border: none;
       }
     </style>

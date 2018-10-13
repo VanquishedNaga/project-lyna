@@ -81,35 +81,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <style include="shared-styles">
       :host {
         display: block;
-      }
-
-      .product {
-        display: inline-block;
-        box-sizing: border-box;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-size: contain;
-      }
-
-      .requestList {
-        padding: 16px;
-        min-width: 900px;
-      }
-
-      .title {
-        font-weight: bold;
-        flex: 1 0 90px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .list-content {
-        flex: 1 0 90px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        min-width: 1000px;
       }
 
       paper-icon-button {
@@ -121,26 +93,26 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <h1>Sent Requests</h1>
       <paper-listbox class="requestList">
         <template is="dom-if" if="[[count]]">
-          <paper-icon-item>
-            <div class="product" slot="item-icon"
+          <paper-icon-item class="title">
+            <div class="item-icon" slot="item-icon"
             style="background-image: url('../images/AR.png');"></div>
-            <div class="title" style="flex: 2 0 180px;">Product</div>
-            <div class="title">Quantity</div>
-            <div class="title">Status</div>
-            <div class="title" style="flex-basis: 180px;">Time</div>
-            <div class="title">Payable</div>
-            <div class="title">Payment</div>
+            <div class="big-list-content">Product</div>
+            <div class="list-content">Quantity</div>
+            <div class="list-content">Status</div>
+            <div class="big-list-content">Time</div>
+            <div class="list-content">Payable</div>
+            <div class="list-content">Payment</div>
           </paper-icon-item>
         </template>
 
         <template is="dom-repeat" items="{{ownRequestList}}" observe="status item.status" rendered-item-count="{{count}}">
           <paper-icon-item>
-            <div class="product" slot="item-icon"
+            <div class="item-icon" slot="item-icon"
             style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-            <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
+            <div class="big-list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
             <div class="list-content">[[item.quantity]]</div>
             <div class="list-content">[[item.status]]</div>
-            <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+            <div class="big-list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
             <div class="list-content">[[getPayable(item.payable)]]</div>
             <div class="list-content">
               <paper-icon-button
@@ -165,7 +137,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <paper-listbox class="requestList">
           <template is="dom-if" if="[[pendingReq]]">
             <paper-icon-item>
-              <div class="product" slot="item-icon"
+              <div class="item-icon" slot="item-icon"
               style="background-image: url('../images/AR.png');"></div>
               <div class="title" style="flex: 2 0 180px;">Product</div>
               <div class="title">Requestor</div>
@@ -179,7 +151,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
         <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestPending}}" observe="status item.status" rendered-item-count="{{pendingReq}}">
           <paper-icon-item>
-            <div class="product" slot="item-icon"
+            <div class="item-icon" slot="item-icon"
             style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
             <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
             <div class="list-content">[[getRequestorName(usersList.*, item.requestor)]]</div>
@@ -212,27 +184,27 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <paper-listbox class="requestList">
         <template is="dom-if" if="[[historyReq]]">
           <paper-icon-item>
-            <div class="product" slot="item-icon"
+            <div class="item-icon" slot="item-icon"
             style="background-image: url('../images/AR.png');"></div>
-            <div class="title" style="flex: 2 0 180px;">Product</div>
-            <div class="title">Requestor</div>
-            <div class="title">Quantity</div>
-            <div class="title">Payable</div>
-            <div class="title">Status</div>
-            <div class="title" style="flex-basis: 180px;">Time</div>
+            <div class="big-list-content title">Product</div>
+            <div class="list-content title">Requestor</div>
+            <div class="list-content title">Quantity</div>
+            <div class="list-content title">Payable</div>
+            <div class="list-content title">Status</div>
+            <div class="big-list-content title">Time</div>
           </paper-icon-item>
         </template>
 
         <template is="dom-repeat" items="{{requestList}}" filter="{{isRequestNotPending}}" observe="status item.status" rendered-item-count="{{historyReq}}">
           <paper-icon-item>
-            <div class="product" slot="item-icon"
+            <div class="item-icon" slot="item-icon"
             style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-            <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
+            <div class="big-list-content">[[getProductName(productsList.*, item.productID)]]</div>
             <div class="list-content">[[getRequestorName(usersList.*, item.requestor)]]</div>
             <div class="list-content">[[item.quantity]]</div>
             <div class="list-content">[[getPayable(item.payable)]]</div>
             <div class="list-content">[[item.status]]</div>
-            <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+            <div class="big-list-content">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
           </paper-icon-item>
         </template>
 

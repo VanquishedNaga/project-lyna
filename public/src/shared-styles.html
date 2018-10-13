@@ -49,16 +49,19 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         min-width: 800px;
       }
 
-      paper-listbox {
-        border-radius: var(--radius);
+      .title {
+        font-weight: bold;
       }
 
       /*Card components*/
 
       .card-common {
+        background-color: white;
         border-radius: var(--radius);
+        display: block;
         font-family: 'Roboto Condensed', sans-serif;
         margin: 16px 0;
+        width: 100%;
       }
 
       .card-header {
@@ -67,6 +70,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         color: white;
         display: flex;
         flex-wrap: wrap;
+      }
+
+      span.header {
+        padding: 8px;
+        font-size: 1.1em;
       }
 
       .horizontal {
@@ -157,6 +165,20 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       /*Listboxes*/
 
+      paper-listbox {
+        border-radius: var(--radius);
+      }
+
+      .item-icon {
+        background-size: contain;
+        border-radius: 50%;
+        box-sizing: border-box;
+        flex: 0 0 40px;
+        height: 40px;
+        margin: 0 16px 0 0;
+        width: 40px;
+      }
+
       paper-listbox paper-icon-item.iron-selected {
         font-weight: normal;
       }
@@ -214,17 +236,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         text-transform: none;
       }
 
-      .avatar {
-        display: inline-block;
-        box-sizing: border-box;
-        width: 40px;
-        min-width: 40px;
-        height: 40px;
-        min-height: 40px;
-        border-radius: 50%;
-        background-size: contain;
-      }
-
       .secondLine {
         color: grey;
         font-size: 0.9em;
@@ -232,7 +243,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       /*For flex tables*/
 
-      div.list-content {
+      .list-content {
         flex: 1 0 90px;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -240,7 +251,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         margin-right: 16px;
       }
 
-      div.big-list-content {
+      .big-list-content {
         flex: 2 0 180px;
         overflow: hidden;
         text-overflow: ellipsis;

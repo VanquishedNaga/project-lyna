@@ -69,20 +69,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       th {
         text-align: left;
       }
-      span.header {
-        padding: 8px;
-        font-size: 1.1em;
-      }
-      .paper-info {
-        min-width: 250px;
-        word-break: break-word;
-        hyphens: manual;
-        vertical-align: top;
-        margin: 16px;
-        display: flex;
-        flex-direction: column;
-        flex: 1 1 250px;
-      }
       .paper-act {
         float: right;
         margin-left: auto;
@@ -105,24 +91,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-header>
         <iron-pages selected="{{selected}}" attr-for-selected="page-name">
           <div page-name="Level" class="default-view-content">
-            <paper-card class="card-common horizontal">
-              <div style="width: 100%;">
-                <div class="card-header">
-                  <span class="header">
-                    Level
-                  </span>
-                  <div class="paper-act">
-                    <paper-icon-button icon="icons:add" on-tap="addLevel"></paper-icon-button>
-                    <paper-icon-button icon="icons:create" on-tap="editLevel"></paper-icon-button>
-                    <paper-icon-button icon="icons:delete" on-tap="delLevel"></paper-icon-button>
-                  </div>
-                </div>
-                <div class="card-content paper-info">
-                  <template is="dom-repeat" items="{{toArray(levelData.*)}}">
-                    <paper-item>[[item.value]]</paper-item>
-                  </template>
+            <paper-card class="card-common">
+              <div class="card-header">
+                <span class="header">
+                  Level
+                </span>
+                <div class="paper-act">
+                  <paper-icon-button icon="icons:add" on-tap="addLevel"></paper-icon-button>
+                  <paper-icon-button icon="icons:create" on-tap="editLevel"></paper-icon-button>
+                  <paper-icon-button icon="icons:delete" on-tap="delLevel"></paper-icon-button>
                 </div>
               </div>
+              <paper-listbox>
+                <template is="dom-repeat" items="{{toArray(levelData.*)}}">
+                  <paper-item>[[item.value]]</paper-item>
+                </template>
+              </paper-listbox>
             </paper-card>
 
             <paper-dialog id="addLevelDialog" on-iron-overlay-closed="onAddDialogClose" modal>
@@ -170,37 +154,35 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
           </div>
           <div page-name="Product Price" class="wide-view-content">
-            <paper-card style="min-width: 1000px;" class="card-common horizontal">
-              <div style="width: 100%;">
-                <div class="card-header">
-                  <span class="header">
-                    Product Price
-                  </span>
-                </div>
-                <div class="card-content paper-info">
-                  <table width="100%" >
+            <paper-card class="card-common">
+              <div class="card-header">
+                <span class="header">
+                  Product Price
+                </span>
+              </div>
+              <div class="card-content">
+                <table width="100%" >
+                  <tr>
+                    <th>Product Name</th>
+                    <template is="dom-repeat" items="{{toArray(levelData.*)}}">
+                      <th>
+                        [[item.value]]
+                      </th>
+                    </template>
+                  </tr>
+                  <template is="dom-repeat" items="{{productsNameList}}">
                     <tr>
-                      <th>Product Name</th>
-                      <template is="dom-repeat" items="{{toArray(levelData.*)}}">
-                        <th>
+                      <td>
+                        [[item.name]]
+                      </td>
+                      <template is="dom-repeat" items="{{toArray(item.prices)}}">
+                        <td>
                           [[item.value]]
-                        </th>
+                        </td>
                       </template>
                     </tr>
-                    <template is="dom-repeat" items="{{productsNameList}}">
-                      <tr>
-                        <td>
-                          [[item.name]]
-                        </td>
-                        <template is="dom-repeat" items="{{toArray(item.prices)}}">
-                          <td>
-                          [[item.value]]
-                          </td>
-                        </template>
-                      </tr>
-                    </template>
-                  </table>
-                </div>
+                  </template>
+                </table>
               </div>
             </paper-card>
             <paper-fab icon="icons:create" on-tap="editPrice"></paper-fab>

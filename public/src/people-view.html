@@ -98,7 +98,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <paper-listbox id="request">
             <template is="dom-repeat" items="{{requestList}}" rendered-item-count="{{count}}">
               <paper-icon-item>
-                <div class="avatar" slot="item-icon"
+                <div class="item-icon" slot="item-icon"
                 style="background-image: url([[getUserInfo(userList.*, item.user, 'profilePic')]]);"></div>
                 <paper-item-body two-line>
                   <div>[[getUserInfo(userList.*, item.user, 'name')]]</div>
@@ -122,7 +122,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <h1>Upline</h1>
           <paper-listbox>
             <paper-icon-item>
-              <div class="avatar" slot="item-icon"
+              <div class="item-icon" slot="item-icon"
               style="background-image: url([[getUserInfo(userList.*, uplineData, 'profilePic')]]);"></div>
               <paper-item-body two-line>
                 <div>[[getUserInfo(userList.*, uplineData, 'name')]]</div>
@@ -135,7 +135,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <paper-listbox class="downlineList">
             <template is="dom-repeat" items="{{downlineList}}">
               <paper-icon-item>
-                <div class="avatar" slot="item-icon"
+                <div class="item-icon" slot="item-icon"
                 style="background-image: url([[getUserInfo(userList.*, item.$key, 'profilePic')]]);"></div>
                 <paper-item-body two-line>
                   <div>[[getUserInfo(userList.*, item.$key, 'name')]]</div>
