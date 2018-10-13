@@ -6,6 +6,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
@@ -14,7 +15,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../bower_components/paper-styles/paper-styles.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
@@ -76,8 +76,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         </app-toolbar>
       </app-header>
 
-      <div class="content">
-        <paper-material elevation="1">
+      <paper-card class="card-common horizontal">
+        <div class="card-content">
           <div>Status: [[userData.status]]</div>
           <paper-dropdown-menu id="uplinemenu" label="Select upline" always-float-label>
             <paper-listbox id="uplinelist" slot="dropdown-content" attr-for-selected="key" selected="[[userData.upline]]">
@@ -87,12 +87,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </paper-listbox>
           </paper-dropdown-menu>
           <paper-button id="submitButton" class="custom" on-tap="submitRequest">Submit</paper-button>
-        </paper-material>
-      </div>
+        </div>
+      </paper-card>
 
-      <div class="content">
-        <template is="dom-if" if="[[!isFirstTimeLogin(userData.status)]]">
-          <paper-material elevation="1" style="position: relative;">
+      <template is="dom-if" if="[[!isFirstTimeLogin(userData.status)]]">
+        <paper-card class="card-common horizontal">
+          <div class="card-content">
             <table width="100%" class="infoTable">
               <tr>
                 <td class="tbLabel">Name</td>
@@ -131,10 +131,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 <td class="tbValue">[[userData.address]]</td>
               </tr>
             </table>
-          </paper-material>
-        </template>
-      </div>
+          </div>
+        </paper-card>
+      </template>
+
       <paper-fab icon="icons:create" on-tap="editInfo"></paper-fab>
+
     </app-header-layout>
 
     <paper-dialog id="editInfo" on-iron-overlay-closed="onEditInfoClose" modal>

@@ -87,9 +87,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         float: right;
         margin-left: auto;
       }
-      .horizontal {
-        @apply(--layout-horizontal);
-      }
       .expandInfo {
         background-color: var(--app-primary-color);
         color: white;
@@ -128,7 +125,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                   </div>
                   <div class="card-content paper-info">
                     <template is="dom-repeat" items="{{toArray(levelData.*)}}">
-                      <paper-listbox>[[item.value]]</paper-listbox>
+                      <paper-item>[[item.value]]</paper-item>
                     </template>
                   </div>
                 </div>
