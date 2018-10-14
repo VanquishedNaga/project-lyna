@@ -23,6 +23,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+<link rel="import" href="bonus-admin-view.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="user-overview-collapse.html">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
@@ -224,6 +225,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               </template>
             </paper-listbox>
           </div>
+
+          <div page-name="Bonus" class="default-view-content">
+            <bonus-admin-view></bonus-admin-view>
+          </div>
+
         </iron-pages>
     </app-header-layout>
 
@@ -248,7 +254,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           tabItems: {
             type: Array,
             value: function() {
-              return ['Level', 'Product Price', 'Users'];
+              return ['Level', 'Product Price', 'Users', 'Bonus'];
             }
           },
         };

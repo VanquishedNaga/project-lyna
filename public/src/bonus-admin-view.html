@@ -1,0 +1,208 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="shared-styles.html">
+
+<script src="../bower_components/strftime/strftime-min.js"></script>
+
+<dom-module id="bonus-admin-view">
+  <template>
+    <firebase-document
+      id="userRevenue"
+      path="/profit/[[selectedUser]]/revenue/[[yearMonth]]"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      id="bonusTxn"
+      path="/bonusTxn"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-query
+      path="/bonusTxn"
+      data="{{bonusTxnArray}}"
+      app-name="absolute-reborn">
+    </firebase-query>
+
+    <firebase-document
+      path="/users"
+      data="{{userListData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-query
+      path="/users"
+      data="{{userListArray}}"
+      app-name="absolute-reborn">
+    </firebase-query>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <div>
+      <h1>Past transactions</h1>
+      <paper-listbox>
+        <template is="dom-repeat" items="{{bonusTxnArray}}" rendered-item-count="{{count}}" sort="sort">
+          <paper-icon-item>
+            <div class="item-icon" slot="item-icon"
+            style="background-image: url([[getUserInfo(userListData.*, item.user, 'profilePic')]]);"></div>
+            <div class="big-list-content">
+              <paper-item-body two-line>
+                <div>[[getUserInfo(userListData.*, item.user, 'name')]]</div>
+                <div secondary class="secondLine">[[formatEpochTime(item.time)]]</div>
+              </paper-item-body></div>
+            <div class="list-content">RM[[item.amount]]</div>
+          </paper-icon-item>
+        </template>
+
+        <template is="dom-if" if="[[!count]]">
+          <paper-icon-item>
+            <div class="big-list-content">There is no transactions.</div>
+          </paper-icon-item>
+        </template>
+      </paper-listbox>
+    </div>
+
+    <paper-fab icon="add" on-click="openBonusDialog"></paper-fab>
+
+    <!-- To confirm accepting/rejecting a stock request -->
+    <paper-dialog id="bonusDialog" on-iron-overlay-closed="onDialogClosed" modal>
+      <h2>Give bonus</h2>
+      <paper-dropdown-menu id="selectedUser" label="Select user" always-float-label>
+        <paper-listbox slot="dropdown-content" attr-for-selected="key" selected="{{selectedUser}}">
+          <template is="dom-repeat" items="{{userListArray}}">
+            <paper-item key="[[item.$key]]">[[item.name]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <paper-input
+      id="bonusAmount"
+      label="Bonus amount"
+      pattern="^\d*\.?\d{0,2}$"
+      style="display: inline-block;"
+      required
+      auto-validate
+      always-float-label>
+      <div slot="prefix">RM</div></paper-input>
+      <div class="buttons">
+        <paper-button id="bonusDialogCancelButton" dialog-dismiss>Cancel</paper-button>
+        <paper-button id="bonusDialogConfirmButton" autofocus on-tap="giveBonus">Confirm
+        </paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
+  </template>
+
+  <script>
+    class BonusAdminView extends Polymer.Element {
+      static get is() { return 'bonus-admin-view'; }
+      static get properties() {
+        return {
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("BonusAdminView ready.");
+      }
+
+      openBonusDialog(event) {
+        Polymer.dom(document.body).appendChild(this.$.bonusDialog);
+        this.$.bonusDialog.open();
+      }
+
+      onDialogClosed(event) {
+        if (event.target == this.$.bonusDialog) {
+          this.$.bonusAmount.value = null;
+          this.selectedUser = null;
+          this.$.bonusAmount.invalid = false;
+          this.$.selectedUser.invalid = false;
+
+          this.$.bonusDialogConfirmButton.disabled = false;
+          this.$.bonusDialogCancelButton.disabled = false;
+        }
+      }
+
+      giveBonus(event) {
+        // Validate input
+        var inputValid = this.$.bonusAmount.validate();
+        inputValid = this.$.selectedUser.value && inputValid;
+        if (!this.$.selectedUser.value) {
+          this.$.selectedUser.invalid = true;
+        }
+
+        if (inputValid) {
+          // Disable buttons
+          this.$.bonusDialogConfirmButton.disabled = true;
+          this.$.bonusDialogCancelButton.disabled = true;
+
+          // Get the current month
+          const currentDate = new Date;
+          const currentMonth = currentDate.getMonth() + 1;
+          const currentYear = currentDate.getFullYear();
+          this.yearMonth = currentYear + currentMonth.toString().padStart(2,'0')
+          // Push bonus transaction
+          this.$.bonusTxn.ref.push({
+            amount: parseFloat(this.$.bonusAmount.value).toFixed(2),
+            time: {".sv":"timestamp"},
+            user: this.selectedUser,
+          }).then(function(snap) {
+            // Update user revenue
+            console.log(snap);
+            console.log(this.$.userRevenue.path);
+            this.$.userRevenue.ref.transaction(function(amount) {
+              return (parseFloat(amount || 0) + parseFloat(this.$.bonusAmount.value)).toFixed(2);
+            }.bind(this)).then(function(snap) {
+              this.$.bonusDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.successToast);
+              this.$.successToast.open();
+            }.bind(this)).catch(function(error) {
+              console.log(error);
+              this.$.bonusDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.failToast);
+              this.$.failToast.open();
+            }.bind(this));
+          }.bind(this)).catch(function(error) {
+            console.log(error);
+            this.$.bonusDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
+        }
+      }
+
+      formatEpochTime(eTS) {
+        return strftime('%D %I:%M %P', new Date(eTS));
+      }
+
+      getUserInfo(change, user, data) {
+        var retVal = user;
+        if (change.base[user] != undefined) {
+          retVal = change.base[user][data];
+        }
+        return retVal;
+      }
+
+      sort(a, b) {
+        return a.time > b.time ? -1 : 1;
+      }
+    }
+
+    window.customElements.define(BonusAdminView.is, BonusAdminView);
+  </script>
+</dom-module>
