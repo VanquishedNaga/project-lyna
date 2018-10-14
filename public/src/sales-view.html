@@ -25,6 +25,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="order-view.html">
 <link rel="import" href="customer-view.html">
+<link rel="import" href="sales-overview-view.html">
 
 <script src="../bower_components/strftime/strftime-min.js"></script>
 
@@ -96,6 +97,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-header>
 
       <iron-pages selected="{{selected}}" attr-for-selected="page-name">
+        <sales-overview-view user="[[user]]" userdata="[[userdata]]" narrow="[[narrow]]" page-name="Overview"></sales-overview-view>
         <order-view user="[[user]]" userdata="[[userdata]]" narrow="[[narrow]]" page-name="Orders" class="wide-view-content"></order-view>
         <customer-view user="[[user]]" userdata="[[userdata]]" page-name="Customers" class="wide-view-content"></customer-view>
       </iron-pages>
@@ -112,12 +114,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           narrow: Object,
           selected: {
             type: String,
-            value: 'Orders'
+            value: 'Overview'
           },
           tabItems: {
             type: Array,
             value: function() {
-              return ['Orders', 'Customers'];
+              return ['Overview', 'Orders', 'Customers'];
             }
           },
         };

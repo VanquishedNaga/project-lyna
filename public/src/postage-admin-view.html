@@ -6,6 +6,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
@@ -37,6 +38,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       data="{{selectedRequest}}">
     </firebase-document>
 
+    <firebase-document
+      app-name="absolute-reborn"
+      path = "/postageData"
+      data="{{currentPostage}}">
+    </firebase-document>
+
     <firebase-query
       path = "/reloadPostageRequests"
       data="{{myRequests}}"
@@ -59,6 +66,19 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         display: flex;
       }
     </style>
+
+    <h1>Current postage rate</h1>
+    <paper-listbox id="postageRate">
+      <paper-item>
+        Peninsular Malaysia
+        <paper-input
+            disabled
+            error-message="Field required!"
+            id="perPostage"
+            value="[[postageData.per]]">
+          </paper-input>
+      </paper-item>
+    </paper-listbox>
 
     <h1>Postage reload requests</h1>
     <paper-listbox id="salesList" class="custom" attr-for-selected="key" style="min-width: 650px;">
@@ -156,6 +176,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       ready() {
         super.ready();
         console.log("PostageAdminView ready.");
+
       }
 
       hasPayProof(change) {
@@ -167,6 +188,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.payProof = event.model.item.payProof.downloadUrl;
           Polymer.dom(document.body).appendChild(this.$.displayPayProofDialog);
           this.$.displayPayProofDialog.open();
+          console.log(this.postageData[per]);
         }
       }
 

@@ -32,6 +32,7 @@ exports.processRestockRequestFunction = functions.https.onCall((data, context) =
           var requestor = snapshot.val().requestor;
           var upline = snapshot.val().upline;
           var product = snapshot.val().productID;
+          var payable = snapshot.val().payable;
 
           // Get and update requestor inventory quantity
           var updateRequestorInventory = admin.database().ref('/users/' + requestor + '/inventory/' + product);
@@ -53,6 +54,23 @@ exports.processRestockRequestFunction = functions.https.onCall((data, context) =
               return currentProduct - parseFloat(quantity);
             });
           }
+
+          //Get current month and year
+          var currentDate = new Date();
+          var currentMonth = ((currentDate.getMonth()+1) < 10 ? '0' : '') + (currentDate.getMonth()+1);
+          var currentYear = currentDate.getFullYear();
+
+          //Update requestor's cost
+          var updateRequestorCost = admin.database().ref('/profit/' + requestor + '/cost/' + currentYear + currentMonth);
+          updateRequestorCost.transaction(function(currentCost) {
+            return (parseFloat(currentCost || 0) + parseFloat(payable)).toFixed(2);
+          });
+
+          //Update upline's revenue
+          var updateUplineRevenue = admin.database().ref('/profit/' + upline + '/revenue/' + currentYear + currentMonth);
+          updateUplineRevenue.transaction(function(currentRevenue) {
+            return (parseFloat(currentRevenue || 0) + parseFloat(payable)).toFixed(2);
+          });
         });
       }
     }
@@ -101,10 +119,15 @@ exports.addSalesFunction = functions.https.onCall((data, context) => {
         return (currentAmount - qty);
       });
 
-      // Update user total revenue.
-      var ref = admin.database().ref('/users/' + seller + '/revenue');
-      ref.transaction(function(currentAmount) {
-        return (parseFloat(currentAmount || 0) + parseFloat(amount)).toFixed(2);
+      //Get current month and year
+      var currentDate = new Date();
+      var currentMonth = ((currentDate.getMonth()+1) < 10 ? '0' : '') + (currentDate.getMonth()+1);
+      var currentYear = currentDate.getFullYear();
+
+      // Update seller total revenue.
+      var updateCurrentRevenue = admin.database().ref('/profit/' + seller + '/revenue/' + currentYear + currentMonth);
+      updateCurrentRevenue.transaction(function(currentRevenue) {
+        return (parseFloat(currentRevenue || 0) + parseFloat(amount)).toFixed(2);
       });
 
       return snap.key;
@@ -226,6 +249,17 @@ exports.processPostageReload = functions.database.ref('/reloadPostageRequests/{r
         // Update balance
         admin.database().ref('/users/' + after.uid + '/postage').transaction(function(currentAmount) {
           return (parseFloat(currentAmount || 0) + parseFloat(after.amount)).toFixed(2);
+        });
+
+        //Get current month and year
+        var currentDate = new Date();
+        var currentMonth = ((currentDate.getMonth()+1) < 10 ? '0' : '') + (currentDate.getMonth()+1);
+        var currentYear = currentDate.getFullYear();
+
+        //Update user's cost
+        var updateRequestorCost = admin.database().ref('/profit/' + after.uid + '/cost/' + currentYear + currentMonth);
+        updateRequestorCost.transaction(function(currentCost) {
+          return (parseFloat(currentCost || 0) + parseFloat(after.amount)).toFixed(2);
         });
       }
 

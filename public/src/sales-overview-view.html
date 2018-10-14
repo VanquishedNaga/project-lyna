@@ -1,0 +1,251 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/google-chart/google-chart.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+
+<link rel="import" href="shared-styles.html">
+
+<script src="../bower_components/strftime/strftime-min.js"></script>
+
+<dom-module id="sales-overview-view">
+  <template>
+    <firebase-document
+      id="doc"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <firebase-document
+      path = "/profit/[[user.uid]]"
+      data = "{{profitData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+
+      .noti-card {
+        width: 90%;
+        /*min-width: 282px;*/
+        display: block;
+        margin: 16px;
+        font-family: 'Roboto Condensed', sans-serif;
+        border-radius: var(--radius);
+      }
+
+      .noti-header {
+        background-color: var(--app-primary-color);
+        color: white;
+        display: flex;
+        flex-wrap: wrap;
+        border-radius: var(--radius) var(--radius) 0 0;
+      }
+
+      span.header {
+        padding: 8px;
+        font-size: 1.1em;
+      }
+
+      .board-content {
+        clear: right;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .board-content {
+        overflow: auto;
+      }
+
+      .noti-info {
+        min-width: 250px;
+        word-break: break-word;
+        hyphens: manual;
+        vertical-align: top;
+        margin: 16px;
+        max-height: 250px;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 250px;
+      }
+
+      google-chart {
+        height: 800px;
+        width: 90%;
+    }
+
+    </style>
+    <paper-card class="noti-card horizontal">
+      <div style="width: 100%;">
+        <div class="noti-header">
+          <span class="header">
+            <iron-icon icon="icons:trending-up"></iron-icon>
+            Total Profit
+          </span>
+        </div>
+        <div class="board-content">
+        <div class="card-content noti-info">
+          Since [[formatEpochDate(userdata.joinedDate)]]:
+          <ul>
+            <li>Total Revenue: RM[[totalRevenue]]</li>
+            <li>Total Cost: RM[[totalCost]]</li>
+            <li>Total Profit: RM[[totalProfit]]</li>
+          </ul>
+        </div>
+      </div>
+      </div>
+    </paper-card>
+
+    <paper-card class="noti-card horizontal">
+      <div style="width: 100%;">
+        <div class="noti-header">
+          <span class="header">
+            <iron-icon icon="icons:trending-up"></iron-icon>
+            Overview of the last 6 months
+          </span>
+        </div>
+        <div class="chart-content">
+          <google-chart
+            id="lineChart"
+            type="line"
+            options='{"title": "Monthly Total (RM)"}'
+            data=[[profitDataArray]]>
+          </google-chart>
+        </div>
+      </div>
+    </paper-card>
+
+    <paper-listbox id="salesList" class="custom">
+      <template is="dom-repeat" items="{{profitDataArray}}">
+        <paper-item>
+          <div class="list-content">[[item.0]]</div>
+          <div class="list-content">[[convertFloatToString(item.1)]]</div>
+          <div class="list-content">[[convertFloatToString(item.2)]]</div>
+          <div class="list-content">[[convertFloatToString(item.3)]]</div>
+        </paper-item>
+      </template>
+    </paper-listbox>
+
+  </template>
+
+  <script>
+    class SalesOverviewView extends Polymer.Element {
+      static get is() { return 'sales-overview-view'; }
+      static get properties() {
+        return {
+          user: Object,
+          userdata: Object,
+          month: {
+            type: Array,
+            value: function() {
+              return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Oct', 'Nov', 'Dec'];
+            }
+          },
+        };
+      }
+
+      static get observers() {
+        return [
+          'getProfitData(profitData.*)',
+        ];
+      }
+
+      ready() {
+        super.ready();
+        console.log("SalesOverviewView ready.");
+      }
+
+      formatEpochDate(eTS) {
+        return strftime('%d %B %Y', new Date(eTS));
+      }
+
+      getProfitData(input) {
+        if (input && input.base) {
+          var array = [];
+          var cost = 0;
+          var revenue = 0;
+          var profit = 0;
+          this.totalCost = 0;
+          this.totalRevenue = 0;
+          this.totalProfit = 0;
+
+          // Calculate total cost
+          if (input.base['cost']) {
+            for (var month in input.base['cost']) {
+              this.totalCost = this.totalCost + parseFloat(input.base['cost'][month] || 0);
+            }
+          }
+
+          // Calculate total revenue
+          if (input.base['revenue']) {
+            for (var month in input.base['revenue']) {
+              this.totalRevenue = this.totalRevenue + parseFloat(input.base['revenue'][month] || 0);
+            }
+          }
+
+          this.totalProfit = (this.totalRevenue - this.totalCost).toFixed(2);
+          this.totalCost = this.totalCost.toFixed(2);
+          this.totalRevenue = this.totalRevenue.toFixed(2);
+
+          // Get current date
+          var currentDate = new Date;
+          var currentMonth = currentDate.getMonth()+1;
+          var currentYear = currentDate.getFullYear();
+
+          // Create array
+          for (var i = 0; i < 6; i++) {
+            if (input.base['cost']) {
+              cost = input.base['cost'][currentYear + currentMonth.toString().padStart(2,'0')] || 0;
+            }
+
+            if (input.base['revenue']) {
+              revenue = input.base['revenue'][currentYear + currentMonth.toString().padStart(2,'0')] || 0;
+            }
+
+            // Calculate total profit per month
+            profit = (parseFloat(revenue) - parseFloat(cost)).toFixed(2);
+
+            // Insert into Array
+            array.unshift([(this.month[currentMonth-1] + ' ' +currentYear.toString()), parseFloat(cost), parseFloat(revenue), parseFloat(profit)]);
+
+            // Calculate previous month
+            if (currentMonth != 1) {
+              currentMonth--;
+            }
+            else {
+              currentMonth = 12;
+              currentYear--;
+            }
+          }
+
+          // Insert chart labels
+          array.unshift(["Month", "Cost", "Revenue", "Profit"]);
+          this.profitDataArray = array;
+        }
+      }
+
+      convertFloatToString(input) {
+        if (typeof input == "string") {
+          return input;
+        }
+        else if (typeof input == "number") {
+          return "RM" + input.toFixed(2);
+        }
+      }
+    }
+
+    window.customElements.define(SalesOverviewView.is, SalesOverviewView);
+  </script>
+</dom-module>
