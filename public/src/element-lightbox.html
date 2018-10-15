@@ -1,0 +1,84 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="element-lightbox">
+  <template>
+    <style include="shared-styles"></style>
+
+    <paper-icon-button
+    class="btn-light"
+    icon="icons:info"
+    on-tap="openImageDialog"
+    hidden$="[[!imgSrc]]"></paper-icon-button>
+
+    <paper-dialog
+    id="imageDialog"
+    on-iron-overlay-closed="closeImageDialog"
+    modal
+    style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: black;">
+      <img
+      src="[[imgSrc]]"
+      alt="imgSrc"
+      style="
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
+      padding: 0;
+      max-height: 100%;
+      max-width: 100%;"/>
+      <paper-icon-button
+      icon="icons:close"
+      dialog-dismiss
+      style="
+      margin: 0;
+      padding: 8px;
+      color: white;
+      background-color: black;
+      float: right;"></paper-icon-button>
+    </paper-dialog>
+  </template>
+
+  <script>
+    class ElementLightbox extends Polymer.Element {
+      static get is() { return 'element-lightbox'; }
+      static get properties() {
+        return {
+          imgSrc: {
+            type: String,
+            value: null,
+          },
+        };
+      }
+
+      openImageDialog(event) {
+        Polymer.dom(document.body).appendChild(this.$.imageDialog);
+        this.$.imageDialog.open();
+      }
+
+      closeImageDialog() {
+        Polymer.dom(document.body).removeChild(this.$.imageDialog);
+      }
+    }
+
+    window.customElements.define(ElementLightbox.is, ElementLightbox);
+  </script>
+</dom-module>

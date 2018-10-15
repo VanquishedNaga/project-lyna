@@ -11,6 +11,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+
+<link rel="import" href="element-lightbox.html">
 <link rel="import" href="shared-styles.html">
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
@@ -97,10 +99,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="big-list-content">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
           <div class="list-content">[[item.status]]</div>
           <div class="list-content">
-            <paper-icon-button
-            icon="icons:info"
-            on-click="openDisplayPayProofDialog"
-            hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
+            <element-lightbox img-src="[[item.payProof.downloadUrl]]"></element-lightbox>
           </div>
           <div class="list-content">
             <paper-icon-button icon="icons:more-horiz" alt="Accept" on-click="openActionDialog" hidden$="[[!isRequestPending(item.*)]]">
@@ -122,43 +121,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </div>
     </paper-dialog>
 
-    <paper-dialog
-    id="displayPayProofDialog"
-    modal
-    style="
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 0;
-    margin-left: auto;
-    margin-right: auto;
-    background-color: black;">
-      <img
-      src="[[payProof]]"
-      alt="payProof"
-      style="
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      margin: auto;
-      padding: 0;
-      max-height: 100%;
-      max-width: 100%;"/>
-      <paper-icon-button
-      icon="icons:close"
-      on-click="closeDisplayPayProofDialog"
-      style="
-      margin: 0;
-      padding: 8px;
-      color: white;
-      background-color: black;
-      float: right;"></paper-icon-button>
-    </paper-dialog>
-
     <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
     <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
   </template>
@@ -177,23 +139,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         super.ready();
         console.log("PostageAdminView ready.");
 
-      }
-
-      hasPayProof(change) {
-        return (change.base['payProof']);
-      }
-
-      openDisplayPayProofDialog(event) {
-        if (event.model.item.payProof.downloadUrl) {
-          this.payProof = event.model.item.payProof.downloadUrl;
-          Polymer.dom(document.body).appendChild(this.$.displayPayProofDialog);
-          this.$.displayPayProofDialog.open();
-          console.log(this.postageData[per]);
-        }
-      }
-
-      closeDisplayPayProofDialog() {
-        this.$.displayPayProofDialog.close();
       }
 
       _formatEpochDate(eTS) {

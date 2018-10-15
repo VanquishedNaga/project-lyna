@@ -72,9 +72,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         display: inline-block;
         width: 100%;
       }
-      paper-icon-item paper-icon-button {
-        color: green;
-      }
     </style>
 
     <!-- Visible contents -->
@@ -104,10 +101,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                   <div>[[getUserInfo(userList.*, item.user, 'name')]]</div>
                   <div secondary class="secondLine"></div>
                 </paper-item-body>
-                <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Accept" on-tap="openApproveDialog">
+                <paper-icon-button id="[[getBtnID('apr_', index)]]" class="btn-light" icon="check" alt="Accept" on-tap="openApproveDialog">
                 </paper-icon-button>
                 <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Accept</paper-tooltip>
-                <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openApproveDialog">
+                <paper-icon-button id="[[getBtnID('rjt_', index)]]" class="btn-light" icon="clear" alt="Reject" on-tap="openApproveDialog">
                 </paper-icon-button>
                 <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
               </paper-icon-item>

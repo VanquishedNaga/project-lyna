@@ -83,10 +83,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         display: block;
         min-width: 1000px;
       }
-
-      paper-icon-button {
-        color: var(--app-secondary-color);
-      }
     </style>
 
     <div class="wide-view-content">
@@ -116,13 +112,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <div class="list-content">[[getPayable(item.payable)]]</div>
             <div class="list-content">
               <paper-icon-button
+              class="btn-light"
               icon="icons:file-upload"
               on-tap="openUploadPayProofDialog"
-              hidden$="[[hasPayProof(item.*)]]"></paper-icon-button>
-              <paper-icon-button
-              icon="icons:info"
-              on-tap="openDisplayPayProofDialog"
-              hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
+              hidden$="[[item.payProof]]"></paper-icon-button>
+              <element-lightbox img-src="[[item.payProof.downloadUrl]]"></element-lightbox>
             </div>
 
           </paper-icon-item>
@@ -159,16 +153,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <div class="list-content">[[item.quantity]]</div>
             <div class="list-content">[[getPayable(item.payable)]]</div>
             <div class="list-content">
-              <paper-icon-button
-              icon="icons:info"
-              on-tap="openDisplayPayProofDialog"
-              hidden$="[[!hasPayProof(item.*)]]"></paper-icon-button>
+              <element-lightbox img-src="[[item.payProof.downloadUrl]]"></element-lightbox>
             </div>
             <div class="list-content">
-              <paper-icon-button id="[[getBtnID('apr_', index)]]" icon="check" alt="Approve" on-tap="openDialog">
+              <paper-icon-button id="[[getBtnID('apr_', index)]]" class="btn-light" icon="check" alt="Approve" on-tap="openDialog">
               </paper-icon-button>
               <paper-tooltip for="[[getBtnID('apr_', index)]]" offset="0">Approve</paper-tooltip>
-              <paper-icon-button id="[[getBtnID('rjt_', index)]]" icon="clear" alt="Reject" on-tap="openDialog">
+              <paper-icon-button id="[[getBtnID('rjt_', index)]]" class="btn-light" icon="clear" alt="Reject" on-tap="openDialog">
               </paper-icon-button>
               <paper-tooltip for="[[getBtnID('rjt_', index)]]" offset="0">Reject</paper-tooltip>
             </div>
@@ -225,43 +216,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           on-tap="processRestockRequest">Yes
         </paper-button>
       </div>
-    </paper-dialog>
-
-    <paper-dialog
-    id="displayPayProofDialog"
-    modal
-    style="
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 0;
-    margin-left: auto;
-    margin-right: auto;
-    background-color: black;">
-      <img
-      src="[[payProof]]"
-      alt="payProof"
-      style="
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      margin: auto;
-      padding: 0;
-      max-height: 100%;
-      max-width: 100%;"/>
-      <paper-icon-button
-      icon="icons:close"
-      on-tap="closeDisplayPayProofDialog"
-      style="
-      margin: 0;
-      padding: 8px;
-      color: white;
-      background-color: black;
-      float: right;"></paper-icon-button>
     </paper-dialog>
 
     <paper-dialog id="uploadPayProofDialog" modal on-iron-overlay-closed="onDialogClosed">
@@ -411,22 +365,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       _formatEpochTime(eTS) {
         return strftime('%I:%M %P', new Date(eTS));
-      }
-
-      hasPayProof(change) {
-        return (change.base['payProof']);
-      }
-
-      openDisplayPayProofDialog(event) {
-        if (event.model.item.payProof.downloadUrl) {
-          this.payProof = event.model.item.payProof.downloadUrl;
-          Polymer.dom(document.body).appendChild(this.$.displayPayProofDialog);
-          this.$.displayPayProofDialog.open();
-        }
-      }
-
-      closeDisplayPayProofDialog() {
-        this.$.displayPayProofDialog.close();
       }
 
       openUploadPayProofDialog(event) {
