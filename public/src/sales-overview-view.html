@@ -120,7 +120,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return {
           user: Object,
           userdata: Object,
-
+          month: {
+            type: Array,
+            value: function() {
+              return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Oct', 'Nov', 'Dec'];
+            }
+          },
         };
       }
 
@@ -186,7 +191,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             profit = (parseFloat(revenue) - parseFloat(cost)).toFixed(2);
 
             // Insert into Array
-            array.unshift([(currentMonth.toString().padStart(2,'0') + '/' +currentYear.toString().slice(-2)), parseFloat(cost), parseFloat(revenue), parseFloat(profit)]);
+            array.unshift([(this.month[currentMonth-1] + '/' +currentYear.toString().slice(-2)), parseFloat(cost), parseFloat(revenue), parseFloat(profit)]);
 
             // Calculate previous month
             if (currentMonth != 1) {
