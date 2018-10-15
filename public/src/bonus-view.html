@@ -1,0 +1,96 @@
+<!--
+@license
+Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
+-->
+
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="shared-styles.html">
+
+<script src="../bower_components/strftime/strftime-min.js"></script>
+
+<dom-module id="bonus-view">
+  <template>
+    <firebase-query
+      path="/bonusTxn"
+      order-by-child="user"
+      equal-to="[[user.uid]]"
+      data="{{bonusTxnArray}}"
+      app-name="absolute-reborn">
+    </firebase-query>
+
+    <firebase-document
+      path="/users"
+      data="{{userListData}}"
+      app-name="absolute-reborn">
+    </firebase-document>
+
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+    </style>
+
+    <div>
+      <h1>Transaction history</h1>
+      <paper-listbox>
+        <template is="dom-repeat" items="{{bonusTxnArray}}" rendered-item-count="{{count}}" sort="sort">
+          <paper-icon-item>
+            <div class="item-icon" slot="item-icon"
+            style="background-image: url([[getUserInfo(userListData.*, item.user, 'profilePic')]]);"></div>
+            <div class="big-list-content">
+              <paper-item-body two-line>
+                <div>[[getUserInfo(userListData.*, item.user, 'name')]]</div>
+                <div secondary class="secondLine">[[formatEpochTime(item.time)]]</div>
+              </paper-item-body></div>
+            <div class="list-content">RM[[item.amount]]</div>
+          </paper-icon-item>
+        </template>
+
+        <template is="dom-if" if="[[!count]]">
+          <paper-icon-item>
+            <div class="big-list-content">There is no transactions.</div>
+          </paper-icon-item>
+        </template>
+      </paper-listbox>
+    </div>
+  </template>
+
+  <script>
+    class BonusView extends Polymer.Element {
+      static get is() { return 'bonus-view'; }
+      static get properties() {
+        return {
+          user: Object,
+          userdata: Object,
+        };
+      }
+
+      ready() {
+        super.ready();
+        console.log("BonusView ready.");
+      }
+
+      formatEpochTime(eTS) {
+        return strftime('%D %I:%M %P', new Date(eTS));
+      }
+
+      getUserInfo(change, user, data) {
+        var retVal = user;
+        if (change.base[user] != undefined) {
+          retVal = change.base[user][data];
+        }
+        return retVal;
+      }
+
+      sort(a, b) {
+        return a.time > b.time ? -1 : 1;
+      }
+    }
+
+    window.customElements.define(BonusView.is, BonusView);
+  </script>
+</dom-module>

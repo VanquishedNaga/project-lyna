@@ -22,10 +22,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
 
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="order-view.html">
+<link rel="import" href="bonus-view.html">
 <link rel="import" href="customer-view.html">
+<link rel="import" href="order-view.html">
 <link rel="import" href="sales-overview-view.html">
+<link rel="import" href="shared-styles.html">
 
 <script src="../bower_components/strftime/strftime-min.js"></script>
 
@@ -100,6 +101,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <sales-overview-view user="[[user]]" userdata="[[userdata]]" narrow="[[narrow]]" page-name="Overview"></sales-overview-view>
         <order-view user="[[user]]" userdata="[[userdata]]" narrow="[[narrow]]" page-name="Orders" class="wide-view-content"></order-view>
         <customer-view user="[[user]]" userdata="[[userdata]]" page-name="Customers" class="wide-view-content"></customer-view>
+        <bonus-view user="[[user]]" userdata="[[userdata]]" page-name="Bonus" class="default-view-content"></bonus-view>
       </iron-pages>
     </app-header-layout>
   </template>
@@ -119,7 +121,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           tabItems: {
             type: Array,
             value: function() {
-              return ['Overview', 'Orders', 'Customers'];
+              return ['Overview', 'Orders', 'Customers', 'Bonus'];
             }
           },
         };

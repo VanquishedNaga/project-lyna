@@ -50,7 +50,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       .title {
-        font-weight: bold;
+        /*Need important to prevent change when selecting the item*/
+        font-weight: bold !important;
       }
 
       /*Card components*/
@@ -179,7 +180,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         width: 40px;
       }
 
-      paper-listbox paper-icon-item.iron-selected {
+      /*To disable selection*/
+
+      paper-icon-item.iron-selected,
+      paper-item.iron-selected {
         font-weight: normal;
       }
 
@@ -207,12 +211,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         --paper-item-focused-before: {
           background-color: transparent;
         };
-      }
-
-      paper-listbox.custom paper-item.iron-selected {
-        background-color: var(--app-secondary-color);
-        color: white;
-        font-weight: normal;
       }
 
       .infoTable {
