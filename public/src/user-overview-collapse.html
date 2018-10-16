@@ -18,6 +18,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/web-animations-js/web-animations-next.min.html">
+
+<link rel="import" href="element-lightbox.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="user-overview-collapse">
@@ -39,6 +41,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       path="/users"
       data="{{userList}}">
     </firebase-document>
+
+    <firebase-storage-ref
+      id="storage"
+      app-name="absolute-reborn"
+      path="/certs"
+      force-unique>
+    </firebase-storage-ref>
 
     <style include="shared-styles">
       :host {
@@ -62,7 +71,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </paper-icon-item>
     <iron-collapse id="collapseElem">
       <div class="expandInfo">
-        <div>
+        <div style="display: flex;">
           <paper-button on-tap="openSuspendUserDialog" class="custom" hidden="[[!isUserApproved(userList.*, item.key)]]">
             <iron-icon icon="pan-tool"></iron-icon>
             <span>Suspend</span>
@@ -75,6 +84,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <iron-icon icon="create"></iron-icon>
             <span>Edit</span>
           </paper-button>
+          <paper-icon-button icon="icons:file-upload" on-tap="openUploadCertDialog" class="custom"></paper-icon-button>
+          <template is="dom-if" if="[[item.value.cert]]">
+            <element-lightbox img-src="[[item.value.cert.downloadUrl]]" class="btn-dark"></element-lightbox>
+          </template>
         </div>
         <table width="100%" class="infoTable">
           <tr>
@@ -188,6 +201,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </div>
     </paper-dialog>
 
+    <paper-dialog id="uploadCertDialog" on-iron-overlay-closed="onUploadCertDialogClosed" modal>
+      <h2>Upload certificate of authorisation</h2>
+      <paper-input type="file" id="certImage" accept="image/jpeg"></paper-input>
+      <div class="buttons">
+        <paper-button id="uploadCertDialogCancel" dialog-dismiss>Cancel</paper-button>
+        <paper-button id="uploadCertDialogUpload" on-tap="uploadCert">Upload</paper-button>
+      </div>
+    </paper-dialog>
+
     <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
     <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
   </template>
@@ -200,11 +222,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         return {
           item: Object,
         };
-      }
-
-      ready() {
-        super.ready();
-        console.log("UserOverviewCollapse ready.");
       }
 
       toArray(input) {
@@ -296,6 +313,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         }
       }
 
+      openUploadCertDialog() {
+        Polymer.dom(document.body).appendChild(this.$.uploadCertDialog);
+        this.$.uploadCertDialog.open();
+      }
+
+      onUploadCertDialogClosed() {
+        this.$.certImage.value = null;
+        this.$.certImage.invalid = false;
+        this.$.uploadCertDialogCancel.disabled = false;
+        this.$.uploadCertDialogUpload.disabled = false;
+      }
+
       submitInfo(event) {
         // Check all inputs are valid, add new fields here.
         var valid = this.$.userName.validate();
@@ -323,6 +352,42 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           }.bind(this))
           .catch(function(error) {
             this.$.editDialog.close();
+            Polymer.dom(document.body).appendChild(this.$.failToast);
+            this.$.failToast.open();
+          }.bind(this));
+        }
+      }
+
+      uploadCert() {
+        var imageFile = this.$.certImage.inputElement.inputElement.files[0];
+        this.$.certImage.invalid = imageFile ? false : true;
+
+        if (imageFile) {
+          // Disable buttons
+          this.$.uploadCertDialogCancel.disabled = true;
+          this.$.uploadCertDialogUpload.disabled = true;
+
+          // Upload image first, previous image will be deleted by cloud function
+          this.$.storage.put(imageFile).then(function(imageSnap) {
+            this.$.doc.ref.update({
+              cert: {
+                path: imageSnap.metadata.fullPath,
+                downloadUrl: imageSnap.downloadURL,
+              }
+            }).then(function(snap) {
+              // Good case
+              this.$.uploadCertDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.successToast);
+              this.$.successToast.open();
+            }.bind(this)).catch(function(err) {
+              // Failed to create new entry
+              this.$.uploadCertDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.failToast);
+              this.$.failToast.open();
+            }.bind(this));
+          }.bind(this)).catch(function(error) {
+            // Failed to upload image
+            this.$.uploadCertDialog.close();
             Polymer.dom(document.body).appendChild(this.$.failToast);
             this.$.failToast.open();
           }.bind(this));
