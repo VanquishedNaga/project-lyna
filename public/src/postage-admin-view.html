@@ -99,7 +99,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="big-list-content">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
           <div class="list-content">[[item.status]]</div>
           <div class="list-content">
-            <element-lightbox img-src="[[item.payProof.downloadUrl]]"></element-lightbox>
+            <element-lightbox img-src="[[item.payProof.downloadUrl]]" class="btn-light"></element-lightbox>
           </div>
           <div class="list-content">
             <paper-icon-button icon="icons:more-horiz" alt="Accept" on-click="openActionDialog" hidden$="[[!isRequestPending(item.*)]]">

@@ -6,14 +6,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="shared-styles.html">
 
 <dom-module id="element-lightbox">
   <template>
-    <style include="shared-styles"></style>
 
     <paper-icon-button
-    class="btn-light"
     icon="icons:info"
     on-tap="openImageDialog"
     hidden$="[[!imgSrc]]"></paper-icon-button>
