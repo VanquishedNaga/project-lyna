@@ -41,9 +41,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     </firebase-document>
 
     <firebase-document
+      id="postage"
       app-name="absolute-reborn"
-      path = "/postageData"
-      data="{{currentPostage}}">
+      path = "/common/postage"
+      data="{{postageData}}">
     </firebase-document>
 
     <firebase-query
@@ -67,18 +68,44 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       paper-item {
         display: flex;
       }
+
+      paper-input.postageInput {
+        margin-left: 16px;
+        margin-bottom: 16px;
+      }
     </style>
 
     <h1>Current postage rate</h1>
     <paper-listbox id="postageRate">
       <paper-item>
-        Peninsular Malaysia
         <paper-input
-            disabled
-            error-message="Field required!"
-            id="perPostage"
-            value="[[postageData.per]]">
-          </paper-input>
+          always-float-label
+          auto-validate
+          class="postageInput"
+          error-message="Invalid input!"
+          label ="Peninsular Malaysia"
+          id="westPostage"
+          on-value-changed="valueChange"
+          pattern="^\d*\.?\d{0,2}$"
+          value="[[postageData.west]]">
+          <div slot="prefix">RM</div>
+        </paper-input>
+        <paper-icon-button id="saveWestPostageButton" hidden icon="check" alt="Accept" on-tap="savePostage"></paper-icon-button>
+      </paper-item>
+      <paper-item>
+        <paper-input
+          always-float-label
+          auto-validate
+          class="postageInput"
+          error-message="Invalid input!"
+          label ="East Malaysia"
+          id="eastPostage"
+          on-value-changed="valueChange"
+          pattern="^\d*\.?\d{0,2}$"
+          value="[[postageData.east]]">
+          <div slot="prefix">RM</div>
+        </paper-input>
+        <paper-icon-button id="saveEastPostageButton" hidden icon="check" alt="Accept" on-tap="savePostage"></paper-icon-button>
       </paper-item>
     </paper-listbox>
 
@@ -198,6 +225,60 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       isRequestPending(change) {
         return (change.base['status'] == 'Pending');
+      }
+
+      valueChange(e) {
+        var input;
+        var data;
+        var button;
+        if (e.target == this.$.westPostage) {
+          input = this.$.westPostage;
+          data = this.postageData.west;
+          button = this.$.saveWestPostageButton;
+        }
+        else {
+          input = this.$.eastPostage;
+          data = this.postageData.east;
+          button = this.$.saveEastPostageButton;
+        }
+        if (data != undefined) {
+          if (input.value == parseFloat(data) || !(input.validate())) {
+            button.hidden = true;
+          }
+          else {
+            button.hidden = false;
+          }
+        }
+      }
+
+      savePostage(e) {
+        var input;
+        var data;
+        var button;
+        var valid;
+
+        if (e.target == this.$.saveWestPostageButton) {
+          input = this.$.westPostage;
+          valid = this.$.westPostage.validate();
+          data = "west";
+          button = this.$.saveWestPostageButton;
+        }
+        else {
+          input = this.$.eastPostage;
+          valid = this.$.eastPostage.validate();
+          data = "east";
+          button = this.$.saveEastPostageButton;
+        }
+
+        if (valid) {
+          this.$.postage.ref.update({
+            [[data]]: parseFloat(input.value).toFixed(2)
+          }).then(function(snapshot) {
+            button.hidden = true;
+            Polymer.dom(document.body).appendChild(this.$.successToast);
+            this.$.successToast.open();
+          }.bind(this));
+        }
       }
     }
 
