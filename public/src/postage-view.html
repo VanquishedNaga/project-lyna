@@ -43,6 +43,12 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       force-unique>
     </firebase-storage-ref>
 
+    <firebase-document
+      app-name="absolute-reborn"
+      path = "/common/postage"
+      data="{{postageData}}">
+    </firebase-document>
+
     <style include="shared-styles">
       :host {
         display: block;
@@ -56,8 +62,29 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <div class="default-view-content">
       <paper-card class="card-common">
+        <div class="card-header">
+          <span class="header">
+            Postage Rates
+          </span>
+        </div>
         <div class="card-content">
-          Balance: RM[[getBalance(userdata.*)]]
+          <div>
+            Peninsular Malaysia: RM[[postageData.west]]
+          </div>
+          <div>
+            East Malaysia: RM[[postageData.east]]
+          </div>
+        </div>
+      </paper-card>
+
+      <paper-card class="card-common">
+        <div class="card-header">
+          <span class="header">
+            Balance
+          </span>
+        </div>
+        <div class="card-content">
+          RM[[getBalance(userdata.*)]]
         </div>
       </paper-card>
 
