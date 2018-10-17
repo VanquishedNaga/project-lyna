@@ -40,20 +40,11 @@ exports.processRestockRequestFunction = functions.https.onCall((data, context) =
             return currentProduct + parseFloat(quantity);
           });
 
-          if (privilege == 'Admin') {
-            // Get and update store quantity
-            var updateUplineInventory = admin.database().ref('/products/' + product + '/qty/free');
-            updateUplineInventory.transaction(function(currentProduct) {
-              return currentProduct - parseFloat(quantity);
-            });
-          }
-          else {
-            // Get and update upline inventory quantity
-            var updateUplineInventory = admin.database().ref('/users/' + upline + '/inventory/' + product);
-            updateUplineInventory.transaction(function(currentProduct) {
-              return currentProduct - parseFloat(quantity);
-            });
-          }
+          // Get and update upline inventory quantity
+          var updateUplineInventory = admin.database().ref('/users/' + upline + '/inventory/' + product);
+          updateUplineInventory.transaction(function(currentProduct) {
+            return currentProduct - parseFloat(quantity);
+          });
 
           //Get current month and year
           var currentDate = new Date();

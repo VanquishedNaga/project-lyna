@@ -290,23 +290,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.event = e;
 
         if (this.event.target.id.indexOf("apr") >= 0) {
-          if (this.userdata.privilege == "Admin") {
+          // Check if user has enough stock for stock request
+          if (this.requestStockQuantity <= this.availableStock) {
             this.isApprove = true;
             Polymer.dom(document.body).appendChild(this.$.actionDialog);
             this.$.actionDialog.open();
           }
           else {
-            // Check if user has enough stock for stock request
-            if (this.requestStockQuantity <= this.availableStock) {
-              this.isApprove = true;
-              Polymer.dom(document.body).appendChild(this.$.actionDialog);
-              this.$.actionDialog.open();
-            }
-            else {
-              // Prompt up screen to notify users don't have enough stock
-              Polymer.dom(document.body).appendChild(this.$.insufficientUnitToast);
-              this.$.insufficientUnitToast.open();
-            }
+            // Prompt up screen to notify users don't have enough stock
+            Polymer.dom(document.body).appendChild(this.$.insufficientUnitToast);
+            this.$.insufficientUnitToast.open();
           }
         }
         else {

@@ -253,8 +253,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           </template>
         </paper-listbox>
       </paper-dropdown-menu>
-      <p>Total in store: [[getTotalQuantity(prodKey)]]</p>
-      <p>Unallocated: [[getFreeQuantity(prodKey)]]</p>
       <paper-input
         id="adminRestockQty"
         always-float-label
@@ -365,11 +363,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       onAdminRestockDialogClosed(event) {
         if (event.target == this.$.adminRestockDialog) {
           if (this.$.adminRestockDialog.closingReason.confirmed) {
-            var processSales = firebase.app('absolute-reborn').functions().httpsCallable('adminRestockFunction');
-            processSales({
-              prodKey: this.prodKey,
-              qty: this.$.adminRestockQty.value,
-            }).then(function(result) {
+            this.$.doc.path = '/users/' + this.user.uid + '/inventory/' + this.prodKey;
+            this.$.doc.ref.transaction(function(amount) {
+              return (parseInt(amount || 0) + parseInt(this.$.adminRestockQty.value));
+            }.bind(this)).then(function(result) {
               Polymer.dom(document.body).appendChild(this.$.successToast);
               this.$.successToast.open();
             }.bind(this)).catch(function(error) {
@@ -539,26 +536,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         for (var key in this.stockData) {
           if (key == prodKey) {
             return this.stockData[key];
-          }
-        }
-        return 0;
-      }
-
-      getTotalQuantity(prodKey) {
-        for (var key in this.productsData) {
-          if (key == prodKey) {
-            try{ var val = this.productsData[key]['qty']['total']; } catch(err) {}
-            return (val == undefined? 0:val);
-          }
-        }
-        return 0;
-      }
-
-      getFreeQuantity(prodKey) {
-        for (var key in this.productsData) {
-          if (key == prodKey) {
-            try{ var val = this.productsData[key]['qty']['free']; } catch(err) {}
-            return (val == undefined? 0:val);
           }
         }
         return 0;
