@@ -91,6 +91,7 @@ exports.addSalesFunction = functions.https.onCall((data, context) => {
   const time = data.time;
   const seller = data.seller;
   const stat = data.stat;
+  const postage = data.postage;
 
   return admin.database().ref('/common/salesId').transaction(function(id){
     return ++id;
@@ -110,7 +111,13 @@ exports.addSalesFunction = functions.https.onCall((data, context) => {
         return (currentAmount - qty);
       });
 
-      //Get current month and year
+      // Deduct postage from seller's postage
+      var updateSellerPostage = admin.database().ref('/users/' + seller + '/postage');
+      updateSellerPostage.transaction(function(currentAmount) {
+        return (parseFloat(currentAmount || 0) - parseFloat(postage)).toFixed(2);
+      });
+
+      // Get current month and year
       var currentDate = new Date();
       var currentMonth = ((currentDate.getMonth()+1) < 10 ? '0' : '') + (currentDate.getMonth()+1);
       var currentYear = currentDate.getFullYear();
