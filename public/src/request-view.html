@@ -132,16 +132,16 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <h1>Pending Received Requests</h1>
         <paper-listbox class="requestList">
           <template is="dom-if" if="[[pendingReq]]">
-            <paper-icon-item>
+            <paper-icon-item class="title">
               <div class="item-icon" slot="item-icon"
               style="background-image: url('../images/AR.png');"></div>
-              <div class="title" style="flex: 2 0 180px;">Product</div>
-              <div class="title">Requestor</div>
-              <div class="title" style="flex-basis: 180px;">Time</div>
-              <div class="title">Quantity</div>
-              <div class="title">Payable</div>
-              <div class="title">Payment</div>
-              <div class="title">Action</div>
+              <div class="big-list-content">Product</div>
+              <div class="list-content">Requestor</div>
+              <div class="big-list-content">Time</div>
+              <div class="list-content">Quantity</div>
+              <div class="list-content">Payable</div>
+              <div class="list-content">Payment</div>
+              <div class="list-content">Action</div>
             </paper-icon-item>
           </template>
 
@@ -149,9 +149,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <paper-icon-item>
             <div class="item-icon" slot="item-icon"
             style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-            <div class="list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
+            <div class="big-list-content">[[getProductName(productsList.*, item.productID)]]</div>
             <div class="list-content">[[getRequestorName(usersList.*, item.requestor)]]</div>
-            <div class="list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+            <div class="big-list-content">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
             <div class="list-content">[[item.quantity]]</div>
             <div class="list-content">[[getPayable(item.payable)]]</div>
             <div class="list-content">
@@ -176,15 +176,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <h1>Responded Received Requests</h1>
       <paper-listbox class="requestList">
         <template is="dom-if" if="[[historyReq]]">
-          <paper-icon-item>
+          <paper-icon-item class="title">
             <div class="item-icon" slot="item-icon"
             style="background-image: url('../images/AR.png');"></div>
-            <div class="big-list-content title">Product</div>
-            <div class="list-content title">Requestor</div>
-            <div class="list-content title">Quantity</div>
-            <div class="list-content title">Payable</div>
-            <div class="list-content title">Status</div>
-            <div class="big-list-content title">Time</div>
+            <div class="big-list-content">Product</div>
+            <div class="list-content">Requestor</div>
+            <div class="list-content">Quantity</div>
+            <div class="list-content">Payable</div>
+            <div class="list-content">Status</div>
+            <div class="big-list-content">Time</div>
           </paper-icon-item>
         </template>
 
