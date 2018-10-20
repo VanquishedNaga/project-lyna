@@ -79,6 +79,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <paper-listbox id="postageRate">
       <paper-item>
         <paper-input
+          required
           always-float-label
           auto-validate
           class="postageInput"
@@ -86,7 +87,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           label ="Peninsular Malaysia"
           id="westPostage"
           on-value-changed="valueChange"
-          pattern="^\d*\.?\d{0,2}$"
+          pattern="^\d+\.?\d{0,2}$"
           value="[[postageData.west]]">
           <div slot="prefix">RM</div>
         </paper-input>
@@ -94,6 +95,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-item>
       <paper-item>
         <paper-input
+          required
           always-float-label
           auto-validate
           class="postageInput"
@@ -101,7 +103,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           label ="East Malaysia"
           id="eastPostage"
           on-value-changed="valueChange"
-          pattern="^\d*\.?\d{0,2}$"
+          pattern="^\d+\.?\d{0,2}$"
           value="[[postageData.east]]">
           <div slot="prefix">RM</div>
         </paper-input>
@@ -248,6 +250,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           else {
             button.hidden = false;
           }
+        }
+        else {  // postage rates have not been defined yet
+          button.hidden = false;
         }
       }
 

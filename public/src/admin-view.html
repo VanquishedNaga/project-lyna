@@ -203,7 +203,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                     label="[[item.value]]"
                     auto-validate
                     error-message="Invalid Field!"
-                    pattern="^\d*\.?\d{0,2}$"
+                    pattern="^\d+\.?\d{0,2}$"
                     always-float-label
                     value="[[getCurrentPrice(productsData.*, prodKey, item.key)]]"
                     id="priceInput[[item.key]]">
@@ -361,7 +361,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.productsNameList.forEach(function(product) {
           this.$.doc.path = '/products/' + product.$key + '/prices/' + index;
           this.$.doc.ref.remove();
-          // console.log(product);
         }.bind(this));
       }
 
