@@ -146,7 +146,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       <iron-pages selected="{{selected}}" attr-for-selected="page-name">
         <div page-name="Product" class="default-view-content">
-          <template is="dom-repeat" items="{{prodItems}}">
+          <template is="dom-repeat" items="{{prodItems}}" sort="sort">
             <paper-card class="card-common horizontal">
               <div style="width: 100%;">
                 <div class="card-header">
@@ -556,6 +556,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         else {
           return (0).toFixed(2);
         }
+      }
+
+      sort(a, b) {
+        return a.key > b.key ? -1 : 1;
       }
     }
     window.customElements.define(StoreView.is, StoreView);

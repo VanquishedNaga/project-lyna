@@ -121,7 +121,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <div class="list-content">Payment</div>
           <div class="list-content">Action</div>
       </paper-item>
-      <template is="dom-repeat" items="{{myRequests}}">
+      <template is="dom-repeat" items="{{myRequests}}" sort="sort">
         <paper-item key="[[item.$key]]">
           <div class="list-content">[[getUserInfo(userList.*, item.uid, 'name')]]</div>
           <div class="list-content">RM[[item.amount]]</div>
@@ -284,6 +284,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.successToast.open();
           }.bind(this));
         }
+      }
+
+      sort(a, b) {
+        return a.time > b.time ? -1 : 1;
       }
     }
 

@@ -71,7 +71,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <div class="list-content">Tracking No.</div>
         <div class="list-content">Action</div>
       </paper-item>
-      <template is="dom-repeat" items="{{salesArray}}">
+      <template is="dom-repeat" items="{{salesArray}}"  sort="sort">
         <paper-item key="[[item.$key]]">
           <div class="list-content">[[pad(item.id)]]</div>
           <div class="list-content">[[getUserInfo(userList.*, item.seller, 'name')]]</div>
@@ -236,6 +236,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         if (id) {
           return id.toString().padStart(4, '0');
         }
+      }
+
+      sort(a, b) {
+        return a.id > b.id ? -1 : 1;
       }
     }
 

@@ -102,7 +102,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </app-header>
 
       <div class="default-view-content">
-        <template is="dom-repeat" items="{{messageList}}">
+        <template is="dom-repeat" items="{{messageList}}" sort="sort">
           <notice-view
               messagekey="[[item.$key]]"
               user="[[user]]"
@@ -227,6 +227,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.addNoticeButton.disabled = false;
         this.$.addNoticeCancelButton.disabled = false;
         Polymer.dom(document.body).removeChild(this.$.addNoticeDialog);
+      }
+
+      sort(a, b) {
+        return a.time > b.time ? -1 : 1;
       }
     }
 

@@ -71,7 +71,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         <div class="list-content">Created by</div>
         <div class="list-content">Action</div>
       </paper-item>
-      <template is="dom-repeat" items="{{custQueryArray}}">
+      <template is="dom-repeat" items="{{custQueryArray}}" sort="sort">
         <paper-item key="[[item.$key]]">
           <div class="list-content">[[pad(item.custId)]]</div>
           <div class="big-list-content">[[item.custName]]</div>
@@ -270,6 +270,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         if (id) {
           return id.toString().padStart(4, '0');
         }
+      }
+
+      sort(a, b) {
+        return a.id > b.id ? -1 : 1;
       }
     }
 
