@@ -1,6 +1,24 @@
 {
   "rules": {
-    ".read": true,
-    ".write": true
+    ".read": "auth != null && auth.provider == 'google'",
+    ".write": "auth != null && auth.provider == 'google'",
+    "bonusTxn": {
+      ".indexOn": ["user"]
+    },
+    "customers": {
+      ".indexOn": ["createdBy"]
+    },
+    "sales": {
+      ".indexOn": ["seller"]
+    },
+    "users": {
+      ".indexOn": ["level"]
+    },
+    "reloadPostageRequests": {
+      ".indexOn": ["uid"]
+    },
+    "productRequests": {
+      ".indexOn": ["upline", "requestor"]
+    },
   }
 }
