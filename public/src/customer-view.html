@@ -218,10 +218,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           }
           else {
             this.$.customerIdElem.ref.transaction(function(id) {
-              if (id) {
-                id++;
-              }
-              return id;
+              return ++id;
             }).then(function(id) {
               this.$.custDocElem.ref.push({
                 custAddr: this.$.custAddr.value,
