@@ -60,13 +60,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <div class="default-view-content">
       <h1>Your Inventory</h1>
       <paper-listbox>
-        <paper-icon-item>
-          <div class="item-icon" slot="item-icon"
-          style="background-image: url('../images/AR.png');"></div>
-          <div class="big-list-content title">Product</div>
-          <div class="list-content title">Quantity</div>
-        </paper-icon-item>
-        <template is="dom-repeat" items="{{inventoryList}}">
+        <template is="dom-if" if="[[inventoryNum]]">
+          <paper-icon-item class="title">
+            <div class="item-icon" slot="item-icon"
+            style="background-image: url('../images/AR.png');"></div>
+            <div class="big-list-content">Product</div>
+            <div class="list-content">Quantity</div>
+          </paper-icon-item>
+        </template>
+        <template is="dom-repeat" items="{{inventoryList}}" rendered-item-count="{{inventoryNum}}">
           <paper-icon-item>
             <div class="item-icon" slot="item-icon"
             style="background-image: url([[getRequestPic(productsList.*, item.$key)]]);"></div>
@@ -74,12 +76,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <div class="list-content">[[getInventoryQuantity(inventoryData.*, item.$key)]]</div>
           </paper-icon-item>
         </template>
+        <template is="dom-if" if="[[!inventoryNum]]">
+          <div style="margin-left: 16px;">You don't have any inventory.</div>
+        </template>
       </paper-listbox>
 
       <h1>Downline Inventory</h1>
       <paper-listbox>
-        <template is="dom-repeat" items="{{downlineList}}">
+        <template is="dom-repeat" items="{{downlineList}}" rendered-item-count="{{downlineNum}}">
           <user-inventory-collapsible userid="[[item.$key]]"></user-inventory-collapsible>
+        </template>
+        <template is="dom-if" if="[[!downlineNum]]">
+          <div style="margin-left: 16px;">You don't have any downline.</div>
         </template>
       </paper-listbox>
     </div>

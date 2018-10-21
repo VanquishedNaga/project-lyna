@@ -110,7 +110,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               </paper-icon-item>
             </template>
             <template is="dom-if" if="[[!count]]">
-              You don't have any request.
+              <div style="margin-left: 16px;">You don't have any request.</div>
             </template>
           </paper-listbox>
         </div>
@@ -130,7 +130,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
           <h1>Downline</h1>
           <paper-listbox class="downlineList">
-            <template is="dom-repeat" items="{{downlineList}}">
+            <template is="dom-repeat" items="{{downlineList}}" rendered-item-count="{{downlineNum}}">
               <paper-icon-item>
                 <div class="item-icon" slot="item-icon"
                 style="background-image: url([[getUserInfo(userList.*, item.$key, 'profilePic')]]);"></div>
@@ -139,6 +139,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                   <div secondary class="secondLine">[[getUserInfo(userList.*, item.$key, 'levelName')]]</div>
                 </paper-item-body>
               </paper-icon-item>
+            </template>
+
+            <template is="dom-if" if="[[!downlineNum]]">
+              <div style="margin-left: 16px;">You don't have any downline.</div>
             </template>
           </paper-listbox>
         </div>

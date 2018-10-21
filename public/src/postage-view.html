@@ -90,13 +90,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       <h1>Reload transactions</h1>
       <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}" style="min-width: calc(32px + 90px*4 + 16px*4)">
-        <paper-item style="font-weight: bold;">
-          <div class="list-content">Amount</div>
-          <div class="list-content">Time</div>
-          <div class="list-content">Status</div>
-          <div class="list-content">Payment</div>
-        </paper-item>
-        <template is="dom-repeat" items="{{myRequests}}" sort="sort">
+        <template is="dom-if" if="[[reloadNum]]">
+          <paper-item class="title">
+            <div class="list-content">Amount</div>
+            <div class="list-content">Time</div>
+            <div class="list-content">Status</div>
+            <div class="list-content">Payment</div>
+          </paper-item>
+        </template>
+        <template is="dom-repeat" items="{{myRequests}}" sort="sort" rendered-item-count="{{reloadNum}}">
           <paper-item key="[[item.$key]]">
             <div class="list-content">RM[[item.amount]]</div>
             <div class="list-content">[[formatEpochTime(item.time)]]</div>
@@ -105,6 +107,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               <element-lightbox img-src="[[item.payProof.downloadUrl]]" class="btn-light"></element-lightbox>
             </div>
           </paper-item>
+        </template>
+
+        <template is="dom-if" if="[[!reloadNum]]">
+          <div style="margin-left: 16px; color: white;">There is no transaction.</div>
         </template>
       </paper-listbox>
     </div>

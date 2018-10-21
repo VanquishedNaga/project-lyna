@@ -83,18 +83,20 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <!-- Visible contents -->
     <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedOrder}}" style="min-width: calc(32px + 90px*11 + 16px*9);">
-      <paper-item style="font-weight: bold;">
-        <div class="list-content">ID</div>
-        <div class="big-list-content">Product</div>
-        <div class="list-content">Quantity</div>
-        <div class="list-content">Customer</div>
-        <div class="list-content">Postcode</div>
-        <div class="list-content">Status</div>
-        <div class="big-list-content">Time</div>
-        <div class="list-content">Tracking No.</div>
-        <div class="list-content">Action</div>
-      </paper-item>
-      <template is="dom-repeat" items="{{mySalesArray}}">
+      <template is="dom-if" if="[[orderNum]]">
+        <paper-item class="title">
+          <div class="list-content">ID</div>
+          <div class="big-list-content">Product</div>
+          <div class="list-content">Quantity</div>
+          <div class="list-content">Customer</div>
+          <div class="list-content">Postcode</div>
+          <div class="list-content">Status</div>
+          <div class="big-list-content">Time</div>
+          <div class="list-content">Tracking No.</div>
+          <div class="list-content">Action</div>
+        </paper-item>
+      </template>
+      <template is="dom-repeat" items="{{mySalesArray}}" rendered-item-count="{{orderNum}}">
         <paper-item key="[[item.$key]]">
           <div class="list-content">[[pad(item.id)]]</div>
           <div class="big-list-content">[[getProdName(productsList.*, item.prod)]]</div>
@@ -111,6 +113,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </paper-icon-button>
           </div>
         </paper-item>
+      </template>
+      <template is="dom-if" if="[[!orderNum]]">
+        <div style="margin-left: 16px; color: white;">No transaction.</div>
       </template>
     </paper-listbox>
     <paper-fab icon="add" on-click="openOrderDialog"></paper-fab>

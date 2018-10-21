@@ -113,15 +113,17 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <h1>Postage reload requests</h1>
     <paper-listbox id="salesList" class="custom" attr-for-selected="key" style="min-width: 650px;">
-      <paper-item style="font-weight: bold;">
-          <div class="list-content">User</div>
-          <div class="list-content">Amount</div>
-          <div class="big-list-content">Time</div>
-          <div class="list-content">Status</div>
-          <div class="list-content">Payment</div>
-          <div class="list-content">Action</div>
-      </paper-item>
-      <template is="dom-repeat" items="{{myRequests}}" sort="sort">
+      <template is="dom-if" if="[[postageNum]]">
+        <paper-item class="title">
+            <div class="list-content">User</div>
+            <div class="list-content">Amount</div>
+            <div class="big-list-content">Time</div>
+            <div class="list-content">Status</div>
+            <div class="list-content">Payment</div>
+            <div class="list-content">Action</div>
+        </paper-item>
+      </template>
+      <template is="dom-repeat" items="{{myRequests}}" sort="sort" rendered-item-count="{{postageNum}}">
         <paper-item key="[[item.$key]]">
           <div class="list-content">[[getUserInfo(userList.*, item.uid, 'name')]]</div>
           <div class="list-content">RM[[item.amount]]</div>
@@ -135,6 +137,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </paper-icon-button>
           </div>
         </paper-item>
+      </template>
+      <template is="dom-if" if="[[!postageNum]]">
+        <div style="margin-left: 16px; color: white;">There is no transactions.</div>
       </template>
     </paper-listbox>
 

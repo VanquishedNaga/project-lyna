@@ -57,16 +57,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
     <!-- Visible contents -->
     <paper-listbox id="salesList" class="custom" attr-for-selected="key" selected="{{selectedCustKey}}" style="min-width: calc(32px + 90px*10 + 16px*7);">
-      <paper-item style="font-weight: bold;">
-        <div class="list-content">ID</div>
-        <div class="big-list-content">Name</div>
-        <div class="big-list-content">Address</div>
-        <div class="list-content">Postcode</div>
-        <div class="list-content">Phone</div>
-        <div class="big-list-content">Created</div>
-        <div class="list-content">Action</div>
-      </paper-item>
-      <template is="dom-repeat" items="{{custQueryArray}}">
+      <template is="dom-if" if="[[custNum]]">
+        <paper-item class="title">
+          <div class="list-content">ID</div>
+          <div class="big-list-content">Name</div>
+          <div class="big-list-content">Address</div>
+          <div class="list-content">Postcode</div>
+          <div class="list-content">Phone</div>
+          <div class="big-list-content">Created</div>
+          <div class="list-content">Action</div>
+        </paper-item>
+     </template>
+      <template is="dom-repeat" items="{{custQueryArray}}" rendered-item-count="{{custNum}}">
         <paper-item key="[[item.$key]]">
           <div class="list-content">[[pad(item.custId)]]</div>
           <div class="big-list-content">[[item.custName]]</div>
@@ -79,6 +81,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             </paper-icon-button>
           </div>
         </paper-item>
+      </template>
+      <template is="dom-if" if="[[!custNum]]">
+        <div style="margin-left: 16px; color: white;">No customer.</div>
       </template>
     </paper-listbox>
     <paper-fab icon="add" on-click="openCustomerDialog"></paper-fab>
