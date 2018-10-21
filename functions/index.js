@@ -56,6 +56,28 @@ exports.onRestockRequestStatusChanged = functions.database.ref('/productRequests
   });
 });
 
+// Update when admin restocks
+exports.onProductRequestCreation = functions.database.ref('/productRequests/{requestId}').onCreate((snapshot) => {
+  // If admin restocks
+  if (!snapshot.val().upline && snapshot.val().status == 'Approved') {
+    // Increase stock amount
+    admin.database().ref('/users/' + snapshot.val().requestor + '/inventory/' + snapshot.val().productID).transaction(function(currentQty) {
+      return (parseInt(currentQty || 0) + parseInt(snapshot.val().quantity));
+    });
+
+    // Increase admin cost
+    const currentDate = new Date();
+    const currentMonth = ((currentDate.getMonth()+1) < 10 ? '0' : '') + (currentDate.getMonth()+1);
+    const currentYear = currentDate.getFullYear();
+
+    admin.database().ref('/profit/' + snapshot.val().requestor + '/cost/' + currentYear + currentMonth).transaction(function(currentCost) {
+      return (parseFloat(currentCost || 0) + parseFloat(snapshot.val().payable)).toFixed(2);
+    });
+  }
+  return null;
+});
+
+
 exports.adminRestockFunction = functions.https.onCall((data, context) => {
   const prodKey = data.prodKey;
   const qty = data.qty;

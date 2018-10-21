@@ -107,10 +107,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           <paper-icon-item>
             <div class="item-icon" slot="item-icon"
             style="background-image: url([[getRequestPic(productsList.*, item.productID)]]);"></div>
-            <div class="big-list-content" style="flex: 2 0 180px;">[[getProductName(productsList.*, item.productID)]]</div>
+            <div class="big-list-content"">[[getProductName(productsList.*, item.productID)]]</div>
             <div class="list-content">[[item.quantity]]</div>
             <div class="list-content">[[item.status]]</div>
-            <div class="big-list-content" style="flex-basis: 180px;">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
+            <div class="big-list-content">[[_formatEpochDate(item.time)]] [[_formatEpochTime(item.time)]]</div>
             <div class="list-content">[[getPayable(item.payable)]]</div>
             <div class="list-content">
               <paper-icon-button
