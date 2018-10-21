@@ -255,11 +255,22 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-dropdown-menu>
       <paper-input
         id="adminRestockQty"
+        auto-validate
         always-float-label
         required
         type="number"
-        error-message="Field required!"
+        error-message="Invalid value!"
         label="Product Quantity">
+      </paper-input>
+      <paper-input
+        id="adminProductCost"
+        always-float-label
+        auto-validate
+        required
+        pattern="^\d+\.?\d{0,2}$"
+        error-message="Invalid value!"
+        label="Product Cost">
+        <div slot="prefix">RM</div>
       </paper-input>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
@@ -363,19 +374,27 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       onAdminRestockDialogClosed(event) {
         if (event.target == this.$.adminRestockDialog) {
           if (this.$.adminRestockDialog.closingReason.confirmed) {
-            this.$.doc.path = '/users/' + this.user.uid + '/inventory/' + this.prodKey;
-            this.$.doc.ref.transaction(function(amount) {
-              return (parseInt(amount || 0) + parseInt(this.$.adminRestockQty.value));
-            }.bind(this)).then(function(result) {
+            this.$.doc.path = '/productRequests';
+            this.$.doc.ref.push({
+              payable: parseFloat(this.$.adminProductCost.value).toFixed(2),
+              productID: this.prodKey,
+              quantity: this.$.adminRestockQty.value,
+              requestor: this.user.uid,
+              status: "Approved",
+              time: {".sv":"timestamp"},
+            }).then(function(snapshot){
               Polymer.dom(document.body).appendChild(this.$.successToast);
               this.$.successToast.open();
-            }.bind(this)).catch(function(error) {
+            }.bind(this)).catch(function(error){
               Polymer.dom(document.body).appendChild(this.$.failToast);
               this.$.failToast.open();
-            }.bind(this));
+            });
           }
           this.prodKey = null;
           this.$.adminRestockQty.value = null;
+          this.$.adminRestockQty.invalid = false;
+          this.$.adminProductCost.value = null;
+          this.$.adminProductCost.invalid = false;
           Polymer.dom(document.body).removeChild(this.$.adminRestockDialog);
         }
       }
