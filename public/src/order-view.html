@@ -61,12 +61,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       data="{{customerList}}">
     </firebase-document>
 
-    <firebase-document
-      app-name="absolute-reborn"
-      path="/common/postage"
-      data="{{postageData}}">
-    </firebase-document>
-
     <firebase-query
       app-name="absolute-reborn"
       path="/customers"
@@ -176,7 +170,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <!-- Toasts -->
     <paper-toast id="invalidToast" class="bad" text="You can't perform this action!"> </paper-toast>
     <paper-toast id="insufficientAmountToast" class="bad" text="You don't have enough in your inventory!"> </paper-toast>
-    <paper-toast id="insufficientPostageToast" class="bad" text="You don't have enough postage!"> </paper-toast>
     <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
     <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
 
@@ -295,19 +288,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.orderDialog.close();
           }
           else {
-            // Get postcode and postage rate
-            const postcode = this.customerList[this.$.custList.selected]["custPostcode"];
-            var postage = parseInt(postcode) >= 87000 ? this.postageData["east"] : this.postageData["west"];
-
             // Check if have enough units.
             if (this.$.prodQuan.value > this.userdata.inventory[this.$.prodList.selected]) {
               Polymer.dom(document.body).appendChild(this.$.insufficientAmountToast);
               this.$.insufficientAmountToast.open();
-            }
-            // Check if postage is enough
-            else if (parseFloat(this.userdata.postage) < postage) {
-              Polymer.dom(document.body).appendChild(this.$.insufficientPostageToast);
-              this.$.insufficientPostageToast.open();
             }
             else {
               var addSales = firebase.app('absolute-reborn').functions().httpsCallable('addSalesFunction');
@@ -319,7 +303,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 time: {".sv":"timestamp"},
                 seller: this.user.uid,
                 stat: "Processing",
-                postage: postage,
               }).then(function(result) {
               }).catch((err) => {
               });

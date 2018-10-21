@@ -105,11 +105,19 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <div>Status: [[selectedOrderData.stat]]</div>
       <div>Time created: [[formatEpochTime(selectedOrderData.time)]]</div>
       <paper-input always-float-label required auto-validate
-        error-message="Field required!"
         id="trackNum"
         value="[[selectedOrderData.trackNum]]"
         label="Parcel tracking number">
       </paper-input>
+      <paper-input always-float-label required auto-validate
+        id="postageAmount"
+        pattern="^\d+\.?\d{0,2}$"
+        label="Postage"
+        value="[[selectedOrderData.postage]]"
+        style="display: inline-block;">
+        <div slot="prefix">RM</div>
+      </paper-input>
+      <div style="display: inline-block;">User postage balance: RM[[getUserInfo(userList.*, selectedOrderData.seller, 'postage')]]</div>
       <div class="buttons">
         <paper-button id="actionDialogCancelButton" dialog-dismiss>Cancel</paper-button>
         <paper-button id="actionDialogRejectButton" on-click="processSales">Reject</paper-button>
@@ -159,15 +167,15 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         this.$.actionDialogCancelButton.disabled = false;
         this.$.actionDialogRejectButton.disabled = false;
         this.$.actionDialogApproveButton.disabled = false;
-
-        this.$.trackNum.value = null;
-        this.$.trackNum.invalid = false;
       }
 
       processSales(event) {
         // If approve button is pressed
         if (event.target.id == 'actionDialogApproveButton') {
-          if (this.$.trackNum.validate()) {
+          var inputValid = this.$.trackNum.validate();
+          inputValid = this.$.postageAmount.validate() && inputValid;
+
+          if (inputValid) {
             // Disable buttons
             this.$.actionDialogCancelButton.disabled = true;
             this.$.actionDialogRejectButton.disabled = true;
@@ -177,6 +185,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.selectedOrderElement.ref.update({
               stat: 'Processed',
               trackNum: this.$.trackNum.value,
+              postage: this.$.postageAmount.value,
             }).then(function(result) {
               this.$.actionDialog.close();
               this.promptToast(this.$.successToast);

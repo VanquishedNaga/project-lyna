@@ -79,7 +79,6 @@ exports.addSalesFunction = functions.https.onCall((data, context) => {
   const time = data.time;
   const seller = data.seller;
   const stat = data.stat;
-  const postage = data.postage;
 
   return admin.database().ref('/common/salesId').transaction(function(id){
     return ++id;
@@ -97,12 +96,6 @@ exports.addSalesFunction = functions.https.onCall((data, context) => {
       var ref = admin.database().ref('/users/' + seller + '/inventory/' + prod);
       ref.transaction(function(currentAmount) {
         return (currentAmount - qty);
-      });
-
-      // Deduct postage from seller's postage
-      var updateSellerPostage = admin.database().ref('/users/' + seller + '/postage');
-      updateSellerPostage.transaction(function(currentAmount) {
-        return (parseFloat(currentAmount || 0) - parseFloat(postage)).toFixed(2);
       });
 
       // Get current month and year
@@ -274,4 +267,17 @@ exports.onCertWrite = functions.database.ref('/users/{userId}/cert').onWrite((ch
     }
   }
   return retVal;
+});
+
+// Update user postage balance when sales is processed
+exports.onSalesProcessed = functions.database.ref('/sales/{salesId}/postage').onWrite((change, context) => {
+  const postage = change.after.val() - change.before.val();
+
+  return admin.database().ref('/sales/' + context.params.salesId).once('value', (snapshot) => {
+    const seller = snapshot.val().seller;
+
+    return admin.database().ref('/users/' + seller + '/postage').transaction(function(currentAmount) {
+      return (parseFloat(currentAmount || 0) - parseFloat(postage)).toFixed(2);
+    });
+  });
 });
