@@ -36,6 +36,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <firebase-document
       id="custDocElem"
       path="/customers"
+      data="{{customerList}}"
       app-name="absolute-reborn">
     </firebase-document>
 
@@ -93,6 +94,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </template>
     </paper-listbox>
     <paper-fab icon="add" on-click="openCustomerDialog"></paper-fab>
+    <paper-fab icon="file-download" on-click="exportToCSV" style="right: 80px;"></paper-fab>
 
     <!-- Dialogs -->
     <paper-dialog id="customerDialog" on-iron-overlay-closed="onCustomerDialogClosed" modal>
@@ -125,7 +127,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-input>
       <paper-dialog-scrollable>
         <paper-textarea
-          id="custNote"
+          id="zCustNote"
           label="Note"
           on-value-changed="onDialogResize"
           always-float-label>
@@ -159,14 +161,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       openCustomerDialog(event) {
-        this.$.custNote.value = null;
+        this.$.zCustNote.value = null;
         if (event.model) {
           this.selectedCustKey = event.model.item.$key;
 
           // Populate inputs with current data
           this.$.custAddr.value = event.model.item.custAddr;
           this.$.custName.value = event.model.item.custName;
-          this.$.custNote.value = event.model.item.custNote || null;
+          this.$.zCustNote.value = event.model.item.zCustNote || null;
           this.$.custPhone.value = event.model.item.custPhone;
           this.$.custPostcode.value = event.model.item.custPostcode;
         }
@@ -185,7 +187,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.custAddr.invalid = false;
           this.$.custPostcode.value = null;
           this.$.custPostcode.invalid = false;
-          this.$.custNote.value = null;
+          this.$.zCustNote.value = null;
 
           // Enable buttons
           this.$.customerDialogCancelButton.disabled = false;
@@ -216,7 +218,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.custDataElement.ref.update({
               custAddr: this.$.custAddr.value,
               custName: this.$.custName.value,
-              custNote: this.$.custNote.value,
+              zCustNote: this.$.zCustNote.value,
               custPhone: this.$.custPhone.value,
               custPostcode: this.$.custPostcode.value,
             }).then(function(snap) {
@@ -235,7 +237,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 custAddr: this.$.custAddr.value,
                 custId: id.snapshot.val(),
                 custName: this.$.custName.value,
-                custNote: this.$.custNote.value,
+                zCustNote: this.$.zCustNote.value,
                 custPhone: this.$.custPhone.value,
                 custPostcode: this.$.custPostcode.value,
                 createdBy: this.user.uid,
@@ -279,6 +281,72 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       sort(a, b) {
         return a.id > b.id ? -1 : 1;
+      }
+
+      exportToCSV() {
+        var arrData = this.customerList;
+        var CSV = '';
+        var labels = false;
+
+        //1st loop is to extract each row
+        for (var i in arrData) {
+          if (arrData.hasOwnProperty(i)) {
+            var row = "";
+            if (!labels) {
+              // Use keys as labels
+              for (var k in arrData[i]) {
+                if (arrData[i].hasOwnProperty(k)) {
+                  row += '"' + k + '",';
+                }
+              }
+              row.slice(0, row.length - 1);
+              CSV += row + '\r\n';
+              labels = true;
+            }
+            row = "";
+            for (var j in arrData[i]) {
+              if (arrData[i].hasOwnProperty(j)) {
+                if (j == 'createdBy') {
+                  row += '"' + this.userList[arrData[i][j]].name + '",';
+                }
+                else if (j == 'createdTime') {
+                  row += '"' + strftime('%d/%b/%y %I:%M %P', new Date(arrData[i][j])) + '",';
+                }
+                else {
+                  row += '"' + arrData[i][j] + '",';
+                }
+              }
+            }
+            row.slice(0, row.length - 1);
+            CSV += row + '\r\n';
+          }
+        }
+
+        if (CSV == '') {
+          alert("Invalid data");
+          return;
+        }
+
+        const fileName = "CustomerList_" + strftime('%F', new Date());
+        var blob = new Blob([CSV], {
+          type: 'text/csv;charset=utf-8;'
+        });
+
+        if (navigator.msSaveBlob) {
+          navigator.msSaveBlob(blob, fileName);
+        }
+        else {
+          var link = document.createElement("a");
+          if (link.download !== undefined) {
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.style = "visibility:hidden";
+            link.download = fileName + ".csv";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        }
       }
     }
 

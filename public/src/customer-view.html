@@ -119,7 +119,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       </paper-input>
       <paper-dialog-scrollable>
         <paper-textarea
-          id="custNote"
+          id="zCustNote"
           label="Note"
           on-value-changed="onDialogResize"
           always-float-label>
@@ -153,14 +153,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       openCustomerDialog(event) {
-        this.$.custNote.value = null;
+        this.$.zCustNote.value = null;
         if (event.model) {
           this.selectedCustKey = event.model.item.$key;
 
           // Populate inputs with current data
           this.$.custAddr.value = event.model.item.custAddr;
           this.$.custName.value = event.model.item.custName;
-          this.$.custNote.value = event.model.item.custNote || null;
+          this.$.zCustNote.value = event.model.item.zCustNote || null;
           this.$.custPhone.value = event.model.item.custPhone;
           this.$.custPostcode.value = event.model.item.custPostcode;
         }
@@ -179,7 +179,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.custAddr.invalid = false;
           this.$.custPostcode.value = null;
           this.$.custPostcode.invalid = false;
-          this.$.custNote.value = null;
+          this.$.zCustNote.value = null;
 
           // Enable buttons
           this.$.customerDialogCancelButton.disabled = false;
@@ -210,7 +210,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.custDataElement.ref.update({
               custAddr: this.$.custAddr.value,
               custName: this.$.custName.value,
-              custNote: this.$.custNote.value,
+              zCustNote: this.$.zCustNote.value,
               custPhone: this.$.custPhone.value,
               custPostcode: this.$.custPostcode.value,
             }).then(function(snap) {
@@ -229,7 +229,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                 custAddr: this.$.custAddr.value,
                 custId: id.snapshot.val(),
                 custName: this.$.custName.value,
-                custNote: this.$.custNote.value,
+                zCustNote: this.$.zCustNote.value,
                 custPhone: this.$.custPhone.value,
                 custPostcode: this.$.custPostcode.value,
                 createdBy: this.user.uid,
