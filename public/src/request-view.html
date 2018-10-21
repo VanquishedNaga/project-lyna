@@ -117,7 +117,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               class="btn-light"
               icon="icons:file-upload"
               on-tap="openUploadPayProofDialog"
-              hidden$="[[item.payProof]]"></paper-icon-button>
+              hidden$="[[hideUploadButton(item.payProof, item.status)]]"></paper-icon-button>
               <element-lightbox img-src="[[item.payProof.downloadUrl]]" class="btn-light"></element-lightbox>
             </div>
 
@@ -231,6 +231,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <paper-toast id="insufficientUnitToast" class="bad" text="Insufficient units in your inventory!"> </paper-toast>
     <paper-toast id="uploadFailedToast" class="bad" text="Upload failed, please try again later."> </paper-toast>
     <paper-toast id="uploadSuccessfulToast" class="good" text="Upload successful."> </paper-toast>
+    <paper-toast id="successToast" class="good" text="Action successful!"> </paper-toast>
+    <paper-toast id="failToast" class="bad" text="Action failed! Please try again."> </paper-toast>
   </template>
 
 
@@ -343,15 +345,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       processRestockRequest(e) {
         var action = this.isApprove ? 'Approved' : 'Rejected';
 
-        var processRestock = firebase.app('absolute-reborn').functions().httpsCallable('processRestockRequestFunction');
-        processRestock({key: this.requestKey, action: action, privilege: this.userdata.privilege})
-        .then(function(result) {
-        })
-        .catch(function(err) {
-        });
-
-        this.$.actionDialog.close();
-        Polymer.dom(document.body).removeChild(this.$.actionDialog);
+        this.$.doc.path = '/productRequests/' + this.requestKey;
+        this.$.doc.ref.update({
+          status: action,
+        }).then(function(snap) {
+          this.$.actionDialog.close();
+          Polymer.dom(document.body).appendChild(this.$.successToast);
+          this.$.successToast.open();
+        }.bind(this)).catch(function(error) {
+          this.$.actionDialog.close();
+          Polymer.dom(document.body).appendChild(this.$.failToast);
+          this.$.failToast.open();
+        }.bind(this));
       }
 
       _formatEpochDate(eTS) {
@@ -425,6 +430,10 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       sort(a, b) {
         return a.time > b.time ? -1 : 1;
+      }
+
+      hideUploadButton(uploaded, status) {
+        return (uploaded || status != 'Pending')
       }
     }
 

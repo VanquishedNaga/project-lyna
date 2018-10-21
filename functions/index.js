@@ -4,66 +4,54 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-exports.processRestockRequestFunction = functions.https.onCall((data, context) => {
-  const key = data.key;
-  const action = data.action;
-  const privilege = data.privilege;
+// Update details when restock request status changes
+exports.onRestockRequestStatusChanged = functions.database.ref('/productRequests/{requestId}/status').onUpdate((change, context) => {
+  const newStatus = change.after.val();
 
-  admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
-    var status = snapshot.val().status;
+  return admin.database().ref('/productRequests/' + context.params.requestId).once('value', (snapshot) => {
+    if (newStatus == 'Approved') {
+      const quantity = snapshot.val().quantity;
+      const requestor = snapshot.val().requestor;
+      const upline = snapshot.val().upline;
+      const product = snapshot.val().productID;
+      const payable = snapshot.val().payable;
 
-    // Only proceed if the action has not been done.
-    if ((status != action) && (status != 'Approved')) {
-      // Check if payment proof was uploaded
-      if (snapshot.hasChild('payProof')) {
-        // Delete the photo
-        var imagePath = snapshot.val().payProof.path;
-        admin.storage().bucket().file(imagePath).delete();
-        admin.database().ref('/productRequests/' + key + '/payProof').remove();
-      }
+      // Get and update requestor inventory quantity
+      const updateRequestorInventory = admin.database().ref('/users/' + requestor + '/inventory/' + product);
+      updateRequestorInventory.transaction(function(currentProduct) {
+        return currentProduct + parseFloat(quantity);
+      });
 
-      // Update request status.
-      admin.database().ref('/productRequests/' + key).update({status:action});
+      // Get and update upline inventory quantity
+      const updateUplineInventory = admin.database().ref('/users/' + upline + '/inventory/' + product);
+      updateUplineInventory.transaction(function(currentProduct) {
+        return currentProduct - parseFloat(quantity);
+      });
 
-      if (action == 'Approved') {
-        // Retrieve restock request data
-        admin.database().ref('/productRequests/' + key).once('value', (snapshot) => {
-          var quantity = snapshot.val().quantity;
-          var requestor = snapshot.val().requestor;
-          var upline = snapshot.val().upline;
-          var product = snapshot.val().productID;
-          var payable = snapshot.val().payable;
+      // Get current month and year
+      const currentDate = new Date();
+      const currentMonth = ((currentDate.getMonth()+1) < 10 ? '0' : '') + (currentDate.getMonth()+1);
+      const currentYear = currentDate.getFullYear();
 
-          // Get and update requestor inventory quantity
-          var updateRequestorInventory = admin.database().ref('/users/' + requestor + '/inventory/' + product);
-          updateRequestorInventory.transaction(function(currentProduct) {
-            return currentProduct + parseFloat(quantity);
-          });
+      // Update requestor's cost
+      const updateRequestorCost = admin.database().ref('/profit/' + requestor + '/cost/' + currentYear + currentMonth);
+      updateRequestorCost.transaction(function(currentCost) {
+        return (parseFloat(currentCost || 0) + parseFloat(payable)).toFixed(2);
+      });
 
-          // Get and update upline inventory quantity
-          var updateUplineInventory = admin.database().ref('/users/' + upline + '/inventory/' + product);
-          updateUplineInventory.transaction(function(currentProduct) {
-            return currentProduct - parseFloat(quantity);
-          });
+      // Update upline's revenue
+      const updateUplineRevenue = admin.database().ref('/profit/' + upline + '/revenue/' + currentYear + currentMonth);
+      updateUplineRevenue.transaction(function(currentRevenue) {
+        return (parseFloat(currentRevenue || 0) + parseFloat(payable)).toFixed(2);
+      });
+    }
 
-          //Get current month and year
-          var currentDate = new Date();
-          var currentMonth = ((currentDate.getMonth()+1) < 10 ? '0' : '') + (currentDate.getMonth()+1);
-          var currentYear = currentDate.getFullYear();
-
-          //Update requestor's cost
-          var updateRequestorCost = admin.database().ref('/profit/' + requestor + '/cost/' + currentYear + currentMonth);
-          updateRequestorCost.transaction(function(currentCost) {
-            return (parseFloat(currentCost || 0) + parseFloat(payable)).toFixed(2);
-          });
-
-          //Update upline's revenue
-          var updateUplineRevenue = admin.database().ref('/profit/' + upline + '/revenue/' + currentYear + currentMonth);
-          updateUplineRevenue.transaction(function(currentRevenue) {
-            return (parseFloat(currentRevenue || 0) + parseFloat(payable)).toFixed(2);
-          });
-        });
-      }
+    // Check if payment proof was uploaded
+    if (snapshot.hasChild('payProof')) {
+      // Delete the photo
+      const imagePath = snapshot.val().payProof.path;
+      admin.storage().bucket().file(imagePath).delete();
+      admin.database().ref('/productRequests/' + context.params.requestId + '/payProof').remove();
     }
   });
 });
