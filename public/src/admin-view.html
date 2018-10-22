@@ -69,6 +69,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
       th {
         text-align: left;
+        padding: 0 8px;
       }
       .paper-act {
         float: right;
@@ -128,7 +129,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             <paper-dialog id="editLevelDialog" on-iron-overlay-closed="onEditDialogClose" modal>
               <h2>Edit Level</h2>
               <paper-dialog-scrollable>
-                <template is="dom-repeat" items="{{toArray(levelData.*)}}">
+                <template is="dom-repeat" items="{{toArray(levelData.*)}}" sort="sort">
                   <paper-input
                     required
                     error-message="Field required!"
@@ -247,7 +248,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           userData: Object,
           priceItem: Object,
           productsData: Object,
-          levelData: Object,
           priceList: Array,
           prodKey: String,
           selected: {type: String, value: 'Level'},
@@ -307,7 +307,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         var valid = this.$.newLevel.validate();
 
         if (valid) {
-          var index = this.levelData.length;
+          const index = Object.keys(this.levelData).length;
           this.$.doc.path = '/level';
           this.$.doc.ref.update({
             [[index]]: this.$.newLevel.value
@@ -326,14 +326,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       editExistingLevel() {
-        for (var i = 0; i < this.levelData.length; i++) {
+        for (var i = 0; i < Object.keys(this.levelData).length; i++) {
           var levelName = Polymer.dom(document.body).querySelector('#level'+i);
           if (levelName.validate() == false) {
             return;
           }
         }
 
-        for (var i = 0; i < this.levelData.length; i++) {
+        for (var i = 0; i < Object.keys(this.levelData).length; i++) {
           var levelName = Polymer.dom(document.body).querySelector('#level'+i);
 
           this.$.doc.path = '/level';
@@ -354,7 +354,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       delLastLevel() {
-        var index = this.levelData.length - 1;
+        const index = Object.keys(this.levelData).length - 1;
         this.$.doc.path = '/level/' + index;
         this.$.doc.ref.remove();
 
@@ -371,7 +371,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       onEditDialogClose() {
-        for (var i = 0; i < this.levelData.length; i++) {
+        for (var i = 0; i < Object.keys(this.levelData).length; i++) {
           var levelName = Polymer.dom(document.body).querySelector('#level'+i);
           levelName.value = this.levelData[i];
           levelName.invalid = false;
@@ -385,7 +385,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       editPrice() {
         Polymer.dom(document.body).appendChild(this.$.editPriceDialog);
-        for (var i = 0; i < this.levelData.length; i++) {
+        for (var i = 0; i < Object.keys(this.levelData).length; i++) {
           var priceInput = Polymer.dom(document.body).querySelector('#priceInput'+i);
           priceInput.value = null;
           priceInput.invalid = false;
@@ -398,6 +398,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           var productSelected = Polymer.dom(document.body).querySelector('#productList');
           productSelected.selected = null;
           this.productKey = null;
+          this.$.productMenu.invalid = false;
           Polymer.dom(document.body).removeChild(this.$.editPriceDialog);
         }
       }
@@ -409,31 +410,42 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       editCurrentPrice() {
-        for (var i = 0; i < this.levelData.length; i++) {
-          var priceInput = Polymer.dom(document.body).querySelector('#priceInput'+i);
-          if (priceInput.validate() == false) {
-            return;
+        if (this.prodKey) {
+          this.$.productMenu.invalid = false;
+          for (var i = 0; i < Object.keys(this.levelData).length; i++) {
+            var priceInput = Polymer.dom(document.body).querySelector('#priceInput'+i);
+            if (priceInput.validate() == false) {
+              return;
+            }
+          }
+
+          for (var i = 0; i < Object.keys(this.levelData).length; i++) {
+            var priceInput = Polymer.dom(document.body).querySelector('#priceInput'+i);
+
+            this.$.doc.path = '/products/' + this.prodKey + '/prices';
+            this.$.doc.ref.update({
+              [[i]]: parseFloat(priceInput.value).toFixed(2),
+            })
+            .then(function(snapshot) {
+              this.$.editPriceDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.successToast);
+              this.$.successToast.open();
+            }.bind(this))
+            .catch(function(error) {
+              this.$.editPriceDialog.close();
+              Polymer.dom(document.body).appendChild(this.$.failToast);
+              this.$.failToast.open();
+            }.bind(this));
           }
         }
-
-        for (var i = 0; i < this.levelData.length; i++) {
-          var priceInput = Polymer.dom(document.body).querySelector('#priceInput'+i);
-
-          this.$.doc.path = '/products/' + this.prodKey + '/prices';
-          this.$.doc.ref.update({
-            [[i]]: parseFloat(priceInput.value).toFixed(2),
-          })
-          .then(function(snapshot) {
-            this.$.editPriceDialog.close();
-            Polymer.dom(document.body).appendChild(this.$.successToast);
-            this.$.successToast.open();
-          }.bind(this))
-          .catch(function(error) {
-            this.$.editPriceDialog.close();
-            Polymer.dom(document.body).appendChild(this.$.failToast);
-            this.$.failToast.open();
-          }.bind(this));
+        else
+        {
+          this.$.productMenu.invalid = true;
         }
+      }
+
+      sort(a, b) {
+        return a.key < b.key ? -1 : 1;
       }
     }
     window.customElements.define(AdminView.is, AdminView);
