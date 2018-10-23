@@ -185,8 +185,11 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       <template is="dom-if" if="[[isBlocked(userdata.status, page)]]">
         <!-- Put restricted pages here -->
         <div class="default-view-content">
+        <paper-icon-button icon="my-icons:menu" drawer-toggle></paper-icon-button>
+        <div>
           You are seeing this because you are an inactive member currently. Please contact your upline for more information.
           To request for an upline, submit your request at the Profile page.
+        </div>
         </div>
       </template>
 
