@@ -67,12 +67,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         white-space: pre-line;
       }
 
-      .board-content {
-        clear: right;
-        display: flex;
-        flex-wrap: wrap;
-      }
-
       .noti-info {
         min-width: 250px;
         word-break: break-word;
@@ -146,7 +140,6 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       img{
         width: 90%;
-        height: 250px;
         background-repeat: no-repeat;
         object-fit: contain;
         background-color: white;
@@ -191,7 +184,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               <paper-icon-button hidden$="[[!messageData.event]]" icon="icons:info-outline" on-tap="openEventInfo"></paper-icon-button>
             </div>
           </div>
-          <div class="board-content">
+          <div>
             <img src="[[messageData.images.downloadUrl]]" alt="boardPic"
               onerror="this.style.display='none'"
               onload="this.style.display='block'"/>
