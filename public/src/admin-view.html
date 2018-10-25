@@ -71,6 +71,9 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
         text-align: left;
         padding: 0 8px;
       }
+      table, th, td {
+        border: 1px solid grey;
+      }
       .paper-act {
         float: right;
         margin-left: auto;
@@ -178,7 +181,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
                         [[item.name]]
                       </td>
                       <template is="dom-repeat" items="{{toArray(item.prices)}}">
-                        <td>
+                        <td style="text-align: right;">
                           [[item.value]]
                         </td>
                       </template>
