@@ -220,6 +220,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
     <!-- Toasts -->
     <paper-toast id="submitRequestToast" class="good" text="Request Submitted. Please wait for approval."> </paper-toast>
     <paper-toast id="submitInfoToast" class="good" text="Information Submitted."> </paper-toast>
+    <paper-toast id="sameUplineRequestToast" class="bad" text="Pending approval from this upline!"> </paper-toast>
 
   </template>
 
@@ -273,26 +274,37 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.editInfo.open();
           }
           else {
-            if (this.userData.status == "Pending approval") {
-              // Delete request from previous upline
-              this.$.request.path = '/users/' + this.userData.upline + '/requests/' + this.uplineRequests.$key;
-              this.$.request.ref.remove();
+            if (this.userData.upline != this.$.uplinelist.selected) {
+              if (this.userData.status == "Pending approval") {
+                // Delete request from previous upline
+                for (var i in this.uplineRequests) {
+                  this.$.request.path = '/users/' + this.userData.upline + '/requests/' + this.uplineRequests[i].$key;
+                  this.$.request.ref.remove();
+                }
+              }
+              // Push request to requested upline.
+              this.$.request.path = '/users/' + this.$.uplinelist.selected + '/requests';
+              this.$.request.ref.push({
+                user: this.user.uid
+              });
+
+              // Delete users from previous upline
+              this.$.doc.path = '/users/' + this.userData.upline + '/downlines/' + this.user.uid;
+              this.$.doc.ref.remove();
+
+              // Set own status to pending approval.
+              this.$.user.ref.update({
+                status: "Pending approval",
+                upline: this.$.uplinelist.selected
+              }).then(function(snapshot) {
+                Polymer.dom(document.body).appendChild(this.$.submitRequestToast);
+                this.$.submitRequestToast.open();
+              }.bind(this));
             }
-            // Push request to requested upline.
-            this.$.request.path = '/users/' + this.$.uplinelist.selected + '/requests';
-            this.$.request.ref.push({
-              user: this.user.uid
-            });
-
-            // Delete users from previous upline
-            this.$.doc.path = '/users/' + this.userData.upline + '/downlines/' + this.user.uid;
-            this.$.doc.ref.remove();
-
-            // Set own status to pending approval.
-            this.$.user.ref.update({
-              status: "Pending approval",
-              upline: this.$.uplinelist.selected
-            });
+            else {
+              Polymer.dom(document.body).appendChild(this.$.sameUplineRequestToast);
+              this.$.sameUplineRequestToast.open();
+            }
           }
         }
         else {
