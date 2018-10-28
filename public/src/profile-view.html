@@ -66,6 +66,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       data = "{{levelData}}"
       app-name="absolute-reborn">
     </firebase-document>
+    <firebase-query
+      path="/users/[[userData.upline]]/requests"
+      order-by-child="user"
+      equal-to="[[user.uid]]"
+      data="{{uplineRequests}}"
+      app-name="absolute-reborn">
+    </firebase-query>
     <style include="shared-styles">
       :host {
         display: block;
@@ -244,7 +251,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
 
       // To only allow one request at a time.
       userDataChanged(status) {
-        if (status == "Pending approval") {
+        if (status == "Suspended") {
           this.$.submitButton.disabled = true;
           this.$.uplinemenu.disabled = true;
         }
@@ -266,13 +273,18 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             this.$.editInfo.open();
           }
           else {
+            if (this.userData.status == "Pending approval") {
+              // Delete request from previous upline
+              this.$.request.path = '/users/' + this.userData.upline + '/requests/' + this.uplineRequests.$key;
+              this.$.request.ref.remove();
+            }
             // Push request to requested upline.
             this.$.request.path = '/users/' + this.$.uplinelist.selected + '/requests';
             this.$.request.ref.push({
               user: this.user.uid
             });
 
-            //Delete users from previous upline
+            // Delete users from previous upline
             this.$.doc.path = '/users/' + this.userData.upline + '/downlines/' + this.user.uid;
             this.$.doc.ref.remove();
 
