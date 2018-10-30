@@ -338,7 +338,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
           this.$.doc.ref.update({
             name: this.$.userName.value,
             privilege: this.$.privilegeMenu.value,
-            level: parseInt(this.$.userLevel.selected) || null,
+            level: isNaN(parseInt(this.$.userLevel.selected)) ? null : parseInt(this.$.userLevel.selected),
             email: this.$.userEmail.value,
             icNum: this.$.userIc.value,
             phone: this.$.userPhone.value,
