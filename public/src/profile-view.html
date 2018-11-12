@@ -171,12 +171,13 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             value="[[userData.name]]"
             always-float-label required auto-validate>
           </paper-input>
-          <paper-input
-            disabled
-            label="Level"
-            value="[[getLevelName(levelData.*,userData.level)]]"
-            always-float-label>
-          </paper-input>
+          <paper-dropdown-menu label="Select level" id="userLevelMenu">
+            <paper-listbox id="userLevel" slot="dropdown-content" attr-for-selected="key">
+              <template is="dom-repeat" items="{{toArray(levelData.*)}}">
+                <paper-item key="[[item.key]]">[[item.value]]</paper-item>
+              </template>
+            </paper-listbox>
+          </paper-dropdown-menu>
           <paper-input
             disabled
             label="Email"
@@ -188,12 +189,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             label="IC Number"
             pattern="\d{12}"
             value="[[userData.icNum]]"
+            error-message="Field required!"
             always-float-label required auto-validate>
           </paper-input>
           <paper-input
             id="userWechat"
             label="WeChat ID"
             value="[[userData.wechat]]"
+            error-message="Field required!"
             always-float-label required auto-validate>
           </paper-input>
           <paper-input
@@ -201,12 +204,14 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
             label="Phone"
             pattern="\d{7,15}"
             value="[[userData.phone]]"
+            error-message="Field required!"
             always-float-label required auto-validate>
           </paper-input>
           <paper-input
             id="userAddress"
             label="Address"
             value="[[userData.address]]"
+            error-message="Field required!"
             always-float-label required auto-validate>
           </paper-input>
         </div>
@@ -323,6 +328,7 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       editInfo(e) {
+        this.$.userLevel.selected = isNaN(this.userData['level']) ? null : this.userData['level'];
         Polymer.dom(document.body).appendChild(this.$.editInfo);
         this.$.editInfo.open();
       }
@@ -341,7 +347,8 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
               phone: this.$.userPhone.value,
               address: this.$.userAddress.value,
               wechat: this.$.userWechat.value,
-              icNum: this.$.userIc.value
+              icNum: this.$.userIc.value,
+              level: isNaN(parseInt(this.$.userLevel.selected)) ? null : parseInt(this.$.userLevel.selected)
             });
 
           if (this.userData.status == "Inactive") {
@@ -370,18 +377,20 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       }
 
       onEditInfoClose() {
-        this.$.userName.value = this.userData.name;
-        this.$.userName.invalid = false;
-        this.$.userPhone.value = this.userData.phone;
-        this.$.userPhone.invalid = false;
-        this.$.userAddress.value = this.userData.address;
-        this.$.userAddress.invalid = false;
-        this.$.userWechat.value = this.userData.wechat;
-        this.$.userWechat.invalid = false;
-        this.$.userIc.value = this.userData.icNum;
-        this.$.userIc.invalid = false;
+        if (event.target == this.$.editInfo) {
+          this.$.userName.value = this.userData.name;
+          this.$.userName.invalid = false;
+          this.$.userPhone.value = this.userData.phone;
+          this.$.userPhone.invalid = false;
+          this.$.userAddress.value = this.userData.address;
+          this.$.userAddress.invalid = false;
+          this.$.userWechat.value = this.userData.wechat;
+          this.$.userWechat.invalid = false;
+          this.$.userIc.value = this.userData.icNum;
+          this.$.userIc.invalid = false;
 
-        Polymer.dom(document.body).removeChild(this.$.editInfo);
+          Polymer.dom(document.body).removeChild(this.$.editInfo);
+        }
       }
 
       getLevelName(change, level) {
@@ -393,6 +402,29 @@ Copyright (c) 2018 Phoon Yin Jiat & Yap Jian Ying. All rights reserved.
       pad(id) {
         if (id) {
           return id.toString().padStart(4, '0');
+        }
+      }
+
+      toArray(input) {
+        if (input) {
+          var obj = input.base;
+          if (obj) {
+            return Object.keys(obj).map(function(key) {
+              return {
+                key: key,
+                value: obj[key]
+              };
+            });
+          }
+          else {
+            obj = input;
+            return Object.keys(obj).map(function(key) {
+              return {
+                key: key,
+                value: obj[key]
+              };
+            });
+          }
         }
       }
     }
